@@ -1,0 +1,12 @@
+Main variant filters:
+Load allele frequencies (--read-freq)
+Calculate needed allele/genotype frequencies
+Report overall genotyping rate (--genotyping-rate)
+Write allele/genotype frequencies to file (--freq, --geno-counts), then QUIT if no other commands
+Generate missing data reports (--missing), then QUIT if no other commands
+Remove variants below genotyping rate threshold (--geno)
+Hardy-Weinberg equilibrium report and/or exact test (--hardy, --hwe), then QUIT if no other commands
+Apply minor allele frequency and count filters (--maf, --max-maf, --mac, --max-mac)
+Apply imputation-quality filter (--mach-r2-filter)
+Enforce minimum spacing (--bp-space)
+Report remaining variant count

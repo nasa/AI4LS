@@ -1,0 +1,2 @@
+##INFO=<ID=gene_id,Number=1,Type=String,Description="Gene name">
+##INFO=<ID=gene_type,Number=1,Type=String,Description="Protein-coding gene">

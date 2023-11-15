@@ -1,0 +1,2 @@
+##INFO=<ID=TRANSCRIPT,Number=1,Type=String,Description="Gene name">
+##INFO=<biotype=protein_coding,Number=1,Type=String,Description="Protein-coding gene">
