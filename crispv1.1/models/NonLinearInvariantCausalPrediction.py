@@ -347,6 +347,9 @@ class NonLinearInvariantCausalPrediction(object):
         validate_nll = self.mean_nll(self.validate_logits, self.validate_targets)
         validate_acc = self.mean_accuracy(self.validate_probs, self.validate_targets)
         validate_acc_std = self.std_accuracy(self.validate_probs, self.validate_targets)
+        # JC adde residuals to results to check for heteroscediasticity
+        for e in range(len(self.train_loaders)):
+            residuals = self.get_residuals(self.train_loaders[e])
         if len(self.selected_features):
             overall_sties, sties, npcorr = self.get_sensitivities()
             overall_sties = overall_sties.squeeze().tolist()
@@ -375,6 +378,7 @@ class NonLinearInvariantCausalPrediction(object):
                 'features': list(np.array(self.full_feature_set)[self.selected_features]),
                 'coefficients': overall_sties if len(self.selected_features) > 0 else None,
                 'pvals': self.selected_p_value,
+                'residuals': residuals,
                 'test_acc': test_acc.numpy().squeeze().tolist(),
                 'test_acc_std': test_acc_std.numpy().squeeze().tolist(),
                 'validate_acc': validate_acc.numpy().squeeze().tolist(),
