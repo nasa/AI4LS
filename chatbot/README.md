@@ -24,7 +24,7 @@ This project introduces a cutting-edge chatbot feature, implemented using Stream
 This feature significantly bolsters the application's ability to process and extract information from complex documents, rendering it an invaluable tool for researchers and general users dealing with PDFs and OSDR studies.
 
 ## Screenshots
-![Chatbot Interface](chatbot/icons/294312948-5ec7036a-8a05-419a-b587-0b124273c90c.png)
+[![Chatbot Interface](chatbot/icons/294312948-5ec7036a-8a05-419a-b587-0b124273c90c.png)](https://github.com/nasa/AI4LS/blob/osdr-chatbot-integration/chatbot/icons/294312948-5ec7036a-8a05-419a-b587-0b124273c90c.png)
 *Figure 1: Streamlit Chatbot interface demonstrating PDF ingestion and query handling.*
 
 ## Additional Notes
