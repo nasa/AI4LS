@@ -17,6 +17,7 @@ This project introduces a cutting-edge chatbot feature, implemented using Stream
 - Rigorous testing has been conducted with various PDF documents and OSDR studies to ensure the chatbot's accuracy and reliability.
 - **How to Test:**
   - Launch the Streamlit app.
+  - Upload model seperately.
   - Upload a PDF document and ask questions pertinent to its content.
   - Engage with the OSDR study mode to query about specific pre-loaded studies.
 
