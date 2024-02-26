@@ -18,6 +18,11 @@ _Watch Lecture_
 This lecture provides an overview of AI/ML and its relevance for space biology research. 
 _Watch Lecture_
 
+### Introduction to Space Biology Data
+This lecture provides an overview of space biology data generation, storage, access, and analysis. _Watch Lecture_
+
+This CoLab notebook provides an exploration of space biology data. _Complete Notebook Here_
+
 ### Section 1 Quiz
 _Take Quiz_
 
