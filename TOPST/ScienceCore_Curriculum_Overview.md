@@ -61,6 +61,8 @@ _Take Quiz_
 
 ### Ethical Considerations
 
+### Section 4 Quiz
+
 ## Section 6. Capstone Projects 
 
 ### Transfer Learning for DNA Damage Identification in Irradiated Cells 
