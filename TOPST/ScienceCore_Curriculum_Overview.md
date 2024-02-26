@@ -21,7 +21,7 @@ _Watch Lecture_
 ### Introduction to Space Biology Data
 This lecture provides an overview of space biology data generation, storage, access, and analysis. _Watch Lecture_
 
-This CoLab notebook provides an exploration of space biology data. _Complete Notebook Here_
+This CoLab notebook provides an exploration of space biology data. Copy this notebook to your personal Google Drive. _Complete Notebook Here_
 
 ### Section 1 Quiz
 _Take Quiz_
