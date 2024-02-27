@@ -12,7 +12,7 @@ For questions during the course, to provide feedback, or to interact with other 
 ## Section 1. Introducing the Course
 ### Introduction to Space Biology
 This lecture provides an overview of the resources needed for this course, as well as an overview of basic concepts in space biology research and data access. 
-_Watch Lecture_
+[Watch Lecture](https://youtu.be/BTAHq4LcjRI)
 
 ### Introduction to AI/ML
 This lecture provides an overview of AI/ML and its relevance for space biology research. 
@@ -21,7 +21,10 @@ _Watch Lecture_
 ### Introduction to Space Biology Data
 This lecture provides an overview of space biology data generation, storage, access, and analysis. _Watch Lecture_
 
-This CoLab notebook provides an exploration of space biology data. Copy this notebook to your personal Google Drive. _Complete Notebook Here_
+This CoLab notebook provides software methods that will be accessed by the other notebooks in this course. Copy this notebook to your personal Google Drive. [Access Notebook](https://colab.research.google.com/drive/176UGdwX5vCbL2_lFsLokHF6_wzZCMr5I)
+
+This CoLab notebook provides an exploration of space biology data. Copy this notebook to your personal Google Drive. [Access Notebook](https://colab.research.google.com/drive/1xnlnIk9_-1PYiRMWvCxCCStRI4lyU43Z?usp=sharing#scrollTo=IvM0qauiPuUA)
+
 
 ### Section 1 Quiz
 _Take Quiz_
