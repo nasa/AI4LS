@@ -23,7 +23,7 @@ This lecture provides an overview of space biology data generation, storage, acc
 
 This CoLab notebook provides software methods that will be accessed by the other notebooks in this course. Copy this notebook to your personal Google Drive. [Access Notebook](https://colab.research.google.com/drive/176UGdwX5vCbL2_lFsLokHF6_wzZCMr5I)
 
-This CoLab notebook provides an exploration of space biology data. Copy this notebook to your personal Google Drive. [Access Notebook](https://colab.research.google.com/drive/1xnlnIk9_-1PYiRMWvCxCCStRI4lyU43Z?usp=sharing#scrollTo=IvM0qauiPuUA)
+This CoLab notebook provides an exploration of space biology data. Copy this notebook to your personal Google Drive and complete all cells. [Access Notebook](https://colab.research.google.com/drive/1xnlnIk9_-1PYiRMWvCxCCStRI4lyU43Z?usp=sharing#scrollTo=IvM0qauiPuUA)
 
 
 ### Section 1 Quiz
