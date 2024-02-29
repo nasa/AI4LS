@@ -1,10 +1,10 @@
 import streamlit as st
-from langchain.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import PyMuPDFLoader
 from streamlit_chat import message
 import tempfile
 from llm import Loadllm
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
 from langchain.vectorstores.faiss import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -14,9 +14,9 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.schema import StrOutputParser
 
 class PDFReader:
-    def __init__(self, uploaded_file):
+    def __init__(self, uploaded_file, model):
         self.uploaded_file = uploaded_file
-
+        self.model = model 
     def handlefileandingest(self):
         def format_docs(docs):
             return "\n\n".join(doc.page_content for doc in docs)
@@ -38,7 +38,7 @@ class PDFReader:
         vectorstore = FAISS.from_documents(documents=split_docs, embedding=embeddings)
         
         #Load language model
-        llm = Loadllm.load_llm()
+        llm = Loadllm.load_llm(self.model)
  
         #Initial summary of PDF
         #template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. Use three sentences maximum. Keep the answer as concise as possible. Always say "thanks for asking!" at the end of the answer. {context} Question: {question} Helpful Answer:"""

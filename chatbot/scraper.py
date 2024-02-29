@@ -1,16 +1,16 @@
 import streamlit as st
-from langchain.document_loaders import UnstructuredURLLoader, AsyncHtmlLoader, PlaywrightURLLoader, SeleniumURLLoader, TextLoader, UnstructuredHTMLLoader, BSHTMLLoader
+from langchain_community.document_loaders import UnstructuredURLLoader, AsyncHtmlLoader, PlaywrightURLLoader, SeleniumURLLoader, TextLoader, UnstructuredHTMLLoader, BSHTMLLoader
 from streamlit_chat import message
 import tempfile
 from llm import Loadllm
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-from langchain.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader
 from langchain.schema import StrOutputParser
 import chromedriver_autoinstaller
 import requests
