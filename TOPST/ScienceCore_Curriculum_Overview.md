@@ -12,11 +12,11 @@ For questions during the course, to provide feedback, or to interact with other 
 ## Section 1. Introducing the Course
 ### Introduction to Space Biology
 This lecture provides an overview of the resources needed for this course, as well as an overview of basic concepts in space biology research and data access. 
-[Watch Lecture](https://www.youtube.com/watch?v=AI-kr6WE2Tg)
+[Watch Lecture](https://youtu.be/AI-kr6WE2Tg)
 
 ### Introduction to AI/ML
 This lecture provides an overview of AI/ML and its relevance for space biology research. 
-_Watch Lecture_
+[Watch Lecture](https://youtu.be/cTeUxTHEnqs)
 
 ### Introduction to Space Biology Data
 This lecture provides an overview of space biology data generation, storage, access, and analysis. [See Google Slides](https://docs.google.com/presentation/d/1TBpesFMJDLIDwiTrJE4uV4sL9Ea4oyIr/edit?usp=sharing&ouid=104372831378835219489&rtpof=true&sd=true)
