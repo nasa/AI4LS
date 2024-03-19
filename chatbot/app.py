@@ -52,3 +52,29 @@ if study_id:
     st.write("For more info: ", website_url)
     webreader = WebReader(website_url)
     webreader.loadweb()
+
+# Sidebar for Initial Context
+initial_context = st.sidebar.text_area("Initial Context", "Enter your text here...", height=300)
+#st.sidebar.write("You've entered:", initial_context)
+# Function to convert freeform text to JSON using LLM (mock function)
+def text_to_json_with_llm(text):
+    # This is where you'd send the text to the LLM with specific instructions.
+    # For demonstration, we'll fabricate a response assuming the LLM parsed the text successfully.
+    # Replace this with actual LLM integration code.
+    response = {
+        "title": "Example Study on AI",
+        "authors": ["Jane Doe", "John Smith"],
+        "abstract": "This study explores the impact of AI on global industries..."
+    }
+    return response
+
+if st.sidebar.button('Convert to JSON'):
+    # Convert the initial context to JSON using the LLM
+    json_response = text_to_json_with_llm(initial_context)
+
+    # Assuming you want to display the JSON in a readable format
+    # json_formatted_str = json.dumps(json_response, indent=2)
+
+    # Display the JSON response
+    st.sidebar.text("JSON Output:")
+    st.sidebar.json(json_response)

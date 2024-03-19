@@ -1,0 +1,32 @@
+test = {group: 1-10, mice: 120, gender: female, strand: B6CF1, dose: 2.6}
+test2 = ...
+
+list_grey = gray.json 
+
+x, y = (0,0)
+##mouse icon
+icon = mouse_folder
+pos = (50, 50) 
+title = mice.json, strand.json, gender.json
+
+##groups 
+for group in groups.json: 
+    title = str(group #)
+    num_of_mice_in_group = (right - left) + 1 #from animal numbers
+
+##radiation icons
+for gray in list_greys:
+   icon = icon_folder 
+   pos = move icon to (x, y)
+   scale = icon*gray
+   x+=0, y =+10
+   title = print(grey) + str(cGy)
+   right_arrow_pos (+10,0)
+
+
+insert_berk_icon = (pos)
+
+
+create_image = .png
+
+   
