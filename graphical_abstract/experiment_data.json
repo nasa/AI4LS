@@ -1,0 +1,24 @@
+{
+    "experiment_groups": [
+        {
+            "group": "1-10",
+            "mice": 120,
+            "gender": "female",
+            "strand": "B6CF1",
+            "dose": 2.6,
+            "sample_type": "Tissue",
+            "samples_collected": 937
+        },
+        {
+            "group": "11-20",
+            "mice": 90,
+            "gender": "male",
+            "strand": "B6CF1",
+            "dose": 5.2,
+            "sample_type": "Tissue",
+            "samples_collected": 850
+        }
+        // ... other groups
+    ]
+}
+
