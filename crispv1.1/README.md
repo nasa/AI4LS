@@ -22,7 +22,7 @@ This repository was forked from the NASA FDL 2020 Astronaut Health Team code rep
 
 ## Installation
 
-Ensure you have a working version of 3.7 (Not currently compatible with 3.8+). We recommend using Python from the [Anaconda Python distribution](https://www.continuum.io/downloads) for a quicker and more reliable experience. However, if you have Python already installed that will probably work fine too.
+Ensure you have a working version of Python 3.7.  CRISP v1.1 is not currently compatible with 3.8+). We recommend using Python from the [Anaconda Python distribution](https://www.continuum.io/downloads) for a quicker and more reliable experience. However, if you have Python already installed that will probably work fine too.
 
 ```sh
 git clone https://github.com/nasa/AI4LS 
