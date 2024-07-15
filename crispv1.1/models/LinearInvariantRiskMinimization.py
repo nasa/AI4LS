@@ -1,30 +1,31 @@
 import numpy as np
 import pandas as pd
 import torch
-from sklearn.metrics import r2_score, mean_squared_error 
+from sklearn.metrics import r2_score, mean_squared_error
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss
 import copy
+
 
 class LinearInvariantRiskMinimization(object):
     def __init__(self, environment_datasets, val_dataset, test_dataset, args):
         self.cuda = torch.cuda.is_available() and args.get('cuda', False)
         self.error_env_list = list()
         self.input_dim = environment_datasets[0].get_feature_dim()
-        #self.output_dim = self.args["output_dim"]
-        self.output_dim =  environment_datasets[0].get_output_dim()
+        # self.output_dim = self.args["output_dim"]
+        self.output_dim = environment_datasets[0].get_output_dim()
         self.test_dataset = test_dataset
         self.args = args
         self.args['output_data_regime'] = 'binary'
         self.logging_iteration = args.get('logging_iteration', 200)
         self.loss_per_iteration = []
         self.acc_per_iteration = []
-        
+
         torch.manual_seed(args.get('seed', 0))
         np.random.seed(args.get('seed', 0))
-        
+
         self.feature_names = test_dataset.predictor_columns
 
-        # Initialise Dataloaders (combine all environment datasets to as train)  
+        # Initialise Dataloaders (combine all environment datasets to as train)
         self.batch_size = args.get('batch_size', 128)
         self.all_dataset = torch.utils.data.ConcatDataset(environment_datasets)
         self.all_loader = torch.utils.data.DataLoader(self.all_dataset, batch_size=self.batch_size, shuffle=True)
@@ -52,24 +53,24 @@ class LinearInvariantRiskMinimization(object):
         return (g1 * g2).sum()
 
     def train(self):
-        dim_x = self.input_dim + 1  
+        dim_x = self.input_dim + 1
         dim_y = self.output_dim
 
         if self.cuda:
             self.phi = torch.nn.Linear(dim_x, dim_x, bias=False).cuda()
             self.w = torch.ones(dim_x, 1).cuda()
             if self.args["output_data_regime"] == "multi-class":
-                self.w = (torch.ones(dim_x, dim_y).cuda())#.cuda()
+                self.w = (torch.ones(dim_x, dim_y).cuda())  # .cuda()
         else:
             self.phi = torch.nn.Linear(dim_x, dim_x, bias=False)
             self.w = torch.ones(dim_x, 1)
             if self.args["output_data_regime"] == "multi-class":
-                self.w = torch.ones(dim_x, dim_y)# / dim_y
-        
+                self.w = torch.ones(dim_x, dim_y)  # / dim_y
+
         self.w.requires_grad = True
 
         opt = torch.optim.Adam([self.phi.weight], lr=self.args["lr"])
-        
+
         if self.args["output_data_regime"] == "real-valued":
             loss = torch.nn.MSELoss()
         elif self.args["output_data_regime"] == "multi-class":
@@ -77,7 +78,8 @@ class LinearInvariantRiskMinimization(object):
         elif self.args["output_data_regime"] == "binary":
             loss = torch.nn.BCEWithLogitsLoss()
         else:
-            raise NotImplementedError("IRM supports real-valued, binary, and multi-class target, not " + str(self.args["output_data_regime"]))
+            raise NotImplementedError(
+                "IRM supports real-valued, binary, and multi-class target, not " + str(self.args["output_data_regime"]))
 
         for iteration in range(self.args["n_iterations"]):
             penalty = 0
@@ -92,39 +94,38 @@ class LinearInvariantRiskMinimization(object):
                     if self.cuda:
                         inputs = inputs.cuda()
                         targets = targets.cuda()
-                        
+
                     if self.args["output_data_regime"] == "multi-class":
                         targets = targets.squeeze().long()
-                    
+
                     pred = self.phi(inputs) @ self.w
                     error_e += loss(pred, targets)
-                    count+=1
+                    count += 1
                     count_e += 1
-                    
-                err_env.append(error_e.item()/count_e)
-                
+
+                err_env.append(error_e.item() / count_e)
+
                 penalty += torch.autograd.grad(outputs=error_e, inputs=self.w, create_graph=True)[0].pow(2).mean()
                 error += error_e
 
             if iteration % self.logging_iteration == 0:
-                if self.args["verbose"]: 
+                if self.args["verbose"]:
                     print('logging accuracy and loss')
                 self.test(self.test_loader)
-                self.acc_per_iteration.append(self.mean_accuracy(self.test_logits.squeeze(), self.test_targets.squeeze()))
+                self.acc_per_iteration.append(
+                    self.mean_accuracy(self.test_logits.squeeze(), self.test_targets.squeeze()))
                 self.loss_per_iteration.append(error / len(env_loader))
-                
+
                 if self.args["verbose"]:
-                    print('logging accuracy and loss',  error.item()/count, penalty.item(), self.acc_per_iteration[-1])
-               
-        
+                    print('logging accuracy and loss', error.item() / count, penalty.item(), self.acc_per_iteration[-1])
+
             if self.args["verbose"] and iteration % 100 == 0:
-                print("iteration:", iteration, "training error:", error.item()/count)
-                
+                print("iteration:", iteration, "training error:", error.item() / count)
+
             opt.zero_grad()
-            (self.reg * error/count + (1 - self.reg) * penalty/count).backward()
+            (self.reg * error / count + (1 - self.reg) * penalty / count).backward()
             opt.step()
             self.error_env_list.append(err_env)
-
 
     def solution(self):
         coef_unnormalized = sum([w.data.abs().sum(axis=1) for w in self.phi.parameters()])
@@ -132,19 +133,19 @@ class LinearInvariantRiskMinimization(object):
             W = torch.eye(self.input_dim + 1).cuda()
         else:
             W = torch.eye(self.input_dim + 1)
-            
+
         for w in self.phi.parameters():
-            W = W@w.T
+            W = W @ w.T
 
         # JC
-        coef = W@self.w
-        #coef_unnormalized = w.data.abs().sum(axis=1) for w in self.phi.parameters()])
+        coef = W @ self.w
+        # coef_unnormalized = w.data.abs().sum(axis=1) for w in self.phi.parameters()])
         coef = coef / coef.sum()
         return coef
-    
+
     def get_sensitivities(self):
         sties = np.zeros(shape=(self.input_dim,))
-        
+
         if self.args["output_data_regime"] == "real-valued":
             loss = torch.nn.MSELoss()
         elif self.args["output_data_regime"] == "multi-class":
@@ -152,32 +153,33 @@ class LinearInvariantRiskMinimization(object):
         elif self.args["output_data_regime"] == "binary":
             loss = torch.nn.BCEWithLogitsLoss()
         else:
-            raise NotImplementedError("IRM supports real-valued, binary, and multi-class target, not " + str(self.args["output_data_regime"]))
-        
+            raise NotImplementedError(
+                "IRM supports real-valued, binary, and multi-class target, not " + str(self.args["output_data_regime"]))
+
         with torch.no_grad():
             for i, (inputs, targets) in enumerate(self.test_loader):
                 n = inputs.size(0)
                 inputs = torch.cat((torch.ones(inputs.size(0), 1), inputs), 1)  ##
                 if self.cuda:
-                        inputs = inputs.cuda()
-                        targets = targets.cuda()
+                    inputs = inputs.cuda()
+                    targets = targets.cuda()
                 # JC
                 output = self.phi(inputs) @ self.w
-                l0 = loss(output, targets) 
+                l0 = loss(output, targets)
 
                 for ii in range(self.input_dim):
-                    if False:  
+                    if False:
                         sties[ii] += 0
                     else:
                         temp = inputs.clone()
-                        temp[: ,ii] = float(self.min_per_dim[ii])
+                        temp[:, ii] = float(self.min_per_dim[ii])
                         outputs1 = self.phi(temp) @ self.w
                         l1 = loss(outputs1, targets)
-                        temp[: ,ii] = float(self.max_per_dim[ii])
+                        temp[:, ii] = float(self.max_per_dim[ii])
                         outputs2 = self.phi(temp) @ self.w
                         l2 = loss(outputs2, targets)
 
-                        sties[ii] += torch.sum (l1 - l0 +  l2 - l0).cpu().numpy()
+                        sties[ii] += torch.sum(l1 - l0 + l2 - l0).cpu().numpy()
         return sties
 
     def test(self, loader):
@@ -186,7 +188,7 @@ class LinearInvariantRiskMinimization(object):
         test_logits = []
         test_probs = []
 
-       # if self.args["output_data_regime"] == "real-valued":
+        # if self.args["output_data_regime"] == "real-valued":
         #    sig = torch.nn.Identity()
         sig = torch.nn.Sigmoid()
 
@@ -248,30 +250,29 @@ class LinearInvariantRiskMinimization(object):
 
     #         print('Finished validating')
 
-
     def get_input_gradients(self):
         sig = torch.nn.Sigmoid()
 
         n_samples = len(self.all_dataset)
-        
+
         input_gradients = torch.zeros((n_samples, self.input_dim))
-        #print("input_gradients:", input_gradients.shape)
-        
+        # print("input_gradients:", input_gradients.shape)
+
         if self.args["output_data_regime"] == "real-valued":
             criterion = torch.nn.MSELoss()
         elif self.args["output_data_regime"] == "multi-class":
             criterion = torch.nn.CrossEntropyLoss()
         elif self.args["output_data_regime"] == "binary":
             criterion = torch.nn.BCEWithLogitsLoss()
-            
+
         for i, (inputs, targets) in enumerate(self.all_loader):
             inputs = torch.cat((torch.ones(inputs.size(0), 1), inputs), 1)  ##
             inputs.requires_grad = True
-            
+
             if self.cuda:
                 inputs = inputs.cuda()
                 targets = targets.cuda()
-            
+
             if self.args["output_data_regime"] == "multi-class":
                 targets = targets.squeeze().long()
 
@@ -279,23 +280,23 @@ class LinearInvariantRiskMinimization(object):
 
             # JC fixed bug - don't take sigmoid here
             loss = criterion(pred, targets)
-            #loss = criterion(sig(pred), targets)
+            # loss = criterion(sig(pred), targets)
             loss.backward()
-            
+
             if self.cuda:
                 grad = inputs.grad.squeeze().detach().cuda()
             else:
                 grad = inputs.grad.squeeze().detach().cpu()
-            #print("grad:", grad.shape)
-
+            # print("grad:", grad.shape)
 
             if np.ndim(grad) == 2:
-                input_gradients[i*self.batch_size:i*self.batch_size+self.batch_size, :] = grad[:, 1:] # don't record the gradient of the intercept
+                input_gradients[i * self.batch_size:i * self.batch_size + self.batch_size, :] = grad[:,
+                                                                                                1:]  # don't record the gradient of the intercept
             else:
                 break
                 # return input_gradients.mean(dim=0)
         return input_gradients.norm(2, dim=0)
-        #return torch.abs(input_gradients).sum(dim=0)
+        # return torch.abs(input_gradients).sum(dim=0)
 
     def results(self):
         test_nll = self.mean_nll(self.test_logits.squeeze(), self.test_targets.squeeze())
@@ -303,7 +304,7 @@ class LinearInvariantRiskMinimization(object):
         test_acc_std = self.std_accuracy(self.test_logits.squeeze(), self.test_targets.squeeze())
         coefficients = self.solution().detach().cpu().numpy().squeeze()[1:].tolist()
         if self.cuda:
-            feature_gradients=None
+            feature_gradients = None
         else:
             feature_gradients = self.get_input_gradients().cpu().numpy().tolist()
 
@@ -314,28 +315,27 @@ class LinearInvariantRiskMinimization(object):
 
         print('accuracy: ', test_acc.numpy().squeeze().tolist())
         return {
-            "test_logits" : self.test_logits.squeeze().numpy().tolist(),
+            "test_logits": self.test_logits.squeeze().numpy().tolist(),
             "test_acc": test_acc.numpy().squeeze().tolist(),
             "test_nll": test_nll.item(),
             "test_probs": self.test_probs.squeeze().numpy().tolist(),
             "test_labels": self.test_targets.squeeze().numpy().tolist(),
             "feature_coeffients": self.solution().detach().cpu().numpy().squeeze()[1:].tolist(),
-            "loss_over_time" : [x.tolist() for x in self.loss_per_iteration],
+            "loss_over_time": [x.tolist() for x in self.loss_per_iteration],
             'acc_over_time': [x.tolist() for x in self.acc_per_iteration],
             'to_bucket': {
                 'method': "Linear IRM",
                 'features': self.feature_names,
                 'coefficients': coefficients,
-                #'feature_gradients' : feature_gradients,
+                # 'feature_gradients' : feature_gradients,
                 'pvals': None,
-                "test_logits" : self.test_logits.squeeze().numpy().tolist(),
+                "test_logits": self.test_logits.squeeze().numpy().tolist(),
                 'test_acc': test_acc.numpy().squeeze().tolist(),
-                'test_acc_std': test_acc_std.item(),# ,.numpy().squeeze().tolist(),
+                'test_acc_std': test_acc_std.item(),  # ,.numpy().squeeze().tolist(),
                 'coefficient_correlation_matrix': None,
-                #'sensitivities': self.get_sensitivities().tolist()
+                # 'sensitivities': self.get_sensitivities().tolist()
             }
         }
-
 
     def validation_results(self):
         validate_nll = self.mean_nll(self.validate_logits.squeeze(), self.validate_targets.squeeze())
@@ -343,7 +343,7 @@ class LinearInvariantRiskMinimization(object):
         validate_acc_std = self.std_accuracy(self.validate_logits.squeeze(), self.validate_targets.squeeze())
         coefficients = self.solution().detach().cpu().numpy().squeeze()[1:].tolist()
         if self.cuda:
-            feature_gradients=None
+            feature_gradients = None
         else:
             feature_gradients = self.get_input_gradients().cpu().numpy().tolist()
 
@@ -354,28 +354,27 @@ class LinearInvariantRiskMinimization(object):
 
         print('validation accuracy: ', validate_acc.numpy().squeeze().tolist())
         return {
-            "validate_logits" : self.validate_logits.squeeze().numpy().tolist(),
+            "validate_logits": self.validate_logits.squeeze().numpy().tolist(),
             "validate_acc": validate_acc.numpy().squeeze().tolist(),
             "validate_nll": validate_nll.item(),
             "validate_probs": self.validate_probs.squeeze().numpy().tolist(),
             "validate_labels": self.validate_targets.squeeze().numpy().tolist(),
             "feature_coeffients": self.solution().detach().cpu().numpy().squeeze()[1:].tolist(),
-            "val_loss_over_time" : [x.tolist() for x in self.loss_per_iteration],
+            "val_loss_over_time": [x.tolist() for x in self.loss_per_iteration],
             'val_acc_over_time': [x.tolist() for x in self.acc_per_iteration],
             'validate_to_bucket': {
                 'method': "Linear IRM",
                 'features': self.feature_names,
                 'coefficients': coefficients,
-                #'feature_gradients' : feature_gradients,
+                # 'feature_gradients' : feature_gradients,
                 'pvals': None,
-                "validate_logits" : self.validate_logits.squeeze().numpy().tolist(),
+                "validate_logits": self.validate_logits.squeeze().numpy().tolist(),
                 'validate_acc': validate_acc.numpy().squeeze().tolist(),
-                'validate_acc_std': validate_acc_std.item(),# ,.numpy().squeeze().tolist(),
+                'validate_acc_std': validate_acc_std.item(),  # ,.numpy().squeeze().tolist(),
                 'coefficient_correlation_matrix': None,
-                #'sensitivities': self.get_sensitivities().tolist()
+                # 'sensitivities': self.get_sensitivities().tolist()
             }
         }
-
 
     def mean_nll(self, logits, y):
         if self.args["output_data_regime"] == "multi-class":
@@ -390,13 +389,13 @@ class LinearInvariantRiskMinimization(object):
             return logits.float()
         else:
             # binary classification case
-            return  (logits > 0.).float()
+            return (logits > 0.).float()
 
     def mean_accuracy(self, logits, y):
         preds = self.acc_preds(logits, y)
         if self.args["output_data_regime"] == "real-valued":
             return mean_squared_error(y, preds)
-        
+
         return ((preds - y).abs() < 1e-2).float().mean()
 
     def std_accuracy(self, logits, y):
