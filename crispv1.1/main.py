@@ -196,6 +196,8 @@ def run(config, alfa=0.5):
 
         from models.CausalNex import CausalNexClass
 
+
+
         # Setup Linear and Non-Linear IRM args
         FRIRM_options = ensemble_options.get('FRIRM', {})
         FRIRM_args = {
@@ -290,7 +292,7 @@ def run(config, alfa=0.5):
         ICP_options = ensemble_options.get('ICP', {})
         ICP_args = {
             "max_set_size": 2,
-            "alpha": 0.05,
+            "alpha": 0.01,
             "seed": 12,
             "verbose": 1
         }
@@ -396,8 +398,8 @@ def run(config, alfa=0.5):
         to_bucket_results.append(to_bucket)
 
         # JC
-        to_bucket_validate = irm_validation_results_dict['validate_to_bucket']
-        to_bucket_results.append(to_bucket_validate)
+        #to_bucket_validate = irm_validation_results_dict['validate_to_bucket']
+        #to_bucket_results.append(to_bucket_validate)
 
         print("Finished Linear IRM")
 

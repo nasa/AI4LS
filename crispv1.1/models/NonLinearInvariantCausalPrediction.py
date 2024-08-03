@@ -10,6 +10,9 @@ from models.TorchModelZoo import MLP2
 
 from utils.defining_sets import defining_sets
 
+from sklearn.metrics import confusion_matrix
+
+
 
 def pretty(vector):
     vlist = vector.view(-1).tolist()
@@ -33,6 +36,8 @@ class NonLinearInvariantCausalPrediction(object):
         self.max_iter = args.get('max_iter', 1000)
         self.full_feature_set = train_environments[0].predictor_columns.copy()
         self.test_environment = test_environment
+        self.confusion_matrix_test = list()
+
 
         self.output_dim = train_environments[0].get_output_dim()
         self.input_dim = train_environments[0].get_feature_dim()
@@ -302,6 +307,12 @@ class NonLinearInvariantCausalPrediction(object):
         self.test_logits = torch.cat(test_logits, dim=1)
         self.test_probs = torch.cat(test_probs, dim=1)
 
+        # JC
+        preds = (self.test_logits > 0.).float().tolist()[0]
+        y = self.test_targets.tolist()[0]
+        conf_matrix = confusion_matrix(y_true=y, y_pred=preds)
+        self.confusion_matrix_test.append(conf_matrix)
+
     def validate(self, loader):
 
         validate_targets = []
@@ -361,20 +372,20 @@ class NonLinearInvariantCausalPrediction(object):
             sties = sties.tolist()
 
         return {
-            "solution": self.intersection_found or self.defining_set_found,
-            "intersection": self.intersection_found,
+            #"solution": self.intersection_found or self.defining_set_found,
+            #"intersection": self.intersection_found,
             "test_acc": test_acc.numpy().squeeze().tolist(),
             "test_acc_std": test_acc_std.numpy().squeeze().tolist(),
-            "test_nll": test_nll,
-            "test_probs": self.test_probs,
+            #"test_nll": test_nll,
+            #"test_probs": self.test_probs,
             "test_labels": self.test_targets,
-            "validate_acc": validate_acc.numpy().squeeze().tolist(),
-            "validate_acc_std": validate_acc_std.numpy().squeeze().tolist(),
-            "validate_nll": validate_nll,
-            "validate_probs": self.validate_probs,
-            "validate_labels": self.validate_targets,
+            #"validate_acc": validate_acc.numpy().squeeze().tolist(),
+            #"validate_acc_std": validate_acc_std.numpy().squeeze().tolist(),
+            #"validate_nll": validate_nll,
+            #"validate_probs": self.validate_probs,
+            #"validate_labels": self.validate_targets,
             "feature_coeffients": None,
-            "selected_p_value": self.selected_p_value,
+            #"selected_p_value": self.selected_p_value,
             "selected_features": np.array(self.full_feature_set)[self.selected_features],
             "selected_feature_indices": self.selected_features,
             "to_bucket": {
@@ -385,10 +396,11 @@ class NonLinearInvariantCausalPrediction(object):
                 'residuals': e_all,
                 'test_acc': test_acc.numpy().squeeze().tolist(),
                 'test_acc_std': test_acc_std.numpy().squeeze().tolist(),
+                'confusion_matrix_test': str(self.confusion_matrix_test),
                 'validate_acc': validate_acc.numpy().squeeze().tolist(),
                 'validate_acc_std': validate_acc_std.numpy().squeeze().tolist(),
-                'coefficient_correlation_matrix': npcorr if len(self.selected_features) > 0 else None,
-                'test_data_sensitivities': sties if len(self.selected_features) > 0 else None
+                #'coefficient_correlation_matrix': npcorr if len(self.selected_features) > 0 else None,
+                #'test_data_sensitivities': sties if len(self.selected_features) > 0 else None
             }
         }
 

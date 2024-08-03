@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from models.TorchModelZoo import MLP, MLP2
-import math
+from sklearn.metrics import confusion_matrix
 
 
 class NonLinearInvariantRiskMinimization(object):
@@ -17,6 +17,7 @@ class NonLinearInvariantRiskMinimization(object):
         # Initialise Model
         method = args.get('NN_method') 
         self.method = method
+        self.confusion_matrix_test = list()
         if method == 'NN':
             print('NLIRM using MLP')
             self.input_dim = environment_datasets[0].get_feature_dim()
@@ -183,6 +184,12 @@ class NonLinearInvariantRiskMinimization(object):
         self.test_targets = torch.cat(test_targets, dim=1)
         self.test_logits = torch.cat(test_logits, dim=1)
         self.test_probs = torch.cat(test_probs, dim=1)
+
+        # JC
+        preds = (self.test_logits > 0.).float().tolist()[0]
+        y = self.test_targets.tolist()[0]
+        conf_matrix = confusion_matrix(y_true=y, y_pred=preds)
+        self.confusion_matrix_test.append(conf_matrix)
     #         print('Finished Testing')
 
     def validate(self):
@@ -227,13 +234,13 @@ class NonLinearInvariantRiskMinimization(object):
 
         return {
             "test_acc": test_acc.numpy().squeeze().tolist(),
-            "test_nll": test_nll,
+            #"test_nll": test_nll,
             "test_probs": self.test_probs,
             "test_labels": self.test_targets,
-            "validate_acc": validate_acc.numpy().squeeze().tolist(),
-            "validate_nll": validate_nll,
-            "validate_probs": self.validate_probs,
-            "validate_labels": self.validate_targets,
+            #"validate_acc": validate_acc.numpy().squeeze().tolist(),
+            #"validate_nll": validate_nll,
+            #"validate_probs": self.validate_probs,
+            #"validate_labels": self.validate_targets,
             "feature_coeffients": self.model.linear.weight.data
                 [0].detach().numpy().squeeze().tolist() if self.method == "Linear" else None,
             "to_bucket": {
@@ -244,8 +251,9 @@ class NonLinearInvariantRiskMinimization(object):
                 'pvals': None,
                 'test_acc': test_acc.numpy().squeeze().tolist(),
                 'test_acc_std': test_acc_std.numpy().squeeze().tolist(),
-                'validate_acc': validate_acc.numpy().squeeze().tolist(),
-                'validate_acc_std': validate_acc_std.numpy().squeeze().tolist()
+                "confusion_matrix_test": str(self.confusion_matrix_test)
+                #'validate_acc': validate_acc.numpy().squeeze().tolist(),
+                #'validate_acc_std': validate_acc_std.numpy().squeeze().tolist()
             }
         }
 

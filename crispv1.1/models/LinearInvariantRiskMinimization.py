@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from sklearn.metrics import r2_score, mean_squared_error
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss
-import copy
+from sklearn.metrics import confusion_matrix
 
 
 class LinearInvariantRiskMinimization(object):
@@ -19,6 +19,8 @@ class LinearInvariantRiskMinimization(object):
         self.logging_iteration = args.get('logging_iteration', 200)
         self.loss_per_iteration = []
         self.acc_per_iteration = []
+        self.confusion_matrix_test = list()
+
 
         torch.manual_seed(args.get('seed', 0))
         np.random.seed(args.get('seed', 0))
@@ -39,6 +41,7 @@ class LinearInvariantRiskMinimization(object):
 
         self.reg = 0.95
         self.train()
+
 
         # Start testing procedure
         self.test(self.test_loader)
@@ -183,7 +186,7 @@ class LinearInvariantRiskMinimization(object):
         return sties
 
     def test(self, loader):
-
+        print('calling test')
         test_targets = []
         test_logits = []
         test_probs = []
@@ -213,6 +216,12 @@ class LinearInvariantRiskMinimization(object):
         self.test_targets = torch.cat(test_targets, dim=1)
         self.test_logits = torch.cat(test_logits, dim=1)
         self.test_probs = torch.cat(test_probs, dim=1)
+
+        # JC
+        preds = (self.test_logits > 0.).float().tolist()[0]
+        y = self.test_targets.tolist()[0]
+        conf_matrix = confusion_matrix(y_true=y, y_pred=preds)
+        self.confusion_matrix_test.append(conf_matrix)
 
     #         print('Finished Testing')
 
@@ -315,9 +324,9 @@ class LinearInvariantRiskMinimization(object):
 
         print('accuracy: ', test_acc.numpy().squeeze().tolist())
         return {
-            "test_logits": self.test_logits.squeeze().numpy().tolist(),
+            #"test_logits": self.test_logits.squeeze().numpy().tolist(),
             "test_acc": test_acc.numpy().squeeze().tolist(),
-            "test_nll": test_nll.item(),
+            #"test_nll": test_nll.item(),
             "test_probs": self.test_probs.squeeze().numpy().tolist(),
             "test_labels": self.test_targets.squeeze().numpy().tolist(),
             "feature_coeffients": self.solution().detach().cpu().numpy().squeeze()[1:].tolist(),
@@ -329,10 +338,11 @@ class LinearInvariantRiskMinimization(object):
                 'coefficients': coefficients,
                 # 'feature_gradients' : feature_gradients,
                 'pvals': None,
-                "test_logits": self.test_logits.squeeze().numpy().tolist(),
+                #"test_logits": self.test_logits.squeeze().numpy().tolist(),
                 'test_acc': test_acc.numpy().squeeze().tolist(),
                 'test_acc_std': test_acc_std.item(),  # ,.numpy().squeeze().tolist(),
-                'coefficient_correlation_matrix': None,
+                "confusion_matrix_test": str(self.confusion_matrix_test)
+                #'coefficient_correlation_matrix': None,
                 # 'sensitivities': self.get_sensitivities().tolist()
             }
         }

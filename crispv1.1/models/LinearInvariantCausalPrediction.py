@@ -29,6 +29,9 @@ class InvariantCausalPrediction(object):
         self.p_value = None
         self.model = None
         self.full_feature_set = train_environments[0].predictor_columns.copy()
+        self.confusion_matrix_test = list()
+        self.confusion_matrix_validate = list()
+
 
         torch.manual_seed(args.get('seed', 0))
         np.random.seed(args.get('seed', 0))
@@ -173,22 +176,26 @@ class InvariantCausalPrediction(object):
         test_logits = self.model.predict(self.x_test[:, self.selected_features])
         test_probs = self.model.predict_proba(self.x_test[:, self.selected_features])
 
-        conf_matrix = confusion_matrix(y_true=self.y_test, y_pred=test_logits)
-        self.conf_matric = conf_matrix
+
         self.test_targets = torch.Tensor(test_targets).squeeze()
         self.test_logits = torch.Tensor(test_logits).squeeze()
         self.test_probs = torch.Tensor(test_probs)
+
+        conf_matrix = confusion_matrix(y_true=self.y_test, y_pred=test_logits)
+        self.confusion_matrix_test.append(conf_matrix)
 
     def validate(self):
         validate_targets = self.y_validate
         validate_logits = self.model.predict(self.x_validate[:, self.selected_features])
         validate_probs = self.model.predict_proba(self.x_validate[:, self.selected_features])
 
-        conf_matrix = confusion_matrix(y_true=self.y_validate, y_pred=validate_logits)
-        self.conf_matric = conf_matrix
+
         self.validate_targets = torch.Tensor(validate_targets).squeeze()
         self.validate_logits = torch.Tensor(validate_logits).squeeze()
         self.validate_probs = torch.Tensor(validate_probs)
+
+        conf_matrix = confusion_matrix(y_true=self.y_validate, y_pred=validate_logits)
+        self.confusion_matrix_validate.append(conf_matrix)
 
 
     def coef_(self):
@@ -212,15 +219,15 @@ class InvariantCausalPrediction(object):
             return {
 
                 "solution": self.intersection_found or self.defining_set_found,
-                "intersection": self.intersection_found,
+                #"intersection": self.intersection_found,
                 "test_acc": test_acc.numpy().squeeze().tolist(),
                 "test_nll": test_nll,
                 "test_probs": self.test_probs,
                 "test_labels": self.test_targets,
-                "validate_acc": validate_acc.numpy().squeeze().tolist(),
-                "validate_nll": validate_nll,
-                "validate_probs": self.validate_probs,
-                "validate_labels": self.validate_targets,
+                #"validate_acc": validate_acc.numpy().squeeze().tolist(),
+                #"validate_nll": validate_nll,
+                #"validate_probs": self.validate_probs,
+                #"validate_labels": self.validate_targets,
                 "feature_coeffients": self.coef_(),
                 "selected_features": np.array(self.full_feature_set)[self.selected_features],
                 "selected_feature_indices": self.selected_features,
@@ -231,6 +238,7 @@ class InvariantCausalPrediction(object):
                     'pvals': np.array(self.p_value).tolist(),
                     'test_acc': test_acc.numpy().squeeze().tolist(),
                     'test_acc_std': test_acc_std.numpy().squeeze().tolist(),
+                    "confusion_matrix_test": str(self.confusion_matrix_test),
                     "validate_acc": validate_acc.numpy().squeeze().tolist(),
                     "validate_acc_std": validate_acc_std.numpy().squeeze().tolist()
                 }
