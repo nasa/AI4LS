@@ -2,7 +2,6 @@ import numpy as np
 import torch
 
 from models.TorchModelZoo import MLP, MLP2
-from sklearn.metrics import confusion_matrix
 
 
 class NonLinearInvariantRiskMinimization(object):
@@ -17,14 +16,11 @@ class NonLinearInvariantRiskMinimization(object):
         # Initialise Model
         method = args.get('NN_method') 
         self.method = method
-        self.confusion_matrix_test = list()
         if method == 'NN':
             print('NLIRM using MLP')
             self.input_dim = environment_datasets[0].get_feature_dim()
             self.output_dim = environment_datasets[0].get_output_dim()
             self.model = MLP(self.args, self.input_dim, self.output_dim)
-            # JC
-            self.model.train()
             if self.cuda:
                 self.model.cuda()
         if method == 'DNN':
@@ -35,7 +31,6 @@ class NonLinearInvariantRiskMinimization(object):
             self.model.train() # self.model.eval() to turn dropout off
             if self.cuda:
                 self.model.cuda()
-
 
         # Initialise Dataloaders (combine all environment datasets to as train)
         self.batch_size = args.get('batch_size', 256)
@@ -68,7 +63,6 @@ class NonLinearInvariantRiskMinimization(object):
 
         self.train()
         self.test()
-        self.validate()
 
     def get_sensitivities(self):
         sties = np.zeros(shape=(self.input_dim,))
@@ -126,21 +120,16 @@ class NonLinearInvariantRiskMinimization(object):
 
             weight_norm = torch.tensor(0.)
             for w in self.model.parameters():
-                # TODO JC why square this?
                 weight_norm += w.norm().pow(2)
-            # JC (take sqrt for L2 norm?)
-            #weight_norm = math.sqrt(weight_norm)
+
             loss = train_nll.clone()
             loss += self.args['l2_regularizer_weight'] * weight_norm
             
             # Penalty weight is an important hyper parameter, which balances the invariance penalty vs. the empirical risk
             # Defaul penalty weight is 1 for the first 100 iterations, and thereon it is increased to 1e4 (based on Arjovsky et al.'s implementation)
             # Other suggested variations in the literature include a sequence of monotonically increasing penalty weights 
-
             penalty_weight = (self.args['penalty_weight']
                               if step >= self.args['penalty_anneal_iters'] else 1.0)
-            # JC
-            #penalty_weight = 1.1 * step
             loss += penalty_weight * train_penalty
             if penalty_weight > 1.0:
                 loss /= penalty_weight
@@ -174,73 +163,26 @@ class NonLinearInvariantRiskMinimization(object):
                     test_targets.append(targets.squeeze().unsqueeze(0))
                     test_logits.append(outputs.cpu().squeeze().unsqueeze(0))
                     test_probs.append(sig(outputs).cpu().squeeze().unsqueeze(0))
-                    print('using cuda')
                 else:
                     test_targets.append(targets.squeeze().unsqueeze(0))
                     test_logits.append(outputs.squeeze().unsqueeze(0))
                     test_probs.append(sig(outputs).squeeze().unsqueeze(0))
-                    print('not using cuda')
 
         self.test_targets = torch.cat(test_targets, dim=1)
         self.test_logits = torch.cat(test_logits, dim=1)
         self.test_probs = torch.cat(test_probs, dim=1)
-
-        # JC
-        preds = (self.test_logits > 0.).float().tolist()[0]
-        y = self.test_targets.tolist()[0]
-        conf_matrix = confusion_matrix(y_true=y, y_pred=preds)
-        self.confusion_matrix_test.append(conf_matrix)
     #         print('Finished Testing')
-
-    def validate(self):
-
-        validate_targets = []
-        validate_logits = []
-        validate_probs = []
-
-        sig = torch.nn.Sigmoid()
-
-        with torch.no_grad():
-            for i, (inputs, targets) in enumerate(self.val_loader):
-                if self.cuda:
-                    inputs = inputs.cuda()
-
-                outputs = self.model(inputs)
-
-                if self.cuda:
-                    validate_targets.append(targets.squeeze().unsqueeze(0))
-                    validate_logits.append(outputs.cpu().squeeze().unsqueeze(0))
-                    validate_probs.append(sig(outputs).cpu().squeeze().unsqueeze(0))
-                    print('using cuda')
-                else:
-                    validate_targets.append(targets.squeeze().unsqueeze(0))
-                    validate_logits.append(outputs.squeeze().unsqueeze(0))
-                    validate_probs.append(sig(outputs).squeeze().unsqueeze(0))
-                    print('not using cuda')
-
-        self.validate_targets = torch.cat(validate_targets, dim=1)
-        self.validate_logits = torch.cat(validate_logits, dim=1)
-        self.validate_probs = torch.cat(validate_probs, dim=1)
-    #         print('Finished Testing')
-
 
     def results(self):
         test_nll = self.mean_nll(self.test_logits, self.test_targets)
         test_acc = self.mean_accuracy(self.test_logits, self.test_targets)
         test_acc_std = self.std_accuracy(self.test_logits, self.test_targets)
-        validate_nll = self.mean_nll(self.validate_logits, self.validate_targets)
-        validate_acc = self.mean_accuracy(self.validate_logits, self.validate_targets)
-        validate_acc_std = self.std_accuracy(self.validate_logits, self.validate_targets)
 
         return {
             "test_acc": test_acc.numpy().squeeze().tolist(),
-            #"test_nll": test_nll,
+            "test_nll": test_nll,
             "test_probs": self.test_probs,
             "test_labels": self.test_targets,
-            #"validate_acc": validate_acc.numpy().squeeze().tolist(),
-            #"validate_nll": validate_nll,
-            #"validate_probs": self.validate_probs,
-            #"validate_labels": self.validate_targets,
             "feature_coeffients": self.model.linear.weight.data
                 [0].detach().numpy().squeeze().tolist() if self.method == "Linear" else None,
             "to_bucket": {
@@ -250,10 +192,7 @@ class NonLinearInvariantRiskMinimization(object):
                     [0].detach().numpy().squeeze().tolist() if self.method == "Linear" else self.get_sensitivities().squeeze().tolist(),
                 'pvals': None,
                 'test_acc': test_acc.numpy().squeeze().tolist(),
-                'test_acc_std': test_acc_std.numpy().squeeze().tolist(),
-                "confusion_matrix_test": str(self.confusion_matrix_test)
-                #'validate_acc': validate_acc.numpy().squeeze().tolist(),
-                #'validate_acc_std': validate_acc_std.numpy().squeeze().tolist()
+                'test_acc_std': test_acc_std.numpy().squeeze().tolist()
             }
         }
 

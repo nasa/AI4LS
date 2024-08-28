@@ -44,14 +44,11 @@ class EmpericalRiskMinimization(object):
         all_dataset = torch.utils.data.ConcatDataset(environment_datasets)
         self.train_loader = torch.utils.data.DataLoader(all_dataset, batch_size=self.batch_size, shuffle=True)
         self.test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
-        self.val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False)
 
         # Start training procedure
         self.train()
         # Start testing procedure
         self.test()
-        # JC
-        self.validate()
 
     def train(self, loader=None):
 
@@ -118,43 +115,6 @@ class EmpericalRiskMinimization(object):
         self.test_logits = torch.cat(test_logits, dim=1)
         self.test_probs = torch.cat(test_probs, dim=1)
 
-    def validate(self, loader=None):
-
-        if loader is None:
-            loader = self.val_loader
-
-        validate_targets = []
-        validate_logits = []
-        validate_probs = []
-
-        sig = torch.nn.Sigmoid()
-
-        with torch.no_grad():
-            for i, (inputs, targets) in enumerate(loader):
-                if self.cuda:
-                    if self.feature_mask:
-                        inputs = inputs[:, self.feature_mask].cuda()
-                    else:
-                        inputs = inputs.cuda()
-                else:
-                    if self.feature_mask:
-                        inputs = inputs[:, self.feature_mask]
-
-                outputs = self.model(inputs)
-
-                if self.cuda:
-                    validate_targets.append(targets.squeeze().unsqueeze(0))
-                    validate_logits.append(outputs.cpu().squeeze().unsqueeze(0))
-                    validate_probs.append(sig(outputs).cpu().squeeze().unsqueeze(0))
-                else:
-                    validate_targets.append(targets.squeeze().unsqueeze(0))
-                    validate_logits.append(outputs.squeeze().unsqueeze(0))
-                    validate_probs.append(sig(outputs).squeeze().unsqueeze(0))
-
-        self.validate_targets = torch.cat(validate_targets, dim=1)
-        self.validate_logits = torch.cat(validate_logits, dim=1)
-        self.validate_probs = torch.cat(validate_probs, dim=1)
-
     def results(self):
         test_nll = self.mean_nll(self.test_logits, self.test_targets)
         test_acc = self.mean_accuracy(self.test_logits, self.test_targets)
@@ -173,27 +133,6 @@ class EmpericalRiskMinimization(object):
                 "pvals": None,
                 "test_acc": test_acc.numpy().squeeze().tolist(),
                 "test_acc_std": test_acc_std.numpy().squeeze().tolist()
-            }
-        }
-
-    def validation_results(self):
-        validate_nll = self.mean_nll(self.validate_logits, self.validate_targets)
-        validate_acc = self.mean_accuracy(self.validate_logits, self.validate_targets)
-        validate_acc_std = self.std_accuracy(self.validate_logits, self.validate_targets)
-
-        return {
-            "validate_acc": validate_acc.numpy().squeeze().tolist(),
-            "validate_nll": validate_nll.numpy().squeeze().tolist(),
-            "validate_probs": self.validate_probs.numpy().squeeze(),
-            "validate_labels": self.validate_targets.numpy().squeeze(),
-            "feature_coeffients": self.model.linear.weight.data.numpy().squeeze() if self.method == 'Linear' else None,
-            "to_bucket_val": {
-                "method": "Non-Causal ERM",
-                "features": np.array(self.features).tolist(),
-                "coefficients": self.model.linear.weight.data.numpy().squeeze().tolist() if self.method == 'Linear' else None,
-                "pvals": None,
-                "validate_acc": validate_acc.numpy().squeeze().tolist(),
-                "validate_acc_std": validate_acc_std.numpy().squeeze().tolist()
             }
         }
 
