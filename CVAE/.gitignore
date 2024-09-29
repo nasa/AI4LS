@@ -1,0 +1,12 @@
+# Add this file to the root of your git repo.  Name it .gitignore
+# A .gitignore file will tell git which files and directories to ignore and
+# not add to version control.
+
+**/.DS_Store
+__pycache__
+*.png
+*.h5
+*.h5ad
+*.zip
+figures
+np_test.py

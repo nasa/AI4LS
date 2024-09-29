@@ -1,0 +1,13 @@
+anndata==0.10.8
+matplotlib==3.8.0
+numpy==2.0.1
+pandas==2.2.2
+plotly==5.9.0
+Requests==2.32.3
+scanorama==1.7.4
+scanpy==1.10.2
+scikit_learn==1.2.2
+scipy==1.14.0
+torch==2.2.0.post100
+torch==2.2.1
+umap_learn==0.5.6
