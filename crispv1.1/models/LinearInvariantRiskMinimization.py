@@ -311,7 +311,17 @@ class LinearInvariantRiskMinimization(object):
 
     def results(self):
         test_nll = self.mean_nll(self.test_logits.squeeze(), self.test_targets.squeeze())
-        test_acc = self.mean_accuracy(self.test_logits.squeeze(), self.test_targets.squeeze())
+        # test_acc = self.mean_accuracy(self.test_logits.squeeze(), self.test_targets.squeeze())
+        tn = 0
+        fp = 0
+        fn = 0
+        tp = 0
+        for cm in self.confusion_matrix_test:
+            tn += cm.ravel()[0]
+            fp += cm.ravel()[1]
+            fn += cm.ravel()[2]
+            tp += cm.ravel()[3]
+        test_acc = (tp + tn) / (tp + tn + fp + fn)
         test_acc_std = self.std_accuracy(self.test_logits.squeeze(), self.test_targets.squeeze())
         coefficients = self.solution().detach().cpu().numpy().squeeze()[1:].tolist()
         if self.cuda:
@@ -324,10 +334,11 @@ class LinearInvariantRiskMinimization(object):
         else:
             npcorr = self.get_corr_mat()
 
-        print('accuracy: ', test_acc.numpy().squeeze().tolist())
+        print('accuracy: ', test_acc)
         return {
             #"test_logits": self.test_logits.squeeze().numpy().tolist(),
-            "test_acc": test_acc.numpy().squeeze().tolist(),
+            #"test_acc": test_acc.numpy().squeeze().tolist(),
+            "test_acc": test_acc,
             #"test_nll": test_nll.item(),
             "test_probs": self.test_probs.squeeze().numpy().tolist(),
             "test_labels": self.test_targets.squeeze().numpy().tolist(),
@@ -341,7 +352,8 @@ class LinearInvariantRiskMinimization(object):
                 # 'feature_gradients' : feature_gradients,
                 'pvals': None,
                 #"test_logits": self.test_logits.squeeze().numpy().tolist(),
-                'test_acc': test_acc.numpy().squeeze().tolist(),
+                #'test_acc': test_acc.numpy().squeeze().tolist(),
+                'test_acc': test_acc,
                 'test_acc_std': test_acc_std.item(),  # ,.numpy().squeeze().tolist(),
                 "confusion_matrix_test": str(self.confusion_matrix_test)
                 #'coefficient_correlation_matrix': None,

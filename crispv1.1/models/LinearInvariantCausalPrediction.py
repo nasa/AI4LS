@@ -7,6 +7,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import confusion_matrix
 
 from utils.defining_sets import defining_sets
+from sklearn.metrics import confusion_matrix
 
 
 def pretty(vector):
@@ -208,7 +209,17 @@ class InvariantCausalPrediction(object):
 
         if self.intersection_found or self.defining_set_found:
             test_nll = self.mean_nll(self.test_logits, self.test_targets)
-            test_acc = self.mean_accuracy(self.test_logits, self.test_targets)
+            #test_acc = self.mean_accuracy(self.test_logits, self.test_targets)
+            tn = 0
+            fp = 0
+            fn = 0
+            tp = 0
+            for cm in self.confusion_matrix_test:
+                tn += cm.ravel()[0]
+                fp += cm.ravel()[1]
+                fn += cm.ravel()[2]
+                tp += cm.ravel()[3]
+            test_acc = (tp + tn) / (tp + tn + fp + fn)
             test_acc_std = self.std_accuracy(self.test_logits, self.test_targets)
 
             validate_nll = self.mean_nll(self.validate_logits, self.validate_targets)
@@ -220,7 +231,8 @@ class InvariantCausalPrediction(object):
 
                 "solution": self.intersection_found or self.defining_set_found,
                 #"intersection": self.intersection_found,
-                "test_acc": test_acc.numpy().squeeze().tolist(),
+                #"test_acc": test_acc.numpy().squeeze().tolist(),
+                "test_acc": test_acc,
                 "test_nll": test_nll,
                 "test_probs": self.test_probs,
                 "test_labels": self.test_targets,
@@ -236,7 +248,8 @@ class InvariantCausalPrediction(object):
                     'features': np.array(self.full_feature_set)[self.selected_features].tolist(),
                     'coefficients': np.array(self.coef_()).tolist(),
                     'pvals': np.array(self.p_value).tolist(),
-                    'test_acc': test_acc.numpy().squeeze().tolist(),
+                    #'test_acc': test_acc.numpy().squeeze().tolist(),
+                    'test_acc': test_acc,
                     'test_acc_std': test_acc_std.numpy().squeeze().tolist(),
                     "confusion_matrix_test": str(self.confusion_matrix_test),
                     "validate_acc": validate_acc.numpy().squeeze().tolist(),

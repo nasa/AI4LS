@@ -353,7 +353,17 @@ class NonLinearInvariantCausalPrediction(object):
 
     def results(self):
         test_nll = self.mean_nll(self.test_logits, self.test_targets)
-        test_acc = self.mean_accuracy(self.test_probs, self.test_targets)
+        #test_acc = self.mean_accuracy(self.test_probs, self.test_targets)
+        tn = 0
+        fp = 0
+        fn = 0
+        tp = 0
+        for cm in self.confusion_matrix_test:
+            tn += cm.ravel()[0]
+            fp += cm.ravel()[1]
+            fn += cm.ravel()[2]
+            tp += cm.ravel()[3]
+        test_acc = (tp + tn) / (tp + tn + fp + fn)
         test_acc_std = self.std_accuracy(self.test_probs, self.test_targets)
         validate_nll = self.mean_nll(self.validate_logits, self.validate_targets)
         validate_acc = self.mean_accuracy(self.validate_probs, self.validate_targets)
@@ -374,7 +384,8 @@ class NonLinearInvariantCausalPrediction(object):
         return {
             #"solution": self.intersection_found or self.defining_set_found,
             #"intersection": self.intersection_found,
-            "test_acc": test_acc.numpy().squeeze().tolist(),
+            #"test_acc": test_acc.numpy().squeeze().tolist(),
+            "test_acc": test_acc,
             "test_acc_std": test_acc_std.numpy().squeeze().tolist(),
             #"test_nll": test_nll,
             #"test_probs": self.test_probs,
@@ -394,7 +405,8 @@ class NonLinearInvariantCausalPrediction(object):
                 'coefficients': overall_sties if len(self.selected_features) > 0 else None,
                 'pvals': self.selected_p_value,
                 'residuals': e_all,
-                'test_acc': test_acc.numpy().squeeze().tolist(),
+                #'test_acc': test_acc.numpy().squeeze().tolist(),
+                'test_acc': test_acc,
                 'test_acc_std': test_acc_std.numpy().squeeze().tolist(),
                 'confusion_matrix_test': str(self.confusion_matrix_test),
                 'validate_acc': validate_acc.numpy().squeeze().tolist(),

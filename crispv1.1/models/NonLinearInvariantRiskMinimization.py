@@ -226,14 +226,25 @@ class NonLinearInvariantRiskMinimization(object):
 
     def results(self):
         test_nll = self.mean_nll(self.test_logits, self.test_targets)
-        test_acc = self.mean_accuracy(self.test_logits, self.test_targets)
+        #test_acc = self.mean_accuracy(self.test_logits, self.test_targets)
+        tn = 0
+        fp = 0
+        fn = 0
+        tp = 0
+        for cm in self.confusion_matrix_test:
+            tn += cm.ravel()[0]
+            fp += cm.ravel()[1]
+            fn += cm.ravel()[2]
+            tp += cm.ravel()[3]
+        test_acc = (tp + tn) / (tp + tn + fp + fn)
         test_acc_std = self.std_accuracy(self.test_logits, self.test_targets)
         validate_nll = self.mean_nll(self.validate_logits, self.validate_targets)
         validate_acc = self.mean_accuracy(self.validate_logits, self.validate_targets)
         validate_acc_std = self.std_accuracy(self.validate_logits, self.validate_targets)
 
         return {
-            "test_acc": test_acc.numpy().squeeze().tolist(),
+            #"test_acc": test_acc.numpy().squeeze().tolist(),
+            "test_acc": test_acc,
             #"test_nll": test_nll,
             "test_probs": self.test_probs,
             "test_labels": self.test_targets,
@@ -249,7 +260,8 @@ class NonLinearInvariantRiskMinimization(object):
                 'coefficients': self.model.linear.weight.data
                     [0].detach().numpy().squeeze().tolist() if self.method == "Linear" else self.get_sensitivities().squeeze().tolist(),
                 'pvals': None,
-                'test_acc': test_acc.numpy().squeeze().tolist(),
+                #'test_acc': test_acc.numpy().squeeze().tolist(),
+                'test_acc': test_acc,
                 'test_acc_std': test_acc_std.numpy().squeeze().tolist(),
                 "confusion_matrix_test": str(self.confusion_matrix_test)
                 #'validate_acc': validate_acc.numpy().squeeze().tolist(),
