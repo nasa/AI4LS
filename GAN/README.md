@@ -13,13 +13,13 @@ Run the following steps to generate fake gene expression data.
 1. Clone this github repository to your local system. 
 
 ```console
-git clone https://github.com/jcasalet/NASA
+git clone https://github.com/nasa/AI4LS
 ```
 
-2. Change directory to the `NASA` directory. 
+2. Change directory to the `AI4LS` directory. 
 
 ```console
-cd NASA 
+cd AI4LS 
 ```
 
 ## Permute the expression data and the metadata 
