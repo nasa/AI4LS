@@ -1,0 +1,12 @@
+pybiomart
+numpy
+matplotlib
+pandas
+argparse
+scipy
+tensorflow
+scikit-learn
+seaborn
+ast
+statistics
+mygene
