@@ -1,0 +1,4 @@
+{
+"cat": ["animalreturn","dataset","condition","gender","libPrep","mission","preservation", "seqFacility", "seqParameters", "strain"],
+"num": ["age", "duration"]
+}
