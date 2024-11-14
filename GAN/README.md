@@ -22,6 +22,27 @@ git clone https://github.com/nasa/AI4LS
 cd AI4LS 
 ```
 
+3. Create a conda environment with Python version 3.8.
+
+```console
+conda create -n gan python=3.8
+```
+
+4. Activate the environment. 
+
+```console
+conda activate gan 
+```
+
+5. Install the Python requirements. 
+
+```console
+pip install -r requirements.txt
+```
+
+
+
+
 ## Permute the expression data and the metadata 
 IMPORTANT: Run the following steps to permute the data and metadata so that the samples are in the same order in both the expression file and the metadata file.  The GAN training algorithm assumes the samples are in the same order, and if they are not, it will produce jibberish results.
 
