@@ -7,6 +7,6 @@ scipy
 tensorflow
 scikit-learn
 seaborn
-ast
 statistics
 mygene
+umap

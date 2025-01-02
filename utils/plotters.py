@@ -32,7 +32,7 @@ def pcaPlot(pca, df, info_df, variable, title, gen_dir, use_meta_cols, use_palet
     plt.yticks([])
 
     ax.set_title(title, fontsize=20)
-    plt.legend(fontsize=15)
+    plt.legend(fontsize=10)
     #plt.show()
     if gen_dir is None:
         gen_dir = '.'
