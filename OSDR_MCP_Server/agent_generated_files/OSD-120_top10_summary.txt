@@ -1,0 +1,11 @@
+Top 10 expressed genes in study OSD-120:
+- AT3G41768: 10,209,304 counts
+- ATMG00020: 9,157,285 counts
+- AT1G07590: 3,233,395 counts
+- AT5G60390: 2,407,385 counts
+- AT3G06355: 2,241,945 counts
+- AT5G02500: 1,717,760 counts
+- AT4G13940: 1,655,880 counts
+- AT3G08580: 1,645,226 counts
+- AT1G21310: 1,606,477 counts
+- AT3G16640: 1,603,939 counts
