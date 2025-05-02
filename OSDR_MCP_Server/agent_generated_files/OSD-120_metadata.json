@@ -1,0 +1,25 @@
+{
+  "dataset_id": "OSD-120",
+  "title": "Genetic dissection of the Arabidopsis spaceflight transcriptome: Are some responses dispensable for the physiological adaptation of plants to spaceflight?",
+  "organism": "Arabidopsis thaliana",
+  "mission": "S, p, a, c, e, X, -, 3",
+  "protocols": [
+    "growth protocol",
+    "sample collection",
+    "Nucleic Acid Extraction",
+    "Library Construction",
+    "Nucleic Acid Sequencing",
+    "GeneLab raw data processing protocol",
+    "GeneLab RNAseq data processing protocol",
+    "Image Analysis"
+  ],
+  "assay_type": [
+    "RNA Sequencing (RNA-Seq)",
+    "Photography"
+  ],
+  "platform": [
+    "Illumina",
+    "CARA"
+  ],
+  "funding": "The work was supported by grant number GA-2013-104 Center for Advancement of Science in Space (CASIS). The funders had no role in study design data collection and analysis decision to publish or preparation of the manuscript."
+}
