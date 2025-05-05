@@ -1,13 +1,22 @@
+export COLABS="colab-earth colab-iss"
+export AGGS="agg-earth agg-iss"
+export COLAB_SHIM="colab-shim"
+
 #export DATA_PATH=/data/work/fluid/project/release/data
-export DATA_PATH=/Users/jcasalet/Desktop/CODES/NASA/FLUID/data
+#export DATA_PATH=/Users/jcasalet/Desktop/CODES/NASA/FLUID/data
 #export SCRIPT_PATH=/data/work/fluid/project/release/scripts
 export SCRIPT_PATH=/Users/jcasalet/Desktop/CODES/NASA/FLUID/scripts
 
 #export AGG_ISS_DATA_PATH=/home/fluid/data/AGG_ISS
+export AGG_ISS_DATA_PATH=/Users/jcasalet/Desktop/CODES/NASA/FLUID/data/WORKSPACE/AGG_ISS
 #export AGG_EARTH_DATA_PATH=/home/fluid/data/AGG_EARTH
+export AGG_EARTH_DATA_PATH=/Users/jcasalet/Desktop/CODES/NASA/FLUID/data/WORKSPACE/AGG_EARTH
 #export COLAB_ISS_DATA_PATH=/home/fluid/data/COLAB_ISS
+export COLAB_ISS_DATA_PATH=/Users/jcasalet/Desktop/CODES/NASA/FLUID/data/WORKSPACE/COLAB_ISS
 #export COLAB_EARTH_DATA_PATH=/home/fluid/data/COLAB_EARTH
+export COLAB_EARTH_DATA_PATH=/Users/jcasalet/Desktop/CODES/NASA/FLUID/data/WORKSPACE/COLAB_EARTH
 #export COLAB_SHIM_DATA_PATH=/home/fluid/data/COLAB_SHIM
+export COLAB_SHIM_DATA_PATH=/Users/jcasalet/Desktop/CODES/NASA/FLUID/data/WORKSPACE/COLAB_SHIM
 
 #export SCRIPT_PATH=/home/fluid/EBC/AGG/scripts
 
