@@ -1,6 +1,16 @@
+#!/bin/basdh
+
+#export COLABORATOR_COUNT=2
 export COLABS="colab-earth colab-iss"
 export AGGS="agg-earth agg-iss"
 export COLAB_SHIM="colab-shim"
+
+export COLABORATOR_COUNT=0
+for colab in $COLABS
+do
+	((COLABORATOR_COUNT=$COLABORATOR_COUNT+1))
+done
+
 
 #export DATA_PATH=/data/work/fluid/project/release/data
 export DATA_PATH=/Users/jcasalet/Desktop/CODES/NASA/AI4LS/FLUID/data

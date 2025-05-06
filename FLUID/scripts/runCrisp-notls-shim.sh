@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Load crisp working directories and other runtim configurations
 source /scripts/crisp-config.sh
@@ -30,24 +30,41 @@ update_plans_iss() {
 	/usr/bin/sed -i "s/.*agg_port.*/    agg_port: $AGG_ISS_PORT/" ~/crisp/fl_plan/plan.yaml
 	/usr/bin/sed -i "s/.*disable_client_auth.*/    disable_client_auth: true/" ~/crisp/fl_plan/plan.yaml
 	/usr/bin/sed -i 's/.*disable_tls.*/    disable_tls: true/' ~/crisp/fl_plan/plan.yaml
-	/usr/bin/sed -i "s/.*collaborator_count.*/    collaborator_count: 2/" ~/crisp/fl_plan/plan.yaml
-	/usr/bin/sed -i "s/.*best_state_path.*/    best_state_path: ${WORKSPACE_ISS_AGG_DIR}\/crisp_best_.pbuf/" ~/crisp/fl_plan/plan.yaml
-	/usr/bin/sed -i "s/.*init_state_path.*/    init_state_path: ${WORKSPACE_ISS_AGG_DIR}\/crisp_init_.pbuf/" ~/crisp/fl_plan/plan.yaml
-	/usr/bin/sed -i "s/.*last_state_path.*/    last_state_path: ${WORKSPACE_ISS_AGG_DIR}\/crisp_last_.pbuf/" ~/crisp/fl_plan/plan.yaml
+	/usr/bin/sed -i "s/.*collaborator_count.*/    collaborator_count: $COLABORATOR_COUNT/" ~/crisp/fl_plan/plan.yaml
+	#/usr/bin/sed -i "s/.*collaborator_count.*/    collaborator_count: 1/" ~/crisp/fl_plan/plan.yaml
+	#/usr/bin/sed -i "s/.*best_state_path.*/    best_state_path: $WORKSPACE_ISS_AGG_DIR\/crisp_best_.pbuf/" ~/crisp/fl_plan/plan.yaml
+	#/usr/bin/sed -i "s/.*init_state_path.*/    init_state_path: $WORKSPACE_ISS_AGG_DIR\/crisp_init_.pbuf/" ~/crisp/fl_plan/plan.yaml
+	#/usr/bin/sed -i "s/.*last_state_path.*/    last_state_path: $WORKSPACE_ISS_AGG_DIR\/crisp_last_.pbuf/" ~/crisp/fl_plan/plan.yaml
 	/usr/bin/sed -i "s/.*rounds_to_train.*/    rounds_to_train: $ROUNDS/" ~/crisp/fl_plan/plan.yaml
         /usr/bin/sed -i "s/.*db_store_rounds.*/    db_store_rounds: $ROUNDS/" ~/crisp/fl_plan/plan.yaml
         /usr/bin/sed -i "s/.*num_epochs.*/      num_epochs: $EPOCHS/" ~/crisp/fl_plan/plan.yaml
 	
 	cat ~/crisp/fl_plan/plan.yaml
-	
-	echo "colab-earth,/data/col_0" > ~/crisp/fl_plan/data.yaml
-	echo "colab-iss,/data/col_1" >> ~/crisp/fl_plan/data.yaml
+
+	#echo "colab-earth,/data/col_0" > ~/crisp/fl_plan/data.yaml
+	#echo "colab-iss,/data/col_1" >> ~/crisp/fl_plan/data.yaml
+
+	cat /dev/null > ~/crisp/fl_plan/data.yaml
+	i=0	
+	for colab in $COLABS
+	do	
+		echo "${colab},/data/col_${i}" >> ~/crisp/fl_plan/data.yaml
+		((i=$i+1))
+	done
+
 	cat ~/crisp/fl_plan/data.yaml
-	
+
+	#echo "collaborators:" > ~/crisp/fl_plan/cols.yaml	
+	#echo "- colab-earth" >> ~/crisp/fl_plan/cols.yaml	
+	#echo "- colab-iss" >> ~/crisp/fl_plan/cols.yaml	
 	echo "collaborators:" > ~/crisp/fl_plan/cols.yaml	
-	echo "- colab-iss" >> ~/crisp/fl_plan/cols.yaml	
-	echo "- colab-earth" >> ~/crisp/fl_plan/cols.yaml	
+	for colab in $COLABS
+	do
+		echo "- ${colab}" >> ~/crisp/fl_plan/cols.yaml	
+	done
+
 	cat ~/crisp/fl_plan/cols.yaml
+
 	
 	if [ "$ROLE" == "agg-iss" ]
 	then
@@ -73,23 +90,40 @@ update_plans_earth() {
 	/usr/bin/sed -i "s/.*agg_port.*/    agg_port: $AGG_EARTH_PORT/" ~/crisp/fl_plan/plan.yaml
 	/usr/bin/sed -i "s/.*disable_client_auth.*/    disable_client_auth: true/" ~/crisp/fl_plan/plan.yaml
 	/usr/bin/sed -i 's/.*disable_tls.*/    disable_tls: true/' ~/crisp/fl_plan/plan.yaml
-	/usr/bin/sed -i "s/.*collaborator_count.*/    collaborator_count: 2/" ~/crisp/fl_plan/plan.yaml
-	/usr/bin/sed -i "s/.*best_state_path.*/    best_state_path: ${WORKSPACE_EARTH_AGG_DIR}\/crisp_best_.pbuf/" ~/crisp/fl_plan/plan.yaml
-	/usr/bin/sed -i "s/.*init_state_path.*/    init_state_path: ${WORKSPACE_EARTH_AGG_DIR}\/crisp_init_.pbuf/" ~/crisp/fl_plan/plan.yaml
-	/usr/bin/sed -i "s/.*last_state_path.*/    last_state_path: ${WORKSPACE_EARTH_AGG_DIR}\/crisp_last_.pbuf/" ~/crisp/fl_plan/plan.yaml
+	/usr/bin/sed -i "s/.*collaborator_count.*/    collaborator_count: $COLABORATOR_COUNT/" ~/crisp/fl_plan/plan.yaml
+	#/usr/bin/sed -i "s/.*collaborator_count.*/    collaborator_count: 1/" ~/crisp/fl_plan/plan.yaml
+	/usr/bin/sed -i "s/.*best_state_path.*/    best_state_path: $WORKSPACE_EARTH_AGG_DIR\/crisp_best_.pbuf/" ~/crisp/fl_plan/plan.yaml
+	/usr/bin/sed -i "s/.*init_state_path.*/    init_state_path: $WORKSPACE_EARTH_AGG_DIR\/crisp_init_.pbuf/" ~/crisp/fl_plan/plan.yaml
+	/usr/bin/sed -i "s/.*last_state_path.*/    last_state_path: $WORKSPACE_EARTH_AGG_DIR\/crisp_last_.pbuf/" ~/crisp/fl_plan/plan.yaml
 	/usr/bin/sed -i "s/.*rounds_to_train.*/    rounds_to_train: $ROUNDS/" ~/crisp/fl_plan/plan.yaml
         /usr/bin/sed -i "s/.*db_store_rounds.*/    db_store_rounds: $ROUNDS/" ~/crisp/fl_plan/plan.yaml
         /usr/bin/sed -i "s/.*num_epochs.*/      num_epochs: $EPOCHS/" ~/crisp/fl_plan/plan.yaml
 	
 	cat ~/crisp/fl_plan/plan.yaml
-	
-	echo "colab-earth,/data/col_0" > ~/crisp/fl_plan/data.yaml
-	echo "colab-iss,/data/col_1" >> ~/crisp/fl_plan/data.yaml
+
+
+	#echo "colab-earth,/data/col_0" > ~/crisp/fl_plan/data.yaml
+	#echo "colab-iss,/data/col_1" >> ~/crisp/fl_plan/data.yaml
+
+	cat /dev/null > ~/crisp/fl_plan/data.yaml
+	i=0	
+	for colab in $COLABS
+	do	
+		echo "${colab},/data/col_${i}" >> ~/crisp/fl_plan/data.yaml
+		((i=$i+1))
+	done
+
 	cat ~/crisp/fl_plan/data.yaml
-	
+
+	#echo "collaborators:" > ~/crisp/fl_plan/cols.yaml	
+	#echo "- colab-earth" >> ~/crisp/fl_plan/cols.yaml	
+	#echo "- colab-iss" >> ~/crisp/fl_plan/cols.yaml	
 	echo "collaborators:" > ~/crisp/fl_plan/cols.yaml	
-	echo "- colab-earth" >> ~/crisp/fl_plan/cols.yaml	
-	echo "- colab-iss" >> ~/crisp/fl_plan/cols.yaml	
+	for colab in $COLABS
+	do
+		echo "- ${colab}" >> ~/crisp/fl_plan/cols.yaml	
+	done
+
 	cat ~/crisp/fl_plan/cols.yaml
 
 	if [ "$ROLE" == "agg-earth" ]
