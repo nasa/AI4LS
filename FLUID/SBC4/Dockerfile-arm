@@ -1,0 +1,79 @@
+#############################
+# FDL US 2021 - Astronaut Health Team
+# 2021 Docker Version:v07
+# James Casaletto 
+# Mar 2022 
+#############################
+
+FROM --platform=linux/arm64/v8 redhat/ubi8
+
+LABEL authors="jcasalet@ucsc.edu"
+
+ARG UID
+ARG GID
+
+# Install some basic utilities
+RUN yum install -y  net-tools  bzip2  zip  unzip  git which openssh-server gcc-c++ python3-devel
+
+
+# create fluid user
+RUN groupadd -g $GID fluid
+RUN echo fluid:fluid > /tmp/pass.txt
+RUN useradd -u $UID -g $GID -s /bin/bash -d /home/fluid -m fluid
+RUN chpasswd < /tmp/pass.txt
+
+# Create directories & set default directory
+USER fluid
+WORKDIR /home/fluid
+RUN git clone -b live_demo https://gitlab.com/frontierdevelopmentlab/astronaut-health/crisp.git
+
+COPY --chown=$UID:$GID crisp/fl_src/crisp_task_runner.py /home/fluid/crisp/fl_src
+COPY --chown=$UID:$GID crisp/fl_src/erm_module.py /home/fluid/crisp/fl_src
+COPY --chown=$UID:$GID crisp/fl_src/utils.py /home/fluid/crisp/fl_src
+
+COPY --chown=$UID:$GID crisp/requirements.txt /home/fluid/crisp
+
+# Install Miniconda and Python latest 
+ENV CONDA_AUTO_UPDATE_CONDA=false
+ENV PATH=/home/fluid/miniconda/bin:$PATH
+#RUN curl -sLo ~/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
+RUN curl -sLo ~/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-aarch64.sh
+RUN chmod +x ~/miniconda.sh
+RUN ~/miniconda.sh -b -p ~/miniconda
+RUN rm ~/miniconda.sh
+#RUN conda config --env --set subdir osx-64
+#RUN conda install -y python==3.7
+
+RUN conda create -y -n venv_3.7 python=3.7 anaconda
+#RUN conda create -y -n venv_3.7 anaconda
+SHELL ["conda", "init", "bash"]
+SHELL ["conda", "run", "-n", "venv_3.7", "/bin/bash", "-c"]
+RUN source ~/miniconda/etc/profile.d/conda.sh
+RUN echo "conda activate venv_3.7" > .bash_profile
+
+# Installing neccessary libraries
+RUN pip install paramiko
+RUN pip install scp
+RUN pip install pyflakes==2.3.0
+RUN pip install pycodestyle==2.7.0
+#RUN conda config --add channels conda-forge
+#RUN conda config --set channel_priority strict
+#RUN conda install --yes --file /home/fluid/crisp/requirements.txt
+RUN pip install -r /home/fluid/crisp/requirements.txt
+RUN pip install torch
+RUN pip install torchvision
+#RUN conda install conda-forge::cudatoolkit
+#RUN conda install cudatoolkit
+RUN conda install nvidia::cudatoolkit
+#RUN conda install cudatoolkit
+RUN pip install tensorflow
+RUN python -m pip install tensorflow-io
+RUN python -m pip uninstall -y tensorflow-io
+#RUN pip install causalnex
+
+# openfl:
+WORKDIR /home/fluid
+RUN git clone --branch fluid_rebase https://github.com/intel/openfl.git
+RUN pip install /home/fluid/openfl/.
+
+RUN sh -c 'echo -e IMAGE COMPLETED - READY TO RUN'
