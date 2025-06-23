@@ -27,13 +27,15 @@ adata = adata[:, adata.var['highly_variable']]
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Decide which model to use: 'vanilla' for vanilla CVAE
-model_for_gen = 'gma'
+model_for_gen = 'vanilla'
 
 # Vanilla CVAE
 if model_for_gen is 'vanilla':
-    model = vanilla_cvae.Vanilla_CVAE(n_genes = 1000, n_labels = 5, latent_size = 32, lr = 0.01)
+    # model = vanilla_cvae.Vanilla_CVAE(n_genes = 1000, n_labels = 5, latent_size = 32, lr = 0.01)
     # van_cvae.train_net(train_loader = train_dataloader, test_loader = val_dataloader, n_epochs = 30)
-    model.load_state_dict(torch.load('trained_models/trained_gma_cvae.pt', map_location=device))
+    # model.load_state_dict(torch.load('trained_models/trained_gma_cvae.pt', map_location=device))
+    model = vanilla_cvae.Vanilla_CVAE(n_genes=2000, n_labels=5, latent_size=64, beta=0.01, lr=0.001, wd=0.1, device=device)
+    model.load_state_dict(torch.load('trained_models/trained_vanilla_cvae.pt', map_location=device))
 # GMA CVAE
 else:
     gmt_dict = utils.read_gmt('data/GL-DPPD-7111_Mmus_Brain_CellType_GeneMarkers.gmt', min_g=0, max_g=1000)

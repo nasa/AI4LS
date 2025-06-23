@@ -8,5 +8,6 @@ __pycache__
 *.h5
 *.h5ad
 *.zip
+*.venv_cvae
 figures
 np_test.py

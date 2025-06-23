@@ -18,7 +18,8 @@ class Vanilla_CVAE(torch.nn.Module):
         self.learn_rate = kwargs.get('lr', 0.001)
         self.weight_decay = kwargs.get('wd', 0.001)
         self.init_w = kwargs.get('init_w', False)
-        self.model = kwargs.get('model', 'trained_models/trained_vanilla_cvae.pt')
+        #self.model = kwargs.get('model', 'trained_models/trained_vanilla_cvae.pt')
+        self.model = kwargs.get('model', 'trained_models/trained_unbatch_vanilla_cvae.pt')
         self.verbose = kwargs.get('verbose', True)
         self.device = kwargs.get('device', torch.device('cpu'))
 
@@ -108,7 +109,7 @@ class Vanilla_CVAE(torch.nn.Module):
         optimizer = optim.Adam(self.parameters(), lr = self.learn_rate, weight_decay = self.weight_decay)
         epoch = 0
         count_to_patience = 0
-        global_min_loss = np.Inf
+        global_min_loss = np.inf
         self.to(self.device)
         
         print("TRAINING IN PROGRESS :D", flush=True)

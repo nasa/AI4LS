@@ -2,10 +2,10 @@ import utils
 import anndata
 import numpy as np
 import pandas as pd
-import requests
 import scanpy as sc
 import scanpy.external as sce
 import scanorama
+import os
 
 # read in h5 files
 adata_612 = sc.read_10x_h5('data/612_filtered_feature_bc_matrix.h5')
@@ -23,55 +23,124 @@ for adata in adata_list:
     adata = utils.preprocess_adata(adata, n_top_genes=1000)
     sc.pp.pca(adata, n_comps=50)
 
-# get metadata jsons from API
-response_612 = requests.get("https://osdr.nasa.gov/osdr/data/osd/meta/612").json()
-list_612 = response_612['study']['OSD-612']['additionalInformation']['samples']['s_OSD-612-txt']['raw']
+# Read metadata directly from txt files
+def read_metadata_txt(file_path):
+    """Read tab-delimited metadata from txt file"""
+    try:
+        df = pd.read_csv(file_path, sep='\t')
+        return df
+    except Exception as e:
+        print(f"Error reading file {file_path}: {e}")
+        return pd.DataFrame()
 
-response_613 = requests.get("https://osdr.nasa.gov/osdr/data/osd/meta/613").json()
-list_613 = response_613['study']['OSD-613']['additionalInformation']['samples']['s_OSD-613-txt']['raw']
+# Read sample metadata files
+s_352_df = read_metadata_txt('data/s_OSD-352.txt')
+s_612_df = read_metadata_txt('data/s_OSD-612.txt')
+s_613_df = read_metadata_txt('data/s_OSD-613.txt')
 
-response_352 = requests.get("https://osdr.nasa.gov/osdr/data/osd/meta/352").json()
-list_352 = response_352['study']['OSD-352']['additionalInformation']['samples']['s_OSD-352-txt']['raw']
+# Get samples that have single-cell RNA sequencing data for 352 dataset
+def get_sc_samples_352():
+    """Get samples with single-cell RNA sequencing data from a_OSD file"""
+    sc_samples = []
+    a_352_path = 'data/a_OSD-352_transcription-profiling_single-cell-rna-sequencing_illumina.txt'
+    
+    if os.path.exists(a_352_path):
+        a_352_df = read_metadata_txt(a_352_path)
+        if not a_352_df.empty:
+            sc_samples = a_352_df['Sample Name'].tolist()
+    
+    return sc_samples
 
-# extra processing for 352 because not all samples are sequenced
-sc_list_352 = response_352['study']['OSD-352']['additionalInformation']['assays']['a_OSD-352_transcription-profiling_single-cell-rna-sequencing_illumina-txt']['raw']
+sc_samples_352 = get_sc_samples_352()
 
-sc_samples_352 = []
-for item in sc_list_352:
-    sample_name = item.get('a100000samplename', '')
-    sc_samples_352.append(sample_name)
-
-
+# Process 612 sample metadata
 rows_612 = []
-for item in list_612:
-    strain = item.get('a100005characteristicsstrain', '')
-    sex = item.get('a100012characteristicssex', '')
-    age_at_launch = utils.parse_age_at_launch(item.get('a100023characteristicsageatlaunch', '0 - 0'))
-    duration = utils.parse_duration(item.get('a100033parametervalueduration', '0 day'))
-    flight = utils.parse_flight(item.get('a100020factorvaluespaceflight'))
-
+for _, row in s_612_df.iterrows():
+    strain = row.get('Characteristics[Strain]', '')
+    sex = row.get('Characteristics[Sex]', '')
+    
+    # Extract age at launch from the data - handle different formats
+    age_value = row.get('Characteristics[Age at Launch]', '0')
+    age_unit = row.get('Unit', 'week')
+    if pd.isna(age_value) or pd.isna(age_unit):
+        age_at_launch = 0
+    else:
+        age_text = f"{age_value} {age_unit}"
+        age_at_launch = utils.parse_age_at_launch(age_text)
+    
+    # Extract duration
+    duration_value = row.get('Parameter Value[duration]', '0')
+    duration_unit = row.get('Unit.1', 'day')  # Using Unit.1 for the duration unit
+    if pd.isna(duration_value) or pd.isna(duration_unit):
+        duration = 0
+    else:
+        duration_text = f"{duration_value} {duration_unit}"
+        duration = utils.parse_duration(duration_text)
+    
+    # Extract flight status
+    flight = utils.parse_flight(row.get('Factor Value[Spaceflight]', ''))
+    
     rows_612.append([strain, sex, age_at_launch, duration, flight])
 
-
+# Process 613 sample metadata
 rows_613 = []
-for item in list_613:
-    strain = item.get('a100005characteristicsstrain', '')
-    sex = item.get('a100012characteristicssex', '')
-    age_at_launch = utils.parse_age_at_launch_2(item.get('a100018factorvalueage', '0 week'))
-    duration = utils.parse_duration(item.get('a100034parametervalueduration', '0 days'))
-    flight = utils.parse_flight(item.get('a100015factorvaluespaceflight'))
-
+for _, row in s_613_df.iterrows():
+    strain = row.get('Characteristics[Strain]', '')
+    sex = row.get('Characteristics[Sex]', '')
+    
+    # Extract age at launch from the data
+    age_value = row.get('Characteristics[Age at Launch]', '0')
+    age_unit = row.get('Unit', 'week')
+    if pd.isna(age_value) or pd.isna(age_unit):
+        age_at_launch = 0
+    else:
+        age_text = f"{age_value} {age_unit}"
+        age_at_launch = utils.parse_age_at_launch_2(age_text)
+    
+    # Extract duration
+    duration_value = row.get('Parameter Value[duration]', '0')
+    duration_unit = row.get('Unit.1', 'day')  # Using Unit.1 for the duration unit
+    if pd.isna(duration_value) or pd.isna(duration_unit):
+        duration = 0
+    else:
+        duration_text = f"{duration_value} {duration_unit}"
+        duration = utils.parse_duration(duration_text)
+    
+    # Extract flight status
+    flight = utils.parse_flight(row.get('Factor Value[Spaceflight]', ''))
+    
     rows_613.append([strain, sex, age_at_launch, duration, flight])
 
+# Process 352 sample metadata - only include samples with single-cell RNA sequencing
 rows_352 = []
-for item in list_352:
-    if item['a100001samplename'] in sc_samples_352:
-        strain = item.get('a100005characteristicsstrain', '')
-        sex = item.get('a100013characteristicssex', '')
-        age_at_launch = utils.parse_age_at_launch_2(item.get('a100009characteristicsageatlaunch', '0 week'))
-        duration = utils.parse_duration(item.get('a100031parametervalueduration', '0 day'))
-        flight = utils.parse_flight(item.get('a100021factorvaluespaceflight'))
-
+for _, row in s_352_df.iterrows():
+    sample_name = row.get('Sample Name', '')
+    # Only include samples with single-cell RNA sequencing data
+    if sample_name in sc_samples_352 or not sc_samples_352:  # Include all if sc_samples list is empty
+        strain = row.get('Characteristics[Strain]', '')
+        sex = row.get('Characteristics[Sex]', '')
+        
+        # Extract age at launch
+        age_value = row.get('Characteristics[Age at Launch]', '0')
+        age_unit = row.get('Unit', 'week')
+        if pd.isna(age_value) or pd.isna(age_unit):
+            age_at_launch = 0
+        else:
+            age_text = f"{age_value} {age_unit}"
+            age_at_launch = utils.parse_age_at_launch_2(age_text)
+        
+        # Extract duration
+        duration_value = row.get('Parameter Value[duration]', '0')
+        duration_unit = row.get('Unit.2', 'day')  # Using Unit.2 for the duration unit in 352 dataset
+        if pd.isna(duration_value) or pd.isna(duration_unit):
+            duration = 0
+        else:
+            duration_text = f"{duration_value} {duration_unit}"
+            duration = utils.parse_duration(duration_text)
+        
+        # Extract flight status
+        flight = utils.parse_flight(row.get('Factor Value[Spaceflight]', ''))
+        
         rows_352.append([strain, sex, age_at_launch, duration, flight])
 
 # create dataframes
@@ -117,6 +186,8 @@ for df, adata in zip(df_list, adata_list):
 adata_612.write('data/processed_612_data.h5ad')
 adata_613.write('data/processed_613_data.h5ad')
 adata_352.write('data/processed_352_data.h5ad')
+
+print("processed adatas")
 
 # Can comment out all above and read in saved preprocessed data instead!
 # adata_612 = sc.read_h5ad('data/processed_612_data.h5ad')

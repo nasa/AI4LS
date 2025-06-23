@@ -101,7 +101,7 @@ class GMA_CVAE(torch.nn.Module):
         optimizer = optim.Adam(self.parameters(), lr = lr, weight_decay = weight_decay)
         epoch = 0
         count_to_patience = 0
-        global_min_loss = np.Inf
+        global_min_loss = np.inf
         self.to(self.device)  # Move model to the device
 
         print("TRAINING IN PROGRESS :D", flush=True)

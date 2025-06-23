@@ -31,7 +31,7 @@ model_for_gen = 'vanilla'  # Change to anything else for GMA CVAE
 # Load the appropriate pre-trained model
 if model_for_gen == 'vanilla':
     model = vanilla_cvae.Vanilla_CVAE(n_genes=2000, n_labels=5, latent_size=64, beta=0.01, lr=0.001, wd=0.1, device=device)
-    model.load_state_dict(torch.load('trained_models/trained_vanilla_cvae.pt', map_location=device))
+    model.load_state_dict(torch.load('trained_models/trained_unbatch_vanilla_cvae.pt', map_location=device))
     print("Vanilla CVAE model loaded successfully")
 else:
     # For GMA CVAE
