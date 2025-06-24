@@ -37,7 +37,7 @@ fig = px.scatter(
     pca_df, x='PCA Component 1', y='PCA Component 2',
     color=labels,
     labels={'PCA Component 1': 'PCA Component 1', 'PCA Component 2': 'PCA Component 2'},
-    title='PCA: Existing v. Generated'
-)
+    title='PCA: Existing v. Generated')
 fig.update_traces(marker=dict(size=2.5))
+fig.write_html('a_plot.html')
 fig.show()
