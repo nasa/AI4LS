@@ -18,22 +18,10 @@ processed_352 = sc.read_h5ad(path+'data/processed_352_data.h5ad')
 
 processed_data = [processed_352, processed_612, processed_613]
 
-def gene_overlap_check(adata_list: list[sc.AnnData]):
-    """Quick check of gene overlap between datasets"""
-    gene_sets = [set(adata.var.index) for adata in adata_list]
-    common_genes = set.intersection(*gene_sets)
-    all_genes = set.union(*gene_sets)
-
-    print(f"Gene overlap summary:")
-    print(f"  Genes common to ALL datasets: {len(common_genes)}")
-    print(f"  Total unique genes: {len(all_genes)}")
-    print(f"  Overlap percentage: {len(common_genes) / len(all_genes) * 100:.1f}%")
-    return common_genes
-
 def merge_anndata_on_shared_vars(
-        adata_list: List[sc.AnnData],
-        output_path: Optional[str] = None
-) -> sc.AnnData:
+        adata_list,
+        output_path
+):
     """
     Merge multiple AnnData objects on shared var indices (genes).
     Assumes each dataset already has a 'dataset' column in .obs.
