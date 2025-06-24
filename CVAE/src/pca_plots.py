@@ -39,5 +39,6 @@ fig = px.scatter(
     labels={'PCA Component 1': 'PCA Component 1', 'PCA Component 2': 'PCA Component 2'},
     title='PCA: Existing v. Generated')
 fig.update_traces(marker=dict(size=2.5))
-fig.write_html('a_plot.html')
+fig.write_html('pca_plot.html')
+fig.write_image('pca_plot.png', scale=2)
 fig.show()
