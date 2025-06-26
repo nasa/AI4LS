@@ -12,8 +12,8 @@ import src.gma_cvae as gma_cvae
 model_to_train = 'vanilla'
 
 # Read in data
-#adata = sc.read_h5ad('data/corrected_data.h5ad')
-adata = sc.read_h5ad('data/unbatch_corrected_data.h5ad')
+adata = sc.read_h5ad('data/corrected_data.h5ad')
+#adata = sc.read_h5ad('data/unbatch_corrected_data.h5ad')
 adata.obs = adata.obs.drop(columns=['dataset'])
 sc.pp.highly_variable_genes(adata, n_top_genes=2000)
 adata = adata[:, adata.var['highly_variable']]

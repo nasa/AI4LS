@@ -18,8 +18,8 @@ class Vanilla_CVAE(torch.nn.Module):
         self.learn_rate = kwargs.get('lr', 0.001)
         self.weight_decay = kwargs.get('wd', 0.001)
         self.init_w = kwargs.get('init_w', False)
-        #self.model = kwargs.get('model', 'trained_models/trained_vanilla_cvae.pt')
-        self.model = kwargs.get('model', 'trained_models/trained_unbatch_vanilla_cvae.pt')
+        self.model = kwargs.get('model', 'trained_models/trained_vanilla_cvae_v2.pt')
+        #elf.model = kwargs.get('model', 'trained_models/trained_unbatch_vanilla_cvae.pt')
         self.verbose = kwargs.get('verbose', True)
         self.device = kwargs.get('device', torch.device('cpu'))
 

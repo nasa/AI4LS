@@ -4,20 +4,23 @@ import scanpy as sc
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import src.vanilla_cvae as vanilla_cvae
+import src.unbatch_vanilla_cvae as unbatch_cvae
+
+print("Is cuda available", torch.cuda.is_available())
 
 # 2. Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 3. Load both models
-model_vanilla = vanilla_cvae.Vanilla_CVAE(n_genes=2000, n_labels=5, latent_size=64, beta=0.01, lr=0.001, wd=0.1, device=device)
-model_vanilla.load_state_dict(torch.load('trained_models/trained_vanilla_cvae.pt', map_location=device))
-model_unbatch = vanilla_cvae.Vanilla_CVAE(n_genes=2000, n_labels=5, latent_size=64, beta=0.01, lr=0.001, wd=0.1, device=device)
+model_vanilla = vanilla_cvae.Vanilla_CVAE(n_genes=2000, n_labels=5, latent_size=32, beta=0.01, lr=0.001, wd=0.1, device=device)
+model_vanilla.load_state_dict(torch.load('trained_models/trained_vanilla_cvae_v2.pt', map_location=device))
+model_unbatch = unbatch_cvae.Unbatch_Vanilla_CVAE(n_genes=2000, n_labels=5, latent_size=32, beta=0.01, lr=0.001, wd=0.1, device=device)
 model_unbatch.load_state_dict(torch.load('trained_models/trained_unbatch_vanilla_cvae.pt', map_location=device))
 
 # 4. Generate 1000 samples each (using same condition vector)
 conditions = torch.tensor([0, 0, 20, 30, 1], dtype=torch.float32)
-samples_vanilla = model_vanilla.generate(conditions, num_samples=1000).cpu().numpy()
-samples_unbatch = model_unbatch.generate(conditions, num_samples=1000).cpu().numpy()
+samples_vanilla = model_vanilla.generate(conditions, num_samples=3000).cpu().numpy()
+samples_unbatch = model_unbatch.generate(conditions, num_samples=3000).cpu().numpy()
 
 # 5. Save samples
 np.save('generated_vanilla_samples.npy', samples_vanilla)
@@ -29,7 +32,7 @@ all_samples = np.concatenate([
     samples_vanilla,
     samples_unbatch
 ], axis=0)
-labels = np.array(['vanilla'] * 1000 + ['unbatch'] * 1000)
+labels = np.array(['vanilla'] * 3000 + ['unbatch'] * 3000)
 
 pca_result = pca.fit_transform(all_samples)
 

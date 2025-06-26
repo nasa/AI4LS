@@ -47,7 +47,7 @@ else:
 condition_cols = ['Strain', 'Sex', 'Age at Launch', 'Duration', 'Flight']
 
 # generate data
-existing_data = adata.X.A
+existing_data = adata.X.toarray()
 # modify conditions to desired values ['Strain' = 0 - 2, 'Sex' = 0 (female), 'Age at Launch' = int of weeks, 
 # 'Duration' = int of days, 'Flight' = 0 for ground, 1 for flight]
 conditions = torch.tensor([0, 0, 20, 30, 1], dtype=torch.float32)
