@@ -1,0 +1,9 @@
+{
+    "Non Linear IRM Feature Selection columns removed": [
+        "contrast",
+        "center_of_mass_y",
+        "radial_mean_activation_21_25px",
+        "radial_mean_activation_76_80px",
+        "radial_mean_activation_106_110px"
+    ]
+}

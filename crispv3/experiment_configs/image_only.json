@@ -1,0 +1,51 @@
+{
+    "name": "Example Image",
+    "short_name": "image-example",
+    "experiment_type": "image_only", 
+    "verbose": 1,
+    "test_val_split": [0.2, 0.1],
+    "data_options": {
+        "dataset_fp": "data/gradcam_features.pkl",
+        "subject_keys": "sample",
+        "targets": ["label"],
+        "predictors": "All",
+        "environments": ["env_split"],
+        "exclude": ["sample", "image_name", "label", "env_split"],
+	"output_data_regime": "binary"
+    },
+    "feature_selection_options": {
+        "max_features": 40,
+        "verbose": 0,
+        "seed": 123
+    },
+    "ensemble_options": {
+        "models": ["RF", "ICP", "NLICP", "IRM", "LIRM"]
+    },
+    
+    "image_data": {
+        "image_dir": "data/preprocessed_images/",
+        "labels_csv": "data/preprocessed_images/labels_v3.csv",
+        "model_type": "DenseNet121",
+        "image_model_training_type": "train_test_split", 
+        "split_ratio": 0.85,
+        "augmentation": true, 
+        "batch_size": 64,
+        "learning_rate": 0.0001,
+        "num_epochs": 5,
+        "model_save_path": "image_model_saved/image_model.pth",
+        "gradcam_features_save_path": "data/gradcam_features.pkl",
+        "tabular_features_path": "data/tabular_db.pickle",
+
+        "image_model_gradcam": {
+            "apply_gradcam": true,
+            "gradcam_output_save_path": "data/gradcam_outputs"
+        },
+
+        "gradcam_features_explainer":{
+            "save_path": "data/gradcam_features_explainer",
+            "show_clusters": false,
+            "show_com": false
+        }
+    }
+    
+}

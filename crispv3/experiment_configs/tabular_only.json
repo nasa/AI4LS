@@ -1,0 +1,25 @@
+{
+    "name": "Example Tabular",
+    "short_name": "tabular-example",
+    "experiment_type": "tabular_only", 
+    "verbose": 1,
+    "test_val_split": [0.2, 0.1],
+    "data_options": {
+        "dataset_fp": "data/example_tabular_db_for_multimodal_exp.pickle",
+        "subject_keys": "sample",
+        "targets": ["label"],
+        "predictors": "All",
+        "environments": ["env_split"],
+        "exclude": ["sample", "image_name", "label", "env_split", "env_split_img", "env_split_tabular"],
+	"output_data_regime": "binary"
+    },
+    "feature_selection_options": {
+        "max_features": 40,
+        "verbose": 0,
+        "seed": 123
+    },
+    "ensemble_options": {
+        "models": ["RF", "ERM", "ICP", "NLICP", "IRM", "LIRM"]
+    }
+    
+}

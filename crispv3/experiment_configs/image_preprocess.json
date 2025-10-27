@@ -1,0 +1,5 @@
+{
+    "image_folder": "data/img_input",
+    "preprocessed_output_folder": "data/preprocessed_images",
+    "environments": "env_split"
+}

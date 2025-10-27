@@ -1,0 +1,30 @@
+{
+    "name": "Example Experiment for AH casual ensemble",
+    "short_name": "<unique_experiment_name>",
+    "use_cloud": false,
+    "bucket_project": "<bucket_project>",
+    "bucket_name": "<bucket_name>",
+    "bucket_path": "<bucket_path>",
+    "verbose": 1,
+    "test_val_split": [0.1, 0.1],
+    "per_variant_experiment": false,
+    "data_options": {
+        "dataset_fp": "<path_to_dataset>",
+        "subject_keys": "<subject_key>",
+        "targets": ["<target_variable_column_name>"],
+        "predictors": "All",
+        "environments": ["<environment_split>"],
+        "exclude": ["<keys_to_exclude>"],
+        "remove_keys": ["<subject_key>", "<any_others_to_remove>"],
+        "merge_keys": ["<not_used_here>"],
+	"output_data_regime": "binary"
+    },
+    "feature_selection_options": {
+        "max_features": 20,
+        "verbose": 0,
+        "seed": 12
+    },
+    "ensemble_options": {
+        "models": ["ERM", "RF", "ICP"]
+    }
+}

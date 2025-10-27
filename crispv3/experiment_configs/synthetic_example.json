@@ -1,0 +1,24 @@
+{
+    "name": "Synthetic example",
+    "short_name": "example",
+    "verbose": 1,
+    "causalnex_frm": 1, 
+    "test_val_split": [0.1, 0.1],
+    "data_options": {
+        "dataset_fp": "data/synthetic/full_fw_synthetic_sem_n_causal_5_0.pickle",
+        "subject_keys": "Subj_ID",
+        "targets": ["Target"],
+        "predictors": "All",
+        "environments": ["env_split"],
+        "exclude": ["Subj_ID"],
+	"output_data_regime": "binary"
+    },
+    "feature_selection_options": {
+        "max_features": 20,
+        "verbose": 0,
+        "seed": 12
+    },
+    "ensemble_options": {
+        "models": ["RF"]
+    }
+}
