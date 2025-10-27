@@ -37,7 +37,7 @@ Run the image preprocessing script to resize and augment the images:
 python image_scripts/preprocess_images.py --image_preprocess_config experiment_configs/image_preprocess.json 
 ```
 
-Download the img_input.zip file from the [following location](https://drive.google.com/file/d/1TatqIIaAnEJ4ORwA6njaHhjy-pcucGtj/view?usp=sharing), put it into the data/ directory, unzip the file, and then proceed.
+Download the `img_input.zip` file from the [following location](https://drive.google.com/file/d/1TatqIIaAnEJ4ORwA6njaHhjy-pcucGtj/view?usp=sharing), put it into the data/ directory, unzip the file, and then proceed.
 
 Image pre-process configuration JSON would require few fields such as the following example:
 
@@ -63,7 +63,7 @@ Once the images are preprocessed, the user can train the CRISP ensemble. The tra
 
 Sample command to run the main training script:
 ```sh
-python main.py --experiment_config experiment_configs/config_file_name.json
+python main.py --experiment_config experiment_configs/image_tabular.json
 ```
 
 ### Configuration File Overview
