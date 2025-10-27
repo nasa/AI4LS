@@ -1,16 +1,16 @@
 # Steps for running CRISP with image modules
 
 ## Package Installation
-Ensure to have a working version of **Python 3.7** and then need to install all required packages. The Python version restriction is mainly for supporting the streamlit web output/results, otherwise for only running the experiment scripts future Python versions also work.
+Ensure to have a working version of **Python 3.8** and then need to install all required packages. The Python version restriction is mainly for supporting the streamlit web output/results, otherwise for only running the experiment scripts future Python versions also work.
 
 Conda users, can use the following commands to create a virtual environment with required Python version:
 
 ```sh
-  1. conda create --name crisp2_1 python=3.7
+  1. conda create --name crispv3 python=3.8
 
-  2. conda activate crisp2_1
+  2. conda activate crispv3
 
-  3. conda install -c conda-forge opencv==4.5.3
+  3. conda install -c conda-forge opencv==4.5.3  #skip this for now
 
   4. pip install -r requirements_new.txt
 
@@ -34,8 +34,10 @@ Conda users, can use the following commands to create a virtual environment with
 Run the image preprocessing script to resize and augment the images:
 
 ```sh
-python image_scripts/preprocess_images.py --image_preprocess_config image_preprocess_config_file_name.json
+python image_scripts/preprocess_images.py --image_preprocess_config experiment_configs/image_preprocess.json 
 ```
+
+Download the img_input.zip file from the [following location](https://drive.google.com/file/d/1TatqIIaAnEJ4ORwA6njaHhjy-pcucGtj/view?usp=sharing), put it into the data/ directory, unzip the file, and then proceed.
 
 Image pre-process configuration JSON would require few fields such as the following example:
 

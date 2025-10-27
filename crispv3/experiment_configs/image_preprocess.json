@@ -1,5 +1,5 @@
 {
-    "image_folder": "data/img_input",
+    "image_folder": "/Users/jcasalet/Desktop/CODES/NASA/AI4LS/img_input",
     "preprocessed_output_folder": "data/preprocessed_images",
     "environments": "env_split"
 }
