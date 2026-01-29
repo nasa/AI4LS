@@ -1,0 +1,278 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
+"""
+Test-Set Single-Sample Preprocessing
+
+Purpose:
+- Load one random ARCHS4 test sample (raw counts) and align to canonical protein‑coding genes (true exon lengths).
+- Apply the same normalization: TPM (length-normalized) → log1p → z-score.
+- Visualize value distributions for a quick sanity check before inference.
+
+Reasons:
+- Ensures gene order and scaling match training to avoid distribution shift.
+- Produces a standardized 1×G vector (`expr_std`) suitable as model input.
+
+Outputs:
+- `expr_logtpm`: log(TPM+1) expression values.
+- `metadata`: sample metadata for the selected GEO sample.
+- `X_std`: z-scored log(TPM) vector for the selected sample 
+- `gene_order`: canonical gene order used for alignment.
+"""
+
+import pandas as pd, numpy as np
+import matplotlib.pyplot as plt
+from Bio import SeqIO
+import archs4py as a4
+
+# -------------------------------------------------------------
+# 1️⃣ Select one random GEO sample from your test set
+# -------------------------------------------------------------
+meta = pd.read_csv("./data/archs4/splits/test_metadata.csv")
+geo_id = np.random.choice(meta["geo_accession"])
+print(f"🔹 Selected sample: {geo_id}")
+
+# -------------------------------------------------------------
+# 2️⃣ Load its raw counts
+# -------------------------------------------------------------
+input_h5 = "../BIOFM_PY/data/archs4/human_gene_v2.5.h5"
+expr = a4.data.samples(input_h5, [geo_id])
+expr = expr.groupby(expr.index).sum()   # gene × 1 sample
+print(f"Raw shape: {expr.shape}")
+
+# -------------------------------------------------------------
+# 3️⃣ Filter to protein-coding genes using TRUE exon lengths
+# -------------------------------------------------------------
+exon_file = "./data/gencode/canonical_genes_with_exon_lengths_safe_sequences.csv"
+exon_df = pd.read_csv(exon_file)  # contains gene_symbol, exon_length_bp
+
+gene_lengths = exon_df.set_index("gene_symbol")["exon_length_bp"]
+
+expr = expr.loc[expr.index.intersection(gene_lengths.index)]
+print(f"Protein expressed (filtered) shape: {expr.shape}")
+
+# -------------------------------------------------------------
+# 4️⃣ Apply preprocessing steps sequentially
+# -------------------------------------------------------------
+# (a) QC — trivial for a single-sample matrix, keep everything nonzero
+expr_qc = expr[expr[geo_id] > 0]
+
+# (b) TPM normalization
+lengths_kb = (gene_lengths.loc[expr_qc.index] / 1000.0).fillna(1)
+
+rate = expr_qc.div(lengths_kb, axis=0)
+
+# correct TPM denominator: sum per sample (axis=0)
+expr_tpm = rate.div(rate.sum(axis=0), axis=1) * 1e6
+
+# (c) Log transform
+expr_log = np.log1p(expr_tpm)
+
+# (d) Standardize (z-score)
+expr_std = (expr_log - expr_log.mean()) / expr_log.std()
+
+# -------------------------------------------------------------
+# 5️⃣ Visualize value distributions at each step
+# -------------------------------------------------------------
+fig, axes = plt.subplots(1, 4, figsize=(18,4), sharey=False)
+datasets = {
+    "Raw counts": expr_qc,
+    "TPM": expr_tpm,
+    "log(TPM+1)": expr_log,
+    "Z-score": expr_std
+}
+
+for ax, (title, df) in zip(axes, datasets.items()):
+    ax.hist(df.values.flatten(), bins=50, color="steelblue", alpha=0.7)
+    ax.set_title(title)
+    ax.set_xlabel("Expression value")
+axes[0].set_ylabel("Gene count")
+plt.suptitle(f"Preprocessing pipeline for sample {geo_id}")
+plt.tight_layout()
+plt.show()
+
+# -------------------------------------------------------------
+# 6️⃣ Optional: print a few example genes
+# -------------------------------------------------------------
+print("\nSample gene values across stages:")
+genes = np.random.choice(expr_qc.index, 5)
+for g in genes:
+    print(f"{g:12s}  raw={expr_qc.loc[g, geo_id]:.1f}, "
+          f"TPM={expr_tpm.loc[g, geo_id]:.1f}, "
+          f"logTPM={expr_log.loc[g, geo_id]:.2f}, "
+          f"z={expr_std.loc[g, geo_id]:.2f}")
+
+
+# In[ ]:
+
+
+"""
+process_archs4_short_proteins.py
+Filters ARCHS4 expression matrix to align with safe-length protein-coding genes (≤3000 aa).
+"""
+
+import os, gc, time
+import numpy as np, pandas as pd
+import archs4py as a4
+
+# -------------------------------------------------------------
+# CONFIGURATION
+# -------------------------------------------------------------
+input_h5 = "../BIOFM_PY/data/archs4/human_gene_v2.5.h5"
+split_csv = "./data/archs4/splits/test_metadata.csv"
+ground_truth_csv = "../BIOFM_PY/data/ensembl/protein_coding_genes.csv"
+safe_path = "./data/ensembl/filtered/safe_sequences.csv"
+exon_len_file = "./data/gencode/canonical_genes_with_exon_lengths_safe_sequences.csv"
+
+
+batch_size = 10000
+qc_min_nonzero = 14000
+start = time.time()
+
+# -------------------------------------------------------------
+# 1️⃣ Load ground truth + safe subset
+# -------------------------------------------------------------
+# genes_df = pd.read_csv(ground_truth_csv)
+# safe_genes = pd.read_csv(safe_path)["gene_symbol"].dropna().unique().tolist()
+
+# Load exon lengths for only the safe sequences
+genes_df = pd.read_csv(exon_len_file)
+
+# Should include: gene_symbol, exon_length_bp
+gene_lengths = genes_df.set_index("gene_symbol")["exon_length_bp"]
+
+# Canonical order for this dataset
+canonical_genes = genes_df["gene_symbol"].tolist()
+print(f"✅ Loaded {len(genes_df):,} canonical protein-coding genes with true exon lengths")
+
+
+print(f"✅ Loaded {len(genes_df):,} safe protein-coding genes (≤3000 aa)")
+
+# -------------------------------------------------------------
+# 2️⃣ Load metadata
+# -------------------------------------------------------------
+meta = pd.read_csv(split_csv)
+geo_ids = meta["geo_accession"].tolist()
+print(f"🧩 {len(geo_ids):,} test samples")
+
+# -------------------------------------------------------------
+# 3️⃣ Stream batches → normalize → accumulate
+# -------------------------------------------------------------
+batches = []
+for i in range(0, len(geo_ids), batch_size):
+    ids = geo_ids[i:i+batch_size]
+    print(f"🔹 Batch {i//batch_size+1}: {len(ids)} samples")
+
+    expr = a4.data.samples(input_h5, ids).groupby(level=0).sum()
+
+    # Keep only safe protein-coding genes
+    expr = expr.loc[expr.index.intersection(gene_lengths.index)]
+
+    # QC
+    nonzero = (expr > 0).sum(axis=0)
+    expr = expr.loc[:, nonzero >= qc_min_nonzero]
+
+    # TPM normalization
+    # exon lengths in kilobases
+    lengths_kb = (gene_lengths.loc[expr.index].fillna(1000)) / 1000.0
+    rate = expr.div(lengths_kb, axis=0)
+    expr_tpm = rate.div(rate.sum(axis=0), axis=1) * 1e6
+
+    # Align to canonical full set and log-transform
+    expr_log = np.log1p(expr_tpm.reindex(canonical_genes, fill_value=0))
+    batches.append(expr_log.astype("float32"))
+
+    del expr, expr_tpm, expr_log
+    gc.collect()
+
+# Combine all batches
+expr_all = pd.concat(batches, axis=1)
+print(f"✅ Combined: {expr_all.shape[0]:,} genes × {expr_all.shape[1]:,} samples")
+
+# -------------------------------------------------------------
+# 4️⃣ Align metadata
+# -------------------------------------------------------------
+meta = meta[meta["geo_accession"].isin(expr_all.columns)].reset_index(drop=True)
+expr_all = expr_all.loc[:, meta["geo_accession"]]
+
+# -------------------------------------------------------------
+# 5️⃣ Standardize (no PCA)
+# -------------------------------------------------------------
+X = expr_all.T.astype(np.float32)
+X_std = (X - X.mean()) / X.std()
+X_std = X_std.fillna(0).to_numpy()
+
+print(f"⏱️ Completed in {(time.time()-start)/60:.1f} min")
+
+# -------------------------------------------------------------
+# 6️⃣ Save results
+# -------------------------------------------------------------
+outdir = "./data/archs4/processed_short_proteins"
+os.makedirs(outdir, exist_ok=True)
+
+expr_all.to_parquet(f"{outdir}/test_expr_logtpm_short.parquet", compression="zstd")
+meta.to_csv(f"{outdir}/test_metadata_short.csv", index=False)
+np.save(f"{outdir}/test_X_std_short.npy", X_std)
+pd.Series(expr_all.index, name="gene_symbol").to_csv(
+    f"{outdir}/test_gene_order_short.csv", index=False
+)
+
+print("\n✅ Saved short-protein–aligned data:")
+print(f"  - Expression matrix: {outdir}/test_expr_logtpm_short.parquet")
+print(f"  - Metadata:          {outdir}/test_metadata_short.csv")
+print(f"  - Standardized data: {outdir}/test_X_std_short.npy")
+print(f"  - Gene order:        {outdir}/test_gene_order_short.csv")
+
+
+# In[4]:
+
+
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt, seaborn as sns
+
+start = time.time()
+
+# -------------------------------------------------------------
+# 6️⃣ Run t-SNE directly
+# -------------------------------------------------------------
+print("⚙️ Running t-SNE...")
+tsne = TSNE(
+    n_components=2,
+    perplexity=30,
+    learning_rate=200,
+    max_iter=1000,
+    init="random",
+    random_state=42,
+    verbose=1
+)
+X_emb = tsne.fit_transform(X_std)
+
+# -------------------------------------------------------------
+# 7️⃣ Plot
+# -------------------------------------------------------------
+plt.figure(figsize=(8,6))
+palette = dict(zip(sorted(meta["tcga_label"].unique()),
+                   sns.color_palette("tab20", len(meta["tcga_label"].unique()))))
+
+for label, color in palette.items():
+    idx = meta["tcga_label"] == label
+    plt.scatter(X_emb[idx,0], X_emb[idx,1], s=15, alpha=0.7, color=color, label=label)
+
+plt.title("t-SNE — ARCHS4 Test Set (Cancer Types)")
+plt.xlabel("t-SNE-1"); plt.ylabel("t-SNE-2")
+plt.legend(markerscale=1.2, fontsize=7, bbox_to_anchor=(1.05,1))
+plt.tight_layout(); plt.show()
+
+plt.savefig("figures/tsne_archs4_test_set_cancer_types.png")
+
+print(f"⏱️ Completed in {(time.time()-start)/60:.1f} min")
+
+
+# In[ ]:
+
+
+
+
