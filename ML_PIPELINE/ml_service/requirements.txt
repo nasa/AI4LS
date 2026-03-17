@@ -1,0 +1,9 @@
+# requirements.txt
+grpcio==1.78.0
+grpcio-tools==1.78.0
+protobuf==6.33.5
+scikit-learn==1.3.2
+xgboost==2.0.3
+pandas==2.1.4
+numpy==1.26.2
+joblib==1.3.2

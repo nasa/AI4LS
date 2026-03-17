@@ -1,0 +1,14 @@
+ml-service/
+├── proto/
+│   └── ml_service.proto
+├── src/
+│   ├── __init__.py
+│   ├── server.py
+│   ├── service.py
+│   ├── trainers.py              # Model training logic
+│   └── model_store.py           # Model persistence
+├── generated/                    # Auto-generated gRPC code
+├── models/                       # Stored model artifacts
+├── requirements.txt
+├── Dockerfile
+└── generate_grpc_code.sh

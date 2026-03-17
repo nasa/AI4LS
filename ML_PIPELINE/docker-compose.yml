@@ -1,0 +1,76 @@
+# docker-compose.yml (in the parent MICRO directory)
+version: '3.8'
+
+services:
+  data_service:
+    build:
+      context: ./data_service
+      dockerfile: Dockerfile
+    container_name: ml-pipeline-data_service
+    ports:
+      - "50051:50051"
+    volumes:
+      - dataset-storage:/data
+    networks:
+      - ml-pipeline-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ml_service:
+    build:
+      context: ./ml_service
+      dockerfile: Dockerfile
+    container_name: ml-pipeline-ml_service
+    ports:
+      - "50052:50052"
+    volumes:
+      - model-storage:/app/models
+    networks:
+      - ml-pipeline-network
+    depends_on:
+      - data_service
+    restart: unless-stopped
+    environment:
+      - DATA_SERVICE_URL=data_service:50051
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  orchestration_service:
+    build:
+      context: ./orchestration_service
+      dockerfile: Dockerfile
+    container_name: ml-pipeline-orchestration
+    ports:
+      - "8000:8000"
+    networks:
+      - ml-pipeline-network
+    depends_on:
+      - data_service
+      - ml_service
+    restart: unless-stopped
+    environment:
+      - DATA_SERVICE_URL=data_service:50051
+      - ML_SERVICE_URL=ml_service:50052
+      - CORS_ORIGINS=["http://localhost:3000","http://localhost:8000"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  dataset-storage:
+    driver: local
+  model-storage:
+    driver: local
+
+networks:
+  ml-pipeline-network:
+    driver: bridge

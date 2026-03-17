@@ -1,0 +1,315 @@
+# test_docker_pipeline.py
+import requests
+import json
+import time
+import sys
+import argparse
+
+BASE_URL = "http://localhost:8000"
+
+
+def test_health():
+    """Test health endpoint"""
+    print("=" * 60)
+    print("STEP 1: Health Check")
+    print("=" * 60)
+
+    response = requests.get(f"{BASE_URL}/health")
+    result = response.json()
+    print(json.dumps(result, indent=2))
+
+    if result['status'] != 'healthy':
+        print("\n⚠️  Services not healthy!")
+        return False
+
+    print("\n✓ All services healthy")
+    return True
+
+
+def download_dataset(osd_id, patterns):
+    """Download dataset from NASA OSDR via the data-service"""
+    print("\n" + "=" * 60)
+    print("STEP 2: Download Dataset from NASA OSDR")
+    print("=" * 60)
+
+    print(f"  OSD ID   : OSD-{osd_id}")
+    print(f"  Patterns : {patterns}")
+
+    payload = {
+        "osd_id": osd_id,
+        "patterns": patterns,
+    }
+
+    response = requests.post(f"{BASE_URL}/api/datasets/download", json=payload)
+
+    if response.status_code != 200:
+        print(f"\n❌ Download request failed: HTTP {response.status_code}")
+        print(response.text)
+        return None, None
+
+    result = response.json()
+    print(f"Valid: {result['is_valid']}")
+
+    if result.get('errors'):
+        print(f"Errors: {result['errors']}")
+
+    if result.get('warnings'):
+        print(f"Warnings: {result['warnings']}")
+
+    columns = []
+    if result.get('dataset_info'):
+        dataset_id = result['dataset_info']['dataset_id']
+        print(f"Dataset ID: {dataset_id}")
+        print(f"Shape: {result['dataset_info']['num_rows']} x {result['dataset_info']['num_columns']}")
+        #print(f"\nColumns:")
+        for col in result['dataset_info']['columns']:
+            #print(f"  - {col['name']} ({col['dtype']})")
+            columns.append(col['name'])
+
+        return dataset_id, columns
+
+    return None, None
+
+
+def upload_dataset(file_name):
+    """Upload and validate dataset from local file"""
+    print("\n" + "=" * 60)
+    print("STEP 2: Upload and Validate Dataset")
+    print("=" * 60)
+
+    with open(file_name, 'rb') as f:
+        files = {'file': ('data.csv', f, 'text/csv')}
+        response = requests.post(f"{BASE_URL}/api/datasets/validate", files=files)
+
+    result = response.json()
+    print(f"Valid: {result['is_valid']}")
+
+    columns = []
+    if result['dataset_info']:
+        dataset_id = result['dataset_info']['dataset_id']
+        print(f"Dataset ID: {dataset_id}")
+        print(f"Shape: {result['dataset_info']['num_rows']} x {result['dataset_info']['num_columns']}")
+        #print(f"\nColumns:")
+        for col in result['dataset_info']['columns']:
+            #print(f"  - {col['name']} ({col['dtype']})")
+            columns.append(col['name'])
+
+        return dataset_id, columns
+
+    return None, None
+
+
+def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list):
+    """Run full ML pipeline"""
+    print("\n" + "=" * 60)
+    print("STEP 3: Run ML Pipeline")
+    print("=" * 60)
+
+    # remove sample and target from features
+    if target_column in columns:
+        columns.remove(target_column)
+    if sample_column in columns:
+        columns.remove(sample_column)
+
+    transformations = []
+    if 'l' in trans_list:
+        transformations.append({"type": "log", "columns": columns, "params": {}})
+    if 'n' in trans_list:
+        transformations.append({"type": "normalize", "columns": columns, "params": {}})
+    if 's' in trans_list:
+        transformations.append({"type": "standardize", "columns": columns, "params": {}})
+    if 't' in trans_list:
+        transformations.append({"type": "tpm", "columns": columns, "params": {}})
+
+    payload = {
+        "dataset_id": dataset_id,
+        "config": {
+            "target_column": target_column,
+            "task_type": task_type,
+            "feature_columns": [],
+            "transformations": transformations,
+            "algorithm": algorithm,
+            "hyperparameters": {},
+            "metrics": ["accuracy", "f1_score"],
+            "test_size": test_size,
+            "random_state": 42
+        }
+    }
+
+    print("\nConfiguration:")
+    print(f"  Algorithm: {payload['config']['algorithm']}")
+    print(f"  Target: {payload['config']['target_column']}")
+    print(f"  Features: All except target")
+    print(f"  Test size: {payload['config']['test_size']}")
+
+    print("\nStreaming progress:")
+    print("-" * 60)
+
+    response = requests.post(
+        f"{BASE_URL}/api/pipeline/run",
+        json=payload,
+        stream=True
+    )
+
+    model_id = None
+    final_metrics = None
+
+    for line in response.iter_lines():
+        if line:
+            progress = json.loads(line)
+
+            status = progress.get('status', 'unknown')
+            message = progress.get('message', '')
+            percent = progress.get('progress_percent', 0)
+
+            bar_length = 40
+            filled = int(bar_length * percent / 100)
+            bar = '█' * filled + '░' * (bar_length - filled)
+
+            print(f"[{bar}] {percent:3d}% | {status:12s} | {message}")
+
+            if progress.get('test_metrics'):
+                final_metrics = progress['test_metrics']
+
+            if progress.get('model_id'):
+                model_id = progress['model_id']
+
+            if progress.get('error'):
+                print(f"  ❌ Error: {progress['error']}")
+                return None, None
+
+    print("-" * 60)
+    return model_id, final_metrics
+
+
+def get_model_info(model_id):
+    """Get model information"""
+    print("\n" + "=" * 60)
+    print("STEP 4: Get Model Information")
+    print("=" * 60)
+
+    response = requests.get(f"{BASE_URL}/api/models/{model_id}")
+    result = response.json()
+
+    print(f"Model ID: {result['model_id']}")
+    print(f"Algorithm: {result['algorithm']}")
+    print(f"Task Type: {result['task_type']}")
+    print(f"Target: {result['target_column']}")
+    print(f"Features: {len(result['feature_columns'])} columns")
+    print(f"Samples: {result['num_samples']}")
+
+    print("\nTest Metrics:")
+    for metric, value in result['test_metrics'].items():
+        print(f"  {metric}: {value:.4f}")
+
+
+def list_models():
+    """List all models"""
+    print("\n" + "=" * 60)
+    print("STEP 5: List All Models")
+    print("=" * 60)
+
+    response = requests.get(f"{BASE_URL}/api/models?limit=10")
+    result = response.json()
+
+    print(f"Total models: {result['total_count']}")
+
+    if result['models']:
+        print("\nModels:")
+        for i, model in enumerate(result['models'], 1):
+            acc = model['test_metrics'].get('accuracy', 'N/A')
+            print(f"{i}. {model['model_id']} | {model['algorithm']} | Acc: {acc}")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-op', '--operation', help='download|upload', default=None, required=True)
+    parser.add_argument('-tc', '--target_column', help='name of target column', default=None, required=True)
+    parser.add_argument('-tt', '--task_type', help='classification|regression', default=None, required=True)
+    parser.add_argument('-al', '--algorithm', help='name of ML algorithm', default=None, required=True)
+    parser.add_argument('-ts', '--test_size', help='decimal amount of data for testing', default=0.2, required=False)
+    parser.add_argument('-if', '--input_file', help='custom file to provide', default=None, required=False)
+    parser.add_argument('-oi', '--osd_id', help='OSDR dataset ID', default=None, required=False)
+    parser.add_argument('-tl', '--trans_list', help='list of transformations', default='clr', required=False)
+    parser.add_argument('-pa', '--patterns', help='string patterns to identify RNA-seq files', default=['unnormalized', 'RSEM'], required=False)
+    parser.add_argument('-sc', '--sample_column', help='name of sample column', default='sample', required=False)
+    
+    args = parser.parse_args()
+
+    operation = args.operation
+    osd_id        = args.osd_id 
+    target_column = args.target_column
+    sample_column = args.sample_column 
+    task_type     = args.task_type 
+    algorithm     = args.algorithm 
+    test_size     = args.test_size 
+    trans_list    = list(args.trans_list)
+    patterns      = list(args.patterns) 
+    input_file = args.input_file
+
+    if operation == 'upload' and input_file is None:
+        print("must provide input_file if using upload operation")
+        sys.exit(1)
+    elif operation == 'download' and osd_id is None:
+        print("must provide osd_id if using download operation")
+        sys.exit(1)
+   
+
+    print('trans_list:', trans_list)
+    print("\n")
+    print("╔" + "=" * 58 + "╗")
+    print("║" + " " * 8 + "DOCKER ML PIPELINE TEST" + " " * 27 + "║")
+    print("╚" + "=" * 58 + "╝")
+    print()
+
+    # Step 1: Health check
+    if not test_health():
+        print("\n❌ Services not healthy. Check logs:")
+        print("   docker-compose logs")
+        return
+
+    time.sleep(2)
+
+    # Step 2: Get dataset (download or upload)
+    if operation == 'download':
+        dataset_id, columns = download_dataset(osd_id, patterns)
+    else:
+        dataset_id, columns = upload_dataset(input_file)
+
+    if not dataset_id:
+        print("\n❌ Failed to load dataset")
+        return
+
+    print(f"\n✓ Dataset ready: {dataset_id}")
+
+    # Step 3: Run pipeline
+    model_id, metrics = run_pipeline(
+        dataset_id, target_column, sample_column,
+        columns, task_type, algorithm, test_size, trans_list
+    )
+    if not model_id:
+        print("\n❌ Pipeline failed")
+        return
+
+    print(f"\n✓ Model trained: {model_id}")
+    if metrics:
+        if task_type == 'classification':
+            print(f"✓ Test Accuracy: {metrics.get('accuracy', 0):.4f}")
+        elif task_type == 'regression':
+            print(f"✓ Test RMSE: {metrics.get('rmse', 0):.4f}")
+
+    # Step 4: Get model info
+    get_model_info(model_id)
+
+    # Step 5: List models
+    #list_models()
+
+    print("\n" + "=" * 60)
+    print("  - Access Swagger UI: http://localhost:8000/docs")
+    print("  - View logs: docker-compose logs -f")
+    print("  - Stop services: docker-compose down")
+    print()
+
+
+if __name__ == "__main__":
+    main()

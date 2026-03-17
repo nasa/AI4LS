@@ -1,0 +1,13 @@
+data-service/
+├── proto/
+│   └── data_service.proto
+├── src/
+│   ├── __init__.py
+│   ├── server.py
+│   ├── service.py
+│   └── transformations.py
+├── generated/
+│   └── (auto-generated gRPC code)
+├── Dockerfile
+├── requirements.txt
+└── docker-compose.yml (at root level)
