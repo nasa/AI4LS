@@ -14,6 +14,11 @@ class DataServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.UploadDataset = channel.unary_unary(
+                '/dataservice.DataService/UploadDataset',
+                request_serializer=data__service__pb2.UploadRequest.SerializeToString,
+                response_deserializer=data__service__pb2.ValidationResult.FromString,
+                _registered_method=True)
         self.ValidateDataset = channel.unary_unary(
                 '/dataservice.DataService/ValidateDataset',
                 request_serializer=data__service__pb2.ValidateRequest.SerializeToString,
@@ -34,13 +39,25 @@ class DataServiceStub(object):
                 request_serializer=data__service__pb2.DatasetInfoRequest.SerializeToString,
                 response_deserializer=data__service__pb2.DatasetInfo.FromString,
                 _registered_method=True)
+        self.DownloadDataset = channel.unary_unary(
+                '/dataservice.DataService/DownloadDataset',
+                request_serializer=data__service__pb2.DownloadRequest.SerializeToString,
+                response_deserializer=data__service__pb2.ValidationResult.FromString,
+                _registered_method=True)
 
 
 class DataServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
+    def UploadDataset(self, request, context):
+        """Upload and store a dataset from raw bytes
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ValidateDataset(self, request, context):
-        """Validate dataset structure and quality
+        """Validate dataset structure and quality (kept for backwards compatibility)
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -67,9 +84,21 @@ class DataServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def DownloadDataset(self, request, context):
+        """Download a dataset from NASA OSDR by dataset ID
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DataServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'UploadDataset': grpc.unary_unary_rpc_method_handler(
+                    servicer.UploadDataset,
+                    request_deserializer=data__service__pb2.UploadRequest.FromString,
+                    response_serializer=data__service__pb2.ValidationResult.SerializeToString,
+            ),
             'ValidateDataset': grpc.unary_unary_rpc_method_handler(
                     servicer.ValidateDataset,
                     request_deserializer=data__service__pb2.ValidateRequest.FromString,
@@ -90,6 +119,11 @@ def add_DataServiceServicer_to_server(servicer, server):
                     request_deserializer=data__service__pb2.DatasetInfoRequest.FromString,
                     response_serializer=data__service__pb2.DatasetInfo.SerializeToString,
             ),
+            'DownloadDataset': grpc.unary_unary_rpc_method_handler(
+                    servicer.DownloadDataset,
+                    request_deserializer=data__service__pb2.DownloadRequest.FromString,
+                    response_serializer=data__service__pb2.ValidationResult.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'dataservice.DataService', rpc_method_handlers)
@@ -100,6 +134,33 @@ def add_DataServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class DataService(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def UploadDataset(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dataservice.DataService/UploadDataset',
+            data__service__pb2.UploadRequest.SerializeToString,
+            data__service__pb2.ValidationResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def ValidateDataset(request,
@@ -199,6 +260,33 @@ class DataService(object):
             '/dataservice.DataService/GetDatasetInfo',
             data__service__pb2.DatasetInfoRequest.SerializeToString,
             data__service__pb2.DatasetInfo.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DownloadDataset(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dataservice.DataService/DownloadDataset',
+            data__service__pb2.DownloadRequest.SerializeToString,
+            data__service__pb2.ValidationResult.FromString,
             options,
             channel_credentials,
             insecure,

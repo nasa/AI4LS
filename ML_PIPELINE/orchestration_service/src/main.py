@@ -1,5 +1,6 @@
 # orchestration-service/src/main.py
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -81,10 +82,16 @@ app.add_middleware(
 
 # ── Request models ────────────────────────────────────────────────────────────
 
+class UploadRequest(BaseModel):
+    exclude_columns: Optional[List[str]] = []
+
 class DownloadRequest(BaseModel):
     osd_id: str
     patterns: List[str] = ["Unnormalized", "RSEM"]
     dataset_id: Optional[str] = ""
+    factor_name: str
+    factor_values: List[str]
+    min_features: int
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
@@ -124,12 +131,13 @@ async def health_check():
 
 # ── Dataset endpoints ─────────────────────────────────────────────────────────
 
-@app.post("/api/datasets/validate", response_model=ValidationResponse)
-async def validate_dataset(
+@app.post("/api/datasets/upload", response_model=ValidationResponse)
+@app.post("/api/datasets/validate", response_model=ValidationResponse)  # kept for backwards compatibility
+async def upload_dataset(
     file: UploadFile = File(...),
     settings: Settings = Depends(get_settings)
 ):
-    """Validate an uploaded dataset"""
+    """Upload a dataset to the data service for storage"""
     content = await file.read()
     if len(content) > settings.max_upload_size:
         raise HTTPException(
@@ -138,9 +146,11 @@ async def validate_dataset(
         )
     
     format_type = "csv" if file.filename.endswith(".csv") else "json"
+    #exclude_columns = List[str] = Form([]) 
+    exclude_columns = List[str] 
     
     try:
-        result = data_client.validate_dataset(content, format_type)
+        result = data_client.upload_dataset(content, format_type, exclude_columns=[])
         
         response = ValidationResponse(
             is_valid=result["is_valid"],
@@ -173,12 +183,18 @@ async def download_dataset(request: DownloadRequest):
     - **osd_id**: NASA OSDR dataset number, e.g. "379" for OSD-379
     - **patterns**: File name patterns to match (default: Unnormalized, RSEM)
     - **dataset_id**: Optional ID to assign; auto-generated if omitted
+    - **factor_name**: name of column in metadata to get factor values from 
+    - **factor_values**: list of column values in metadata for target values 
+    - **min_features**: minimum number of features to keep after dim reduction 
     """
     try:
         result = data_client.download_dataset(
             osd_id=request.osd_id,
             patterns=request.patterns,
             dataset_id=request.dataset_id or "",
+            factor_name=request.factor_name,
+            factor_values=request.factor_values,
+            min_features=request.min_features,
         )
 
         response = ValidationResponse(
@@ -274,6 +290,9 @@ async def run_pipeline(request: PipelineRequest):
     async def generate_progress():
         try:
             transformed_id = request.dataset_id
+            factor_name = request.config.factor_name
+            factor_values = request.config.factor_values
+            min_features = request.config.min_features
             
             if request.config.transformations:
                 logger.info(f"Pipeline {pipeline_id}: Applying transformations...")
@@ -284,7 +303,7 @@ async def run_pipeline(request: PipelineRequest):
                     "message": "Applying data transformations...",
                     "progress_percent": 10
                 }) + "\n"
-                
+
                 transformations = [
                     {
                         "type": t.type.value,

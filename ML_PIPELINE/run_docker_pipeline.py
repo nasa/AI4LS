@@ -1,4 +1,4 @@
-# test_docker_pipeline.py
+# run_docker_pipeline.py
 import requests
 import json
 import time
@@ -26,18 +26,24 @@ def test_health():
     return True
 
 
-def download_dataset(osd_id, patterns):
+def download_dataset(args):
     """Download dataset from NASA OSDR via the data-service"""
     print("\n" + "=" * 60)
     print("STEP 2: Download Dataset from NASA OSDR")
     print("=" * 60)
 
-    print(f"  OSD ID   : OSD-{osd_id}")
-    print(f"  Patterns : {patterns}")
+    print(f"  OSD ID   : OSD-{args.osd_id}")
+    print(f"  Patterns : {args.patterns}")
+    print(f"  Factor Name : {args.factor_name}")
+    print(f"  Factor Values : {args.factor_values}")
 
     payload = {
-        "osd_id": osd_id,
-        "patterns": patterns,
+        "osd_id": args.osd_id,
+        "patterns": args.patterns,
+        "exclude_columns": args.exclude_columns,
+        "factor_name": args.factor_name,
+        "factor_values": args.factor_values,
+        "min_features": args.min_features,
     }
 
     response = requests.post(f"{BASE_URL}/api/datasets/download", json=payload)
@@ -71,14 +77,15 @@ def download_dataset(osd_id, patterns):
     return None, None
 
 
-def upload_dataset(file_name):
+def upload_dataset(file_name, exclude_columns):
     """Upload and validate dataset from local file"""
     print("\n" + "=" * 60)
     print("STEP 2: Upload and Validate Dataset")
     print("=" * 60)
 
     with open(file_name, 'rb') as f:
-        files = {'file': ('data.csv', f, 'text/csv')}
+        #files = {'file': ('data.csv', f, 'text/csv')}
+        files = {'file': ('data.csv', f, 'csv')}
         response = requests.post(f"{BASE_URL}/api/datasets/validate", files=files)
 
     result = response.json()
@@ -99,7 +106,7 @@ def upload_dataset(file_name):
     return None, None
 
 
-def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list):
+def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list, factor_name, factor_values, min_features):
     """Run full ML pipeline"""
     print("\n" + "=" * 60)
     print("STEP 3: Run ML Pipeline")
@@ -108,8 +115,6 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
     # remove sample and target from features
     if target_column in columns:
         columns.remove(target_column)
-    if sample_column in columns:
-        columns.remove(sample_column)
 
     transformations = []
     if 'l' in trans_list:
@@ -132,7 +137,10 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
             "hyperparameters": {},
             "metrics": ["accuracy", "f1_score"],
             "test_size": test_size,
-            "random_state": 42
+            "random_state": 42,
+            "factor_name": factor_name,
+            "factor_values": factor_values,
+            "min_features": min_features,
         }
     }
 
@@ -220,19 +228,26 @@ def list_models():
             acc = model['test_metrics'].get('accuracy', 'N/A')
             print(f"{i}. {model['model_id']} | {model['algorithm']} | Acc: {acc}")
 
+def list_of_strings(arg):
+    return arg.split(",")
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-op', '--operation', help='download|upload', default=None, required=True)
-    parser.add_argument('-tc', '--target_column', help='name of target column', default=None, required=True)
     parser.add_argument('-tt', '--task_type', help='classification|regression', default=None, required=True)
     parser.add_argument('-al', '--algorithm', help='name of ML algorithm', default=None, required=True)
     parser.add_argument('-ts', '--test_size', help='decimal amount of data for testing', default=0.2, required=False)
     parser.add_argument('-if', '--input_file', help='custom file to provide', default=None, required=False)
     parser.add_argument('-oi', '--osd_id', help='OSDR dataset ID', default=None, required=False)
-    parser.add_argument('-tl', '--trans_list', help='list of transformations', default='clr', required=False)
-    parser.add_argument('-pa', '--patterns', help='string patterns to identify RNA-seq files', default=['unnormalized', 'RSEM'], required=False)
-    parser.add_argument('-sc', '--sample_column', help='name of sample column', default='sample', required=False)
+    parser.add_argument('-tl', '--trans_list', help='list of transformations', default=[], type=list_of_strings, required=False)
+    parser.add_argument('-ec', '--exclude_columns', help='list of columns to exclude', default=[], type=list_of_strings, required=False)
+    parser.add_argument('-pa', '--patterns', help='string patterns to identify RNA-seq files', default=['unnormalized', 'RSEM'], type=list_of_strings, required=False)
+    parser.add_argument('-sc', '--sample_column', help='sample column name', default=None, required=False)
+    parser.add_argument('-tc', '--target_column', help='name of target column', default=None, required=False)
+    parser.add_argument('-fl', '--factor_name', help='metadata factor name', default='Factor Value[Spaceflight]', required=False)
+    parser.add_argument('-fv', '--factor_values', help='metadata factor values', type=list_of_strings, default=['Ground Control', 'Space Flight'], required=False)
+    parser.add_argument('-mf', '--min_features', help='minimum number of features to keep after CVS dimensionality reduction', default=1000, required=False)
+
     
     args = parser.parse_args()
 
@@ -244,18 +259,43 @@ def main():
     algorithm     = args.algorithm 
     test_size     = args.test_size 
     trans_list    = list(args.trans_list)
+    exclude_columns    = list(args.exclude_columns)
     patterns      = list(args.patterns) 
     input_file = args.input_file
+    factor_name = args.factor_name
+    factor_values = args.factor_values
+    min_features = args.min_features
 
-    if operation == 'upload' and input_file is None:
-        print("must provide input_file if using upload operation")
-        sys.exit(1)
-    elif operation == 'download' and osd_id is None:
-        print("must provide osd_id if using download operation")
-        sys.exit(1)
-   
+    if operation == 'upload':
+        if input_file is None:
+            print("must provide input_file if using upload operation")
+            sys.exit(1)
+        if target_column is None:
+            print("must provide target_column if using upload operation")
+            sys.exit(1)
+        if sample_column is None:
+            print("must provide sample_column if using upload operation")
+            sys.exit(1)
+    elif operation == 'download':
+        if osd_id is None:
+            print("must provide osd_id if using download operation")
+            sys.exit(1)
+        if target_column is None:
+            target_column = factor_name
+            print(f"  ℹ️  Using factor_name as target_column: {target_column}")
+    # Add after argument parsing
+    print(f"DEBUG - Arguments:")
+    print(f"  operation: {operation}")
+    print(f"  osd_id: {osd_id}")
+    print(f"  target_column: {target_column}")
+    print(f"  task_type: {task_type}")
+    print(f"  algorithm: {algorithm}")
+    print(f"  transformations: {trans_list}")
+    print(f"  factor_name: {factor_name}")
+    print(f"  factor_values: {factor_values}")
+    print(f"  min_features: {min_features}")
+    print()
 
-    print('trans_list:', trans_list)
     print("\n")
     print("╔" + "=" * 58 + "╗")
     print("║" + " " * 8 + "DOCKER ML PIPELINE TEST" + " " * 27 + "║")
@@ -272,9 +312,12 @@ def main():
 
     # Step 2: Get dataset (download or upload)
     if operation == 'download':
-        dataset_id, columns = download_dataset(osd_id, patterns)
+        dataset_id, columns = download_dataset(args)
+    elif operation == 'upload':
+        dataset_id, columns = upload_dataset(input_file, exclude_columns)
     else:
-        dataset_id, columns = upload_dataset(input_file)
+        print("unknown operation: ", operation)
+        sys.exit(1)
 
     if not dataset_id:
         print("\n❌ Failed to load dataset")
@@ -284,8 +327,9 @@ def main():
 
     # Step 3: Run pipeline
     model_id, metrics = run_pipeline(
-        dataset_id, target_column, sample_column,
-        columns, task_type, algorithm, test_size, trans_list
+        dataset_id, target_column, sample_column, 
+        columns, task_type, algorithm, test_size, trans_list,
+        factor_name, factor_values,min_features
     )
     if not model_id:
         print("\n❌ Pipeline failed")

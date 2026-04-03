@@ -4,7 +4,10 @@ syntax = "proto3";
 package dataservice;
 
 service DataService {
-  // Validate dataset structure and quality
+  // Upload and store a dataset from raw bytes
+  rpc UploadDataset(UploadRequest) returns (ValidationResult);
+
+  // Validate dataset structure and quality (kept for backwards compatibility)
   rpc ValidateDataset(ValidateRequest) returns (ValidationResult);
   
   // Apply transformations to dataset
@@ -20,16 +23,22 @@ service DataService {
   rpc DownloadDataset(DownloadRequest) returns (ValidationResult);
 }
 
+message UploadRequest {
+  bytes   file_content = 1;  // Raw CSV or JSON bytes
+  string  format       = 2;  // "csv" or "json"
+  string  dataset_id   = 3;  // optional; auto-generated if empty
+}
+
 message DownloadRequest {
-  string osd_id = 1;           // e.g. "379" for OSD-379
-  repeated string patterns = 2; // e.g. ["Unnormalized", "RSEM"]
-  string dataset_id = 3;        // optional; auto-generated if empty
+  string osd_id = 1;
+  repeated string patterns = 2;
+  string dataset_id = 3;
 }
 
 message ValidateRequest {
   string dataset_id = 1;
-  bytes dataset_content = 2; // Raw CSV/JSON data
-  string format = 3; // "csv", "json", "parquet"
+  bytes dataset_content = 2;
+  string format = 3;
 }
 
 message ValidationResult {
@@ -49,7 +58,7 @@ message DatasetInfo {
 
 message ColumnInfo {
   string name = 1;
-  string dtype = 2; // "numeric", "categorical", "datetime", "text"
+  string dtype = 2;
   int32 null_count = 3;
   repeated string sample_values = 4;
 }
@@ -60,9 +69,9 @@ message TransformRequest {
 }
 
 message Transformation {
-  string type = 1; // "log", "standardize", "normalize", "one_hot_encode"
-  repeated string columns = 2; // Columns to apply transformation to
-  map<string, string> params = 3; // Additional parameters
+  string type = 1;
+  repeated string columns = 2;
+  map<string, string> params = 3;
 }
 
 message TransformationResult {
@@ -74,12 +83,12 @@ message TransformationResult {
 
 message StreamRequest {
   string dataset_id = 1;
-  int32 chunk_size = 2; // Number of rows per chunk
+  int32 chunk_size = 2;
 }
 
 message DataChunk {
   int32 chunk_number = 1;
-  bytes data = 2; // Serialized chunk (CSV/JSON)
+  bytes data = 2;
   bool is_final = 3;
 }
 

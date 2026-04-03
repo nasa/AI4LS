@@ -12,6 +12,7 @@ import logging
 import os
 import zipfile
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,8 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         response.raise_for_status()
         return response.content
 
+
+
     def _find_file(self, files: dict, osd_key: str, patterns: List[str]) -> List[str]:
         """Return filenames whose paths match ALL patterns (case-insensitive)."""
         return [
@@ -70,17 +73,31 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         from sklearn.feature_selection import  mutual_info_regression
         return mutual_info_regression(X, y, random_state=seed)
 
-    def _filter_cvs(self, df, thresh):
+    def _filter_cvs(self, df, start, step, min_features):
         # calculate coefficient of variation
         # assumes samples x genes
-        keep_columns = list()
-        for col in list(df.columns):
-            m = np.mean(df[col])
-            sd = np.std(df[col])
-            if m != 0 and sd/m > thresh:
-               keep_columns.append(col)
-        return df[keep_columns]
-   
+        if df.shape[1] <= min_features:
+            logger.info(f"len(df) is less than min_features {min_features}") 
+            return df 
+        keep_columns_use = list(df.columns)
+        while True: 
+            keep_columns = list() 
+            for col in list(df.columns):
+                m = np.mean(df[col])
+                sd = np.std(df[col])
+                if m != 0 and sd/m > start:
+                    keep_columns.append(col)
+            if len(keep_columns) < min_features:
+                logger.info(f"keep cols less than min cols: {len(keep_columns)} ")
+                logger.info(f"length of keep_cols_use: {len(keep_columns_use)}")
+                break
+            else:
+                keep_columns_use = keep_columns 
+                start += step
+                logger.info(f"stepping up start: {start}")
+
+        return df[keep_columns_use]
+
 
     def _filterNotCorrelated(self, df, y, k, seed):
         # remove non-correlated
@@ -94,14 +111,34 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         indices = selector.get_support(indices=True)
         return df.iloc[indices]
 
+    def check_for_nans(self, df):
+        # check for nans
+        nan_count = df.isna().sum().sum()
+        logger.info(f"nan count: {nan_count}")
+        if nan_count > 0:
+            df = df.fillna(0)
+        return df
+
+    def transpose_df(self, df):
+        # Step 5b: transpose df into samples x genes
+        dft = df.T
+        dft.columns = dft.iloc[0]
+        dft.drop(dft.index[0], inplace=True)
+        dft.rename_axis('sample', inplace=True)
+        return dft 
+
     def DownloadDataset(self, request, context):
         """
         Download an RNA-seq counts file from NASA OSDR, store it as a
         dataset, and return a ValidationResult just like ValidateDataset.
         """
+        logger.info(f"request in DownloadDataset: {request}")
         osd_id   = request.osd_id
         patterns = list(request.patterns) or ["Unnormalized", "RSEM"]
         osd_key  = f"OSD-{osd_id}"
+        factor_name = request.factor_name
+        factor_values = list(request.factor_values)
+        min_features = request.min_features
 
         try:
             # Step 1: fetch file listing
@@ -128,41 +165,30 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             # Step 5: parse into DataFrame (tab-separated counts files are common)
             sep = "\t" if "\t" in rna_seq_text.split("\n")[0] else ","
             df = pd.read_csv(StringIO(rna_seq_text), sep=sep)
+            logger.info(f"Downloaded to shape: {df.shape[0]} by {df.shape[1]}")
 
-            # check for nans
-            nan_count = df.isna().sum().sum()
-            logger.info(f"nan count: {nan_count}")
-            if nan_count > 0:
-                df = df.fillna(0)
+            # replace nans with 0's
+            df = self.check_for_nans(df)
+            logger.info(f"shape after replace nans: {df.shape[0]} by {df.shape[1]}")
 
-
-            # Step 5b: transform df into samples x genes
-            dft = df.T
-            dft.columns = dft.iloc[0]
-            dft.drop(dft.index[0], inplace=True)
-            dft.rename_axis('sample', inplace=True)
-            df = dft
-            logger.info(df.head())
+            # transpose df into samples x genes
+            df = self.transpose_df(df)
+            logger.info(f"shape after transpose: {df.shape[0]} by {df.shape[1]}")
 
             # remove name of columns
             df.columns.name = None
+
 
             # set dtype for entire dataframe
             df = df.astype(float)
 
             # filter low CVS
-            df = self._filter_cvs(df, 2)
+            logger.info(f"shape before filter_cvs: {df.shape}")
+            df = self._filter_cvs(df, start=1, step=0.25, min_features=min_features)
             logger.info(f"shape after filter_cvs: {df.shape}")
 
 
-            # check type of data
-            #data_type = df['ENSMUSG00002076992'].dtype
-            #logger.info(f"dtype of gene col: {data_type}")
-
-            # Step 5c: filter out genes
-            
-
-            # Step 5c: download metadata
+            # Step 5c: find metadata
             matches = self._find_file(files, osd_key, ['metadata', 'zip'])
             if not matches:
                 return data_service_pb2.ValidationResult(
@@ -189,23 +215,29 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             metadata_file = 's_OSD-' + osd_id + '.txt'
             meta = pd.read_csv(dest_dir + '/' + metadata_file, sep='\t', header=0) 
             logger.info(meta.head())
-            metadata = meta[['Sample Name', 'Factor Value[Spaceflight]']]
+            #metadata = meta[['Sample Name', 'Factor Value[Spaceflight]']]
+            metadata = meta[['Sample Name', factor_name]] 
             logger.info(metadata)
 
             # Step 5g: combine condition with expr
             conditions = list()
-            for sample in df.index: 
-                condition = metadata[metadata['Sample Name'] == sample]['Factor Value[Spaceflight]'].values[0] 
+            logger.info(f"samples include: {list(df.index)}")
+            for sample in list(df.index): 
+                logger.info(f"examing sample: {sample}")
+                condition = metadata[metadata['Sample Name'] == sample][factor_name].values[0] 
+                # TODO add factor_values here
                 if 'flight' in condition.lower():
+                    logger.info(f"appending {condition.lower()} to 1")
                     conditions.append(1)
                 else:
+                    logger.info(f"appending {condition.lower()} to 0")
                     conditions.append(0) 
-            logger.info(conditions)
-            df['condition'] = conditions
+            logger.info(f"conditions are: {conditions}")
+            df[factor_name] = conditions
 
             # Step 5h: remove metadata
             #os.removedirs(dest_dir)
- 	
+
             # Step 6: validate and store
             errors = []
             warnings = []
@@ -250,6 +282,67 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
     # ------------------------------------------------------------------
     # Existing RPCs (unchanged)
     # ------------------------------------------------------------------
+
+    def UploadDataset(self, request, context):
+        """Accept raw file bytes, parse, store and return metadata"""
+        try:
+            # Get exclude_columns from request
+            exclude_columns = list(request.exclude_columns) if request.exclude_columns else []
+        
+            if request.format == "csv":
+                df = pd.read_csv(BytesIO(request.file_content))
+            elif request.format == "json":
+                df = pd.read_json(BytesIO(request.file_content))
+            else:
+                return data_service_pb2.ValidationResult(
+                    is_valid=False,
+                    errors=[f"Unsupported format: {request.format}"]
+                )
+
+            # replace nans with 0's
+            df = self.check_for_nans(df)
+
+            # remove sample column from df
+            for col in exclude_columns:
+                if col in list(df.columns):
+                    df.drop(columns=[col], inplace=True)
+
+            # set dtype for entire dataframe
+            df = df.astype(float)
+
+            errors = []
+            warnings = []
+
+            if df.empty:
+                errors.append("Dataset is empty")
+            if len(df.columns) == 0:
+                errors.append("Dataset has no columns")
+            logger.warn(f"errors: {errors}")
+            null_percentage = df.isnull().sum().sum() / (df.shape[0] * df.shape[1])
+            if null_percentage > 0.5:
+                warnings.append(f"Dataset has {null_percentage:.1%} missing values")
+
+            dataset_id = request.dataset_id or str(uuid.uuid4())
+            if not errors:
+                self.datasets[dataset_id] = df
+                logger.info(f"Uploaded dataset {dataset_id} ({len(df)} rows)")
+                logger.info(f"  Total datasets in memory: {len(self.datasets)}")
+
+            dataset_info = self._build_dataset_info(dataset_id, df)
+
+            return data_service_pb2.ValidationResult(
+                is_valid=len(errors) == 0,
+                errors=errors,
+                warnings=warnings,
+                info=dataset_info
+            )
+
+        except Exception as e:
+            return data_service_pb2.ValidationResult(
+                is_valid=False,
+                errors=[f"Failed to upload dataset: {str(e)}"]
+            )
+
 
     def ValidateDataset(self, request, context):
         """Validate dataset and return metadata"""
@@ -320,7 +413,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                 elif transform.type == "one_hot_encode":
                     df = self.transformer.one_hot_encode(df, columns)
                 elif transform.type == "tpm":
-                    df = self.transformer.tpm(df, columns)
+                    df = self.transformer.tpm_transform(df, columns)
                 else:
                     return data_service_pb2.TransformationResult(
                         success=False,

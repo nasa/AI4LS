@@ -49,6 +49,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
             
             # Get dataset from Data Service
             df = self._get_dataset(request.dataset_id)
+            logger.info(f"shape: {df.shape[0]} by {df.shape[1]} ")
             
             if df is None:
                 yield ml_service_pb2.TrainingProgress(
@@ -66,7 +67,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                     model_id=model_id,
                     status="failed",
                     message=f"Target column '{request.target_column}' not found",
-                    error_message=f"Column '{request.target_column}' does not exist in dataset. Available columns: {list(df.columns)}",
+                    error_message=f"Column '{request.target_column}' does not exist in dataset.",
                     progress_percent=0
                 )
                 return

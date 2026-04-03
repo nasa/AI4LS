@@ -17,5 +17,3 @@ fi
 docker system prune -f
 docker-compose build $svc 
 docker-compose up -d $svc
-
-docker-compose logs -f

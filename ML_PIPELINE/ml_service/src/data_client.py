@@ -2,6 +2,7 @@
 import grpc
 import pandas as pd
 from io import BytesIO
+from io import StringIO
 import sys
 from pathlib import Path
 import logging
@@ -33,38 +34,35 @@ class DataServiceClient:
         logger.info(f"Connected to Data Service at {service_url}")
     
     def get_dataset(self, dataset_id: str) -> pd.DataFrame:
-        """Fetch a dataset by streaming it from Data Service"""
-        try:
-            logger.info(f"Fetching dataset {dataset_id} from Data Service...")
-            
-            request = StreamRequest(
-                dataset_id=dataset_id,
-                chunk_size=10000  # Large chunks for efficiency
-            )
-            
-            # Collect all chunks
-            chunks = []
-            for chunk in self.stub.StreamDataset(request):
-                chunks.append(chunk.data)
-            
-            if not chunks:
-                logger.error(f"No data received for dataset {dataset_id}")
-                return None
-            
-            # Combine chunks and parse as CSV
-            combined_data = b''.join(chunks)
-            df = pd.read_csv(BytesIO(combined_data))
-            
-            logger.info(f"Dataset {dataset_id} loaded: {len(df)} rows, {len(df.columns)} columns")
-            return df
-            
-        except grpc.RpcError as e:
-            logger.error(f"gRPC error fetching dataset: {e.code()} - {e.details()}")
-            return None
-        except Exception as e:
-            logger.error(f"Error fetching dataset: {e}")
-            return None
-    
-    def close(self):
+     """Fetch a dataset by streaming it from Data Service"""
+     try:
+         logger.info(f"Fetching dataset {dataset_id} from Data Service...")
+
+         request = StreamRequest(
+             dataset_id=dataset_id,
+             chunk_size=10000
+         )
+
+         frames = []
+         for chunk in self.stub.StreamDataset(request):
+             chunk_df = pd.read_csv(StringIO(chunk.data.decode("utf-8")))
+             frames.append(chunk_df)
+
+         if not frames:
+             logger.error(f"No data received for dataset {dataset_id}")
+             return None
+
+         df = pd.concat(frames, ignore_index=True)
+         logger.info(f"Dataset {dataset_id} loaded: {len(df)} rows, {len(df.columns)} columns")
+         return df
+
+     except grpc.RpcError as e:
+         logger.error(f"gRPC error fetching dataset: {e.code()} - {e.details()}")
+         return None
+     except Exception as e:
+         logger.error(f"Error fetching dataset: {e}")
+         return None 
+
+     def close(self):
         """Close the gRPC channel"""
         self.channel.close()

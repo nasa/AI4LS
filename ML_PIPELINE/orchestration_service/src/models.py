@@ -3,8 +3,15 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from enum import Enum
 
+
+# If you don't have an UploadRequest model, add it:
+class UploadRequest(BaseModel):
+    """Request to upload a dataset"""
+    exclude_columns: List[str] = []
+
 class TransformationType(str, Enum):
     """Available transformation types"""
+    TPM = "tpm"
     LOG = "log"
     STANDARDIZE = "standardize"
     NORMALIZE = "normalize"
@@ -60,6 +67,7 @@ class MLAlgorithm(str, Enum):
     NEURAL_NETWORK = "neural_network"
     RIDGE = "Ridge"
     LASSO = "Lasso"
+    XGBOOST = "xgboost"
 
 
 class MetricType(str, Enum):
@@ -75,15 +83,19 @@ class MetricType(str, Enum):
 
 class PipelineConfig(BaseModel):
     """Complete pipeline configuration"""
-    target_column: str  # ADD THIS
-    task_type: str = "classification"  # ADD THIS: "classification" or "regression"
-    feature_columns: List[str] = []  # ADD THIS: empty means use all except target
+    target_column: str  
+    task_type: str = "classification"
+    feature_columns: List[str] = []  # empty means use all except target
     transformations: List[TransformationConfig] = []
     algorithm: MLAlgorithm
     hyperparameters: Dict[str, Any] = {}
     metrics: List[MetricType]
     test_size: float = Field(default=0.2, ge=0.1, le=0.5)
     random_state: Optional[int] = 42
+    factor_name: Optional[str] = None 
+    factor_values: Optional[List[str]] = None
+    min_features: Optional[int] = 1000
+    exclude_columns: Optional[List[str]] = None
 
 class PipelineRequest(BaseModel):
     """Request to run full ML pipeline"""

@@ -32,8 +32,8 @@ class ModelTrainer:
         "random_forest": RandomForestRegressor,
         "svm": SVR,
         "linear_regression": LinearRegression,
-        "ridge": Ridge,
-        "lasso": Lasso,
+        "Ridge": Ridge,
+        "Lasso": Lasso,
         "gradient_boosting": GradientBoostingRegressor,
         "xgboost": xgb.XGBRegressor,
         "neural_network": MLPRegressor,
@@ -44,9 +44,8 @@ class ModelTrainer:
         """Create a model instance"""
         if task_type == "classification":
             model_class = ModelTrainer.CLASSIFICATION_MODELS.get(algorithm)
-        else:
+        elif task_type == "regression":
             model_class = ModelTrainer.REGRESSION_MODELS.get(algorithm)
-        
         if model_class is None:
             raise ValueError(f"Unknown algorithm: {algorithm} for task: {task_type}")
         
