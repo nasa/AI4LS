@@ -11,7 +11,7 @@ from src.transformations import DataTransformer
 import logging
 import os
 import zipfile
-
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,14 +24,52 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
     """gRPC service implementation for data operations"""
 
     def __init__(self):
-        # In-memory storage (in production, use Redis/S3/database)
         self.datasets: Dict[str, pd.DataFrame] = {}
         self.transformer = DataTransformer()
+        
+        # Dataset persistence
+        self.dataset_path = Path("/app/datasets")
+        self.dataset_path.mkdir(parents=True, exist_ok=True)
+        
+        # Load existing datasets from disk
+        self._load_datasets_from_disk()
+        
+        logger.info("DataServiceImpl initialized")
+        logger.info(f"Dataset storage path: {self.dataset_path}")
 
     # ------------------------------------------------------------------
     # NASA OSDR helpers
     # ------------------------------------------------------------------
 
+    def _load_datasets_from_disk(self):
+        """Load all datasets from disk on startup"""
+        try:
+            parquet_files = list(self.dataset_path.glob("*.parquet"))
+            logger.info(f"Found {len(parquet_files)} datasets on disk")
+            
+            for file in parquet_files:
+                try:
+                    dataset_id = file.stem
+                    df = pd.read_parquet(file)
+                    self.datasets[dataset_id] = df
+                    logger.info(f"✓ Loaded dataset {dataset_id}: {df.shape}")
+                except Exception as e:
+                    logger.error(f"✗ Failed to load {file.name}: {e}")
+            
+            logger.info(f"Total datasets in memory: {len(self.datasets)}")
+            
+        except Exception as e:
+            logger.error(f"Error loading datasets from disk: {e}")
+    
+    def _save_dataset_to_disk(self, dataset_id: str, df: pd.DataFrame):
+        """Save dataset to disk as parquet file"""
+        try:
+            file_path = self.dataset_path / f"{dataset_id}.parquet"
+            df.to_parquet(file_path, index=False)
+            logger.info(f"✓ Saved dataset {dataset_id} to {file_path} ({df.shape})")
+        except Exception as e:
+            logger.error(f"✗ Error saving dataset {dataset_id}: {e}")
+    
     def _fetch_json(self, url: str):
         """GET a URL and return parsed JSON, or raise on error."""
         response = requests.get(url, timeout=60)
@@ -254,6 +292,8 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             dataset_id = request.dataset_id or str(uuid.uuid4())
             if not errors:
                 self.datasets[dataset_id] = df
+                self._save_dataset_to_disk(dataset_id, df)  # ADD THIS
+
                 logger.info(f"✓ Stored downloaded dataset {dataset_id} ({len(df)} rows) from {rna_file}")
                 logger.info(f"  Total datasets in memory: {len(self.datasets)}")
 
@@ -325,6 +365,8 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             dataset_id = request.dataset_id or str(uuid.uuid4())
             if not errors:
                 self.datasets[dataset_id] = df
+                self._save_dataset_to_disk(dataset_id, df)  # ADD THIS
+
                 logger.info(f"Uploaded dataset {dataset_id} ({len(df)} rows)")
                 logger.info(f"  Total datasets in memory: {len(self.datasets)}")
 
@@ -347,15 +389,30 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
     def ValidateDataset(self, request, context):
         """Validate dataset and return metadata"""
         try:
+            dataset_id = request.dataset_id or str(uuid.uuid4())
+
             if request.format == "csv":
                 df = pd.read_csv(BytesIO(request.dataset_content))
             elif request.format == "json":
                 df = pd.read_json(BytesIO(request.dataset_content))
             else:
-                return data_service_pb2.ValidationResult(
+                '''return data_service_pb2.ValidationResult(
                     is_valid=False,
                     errors=[f"Unsupported format: {request.format}"]
+                )'''
+                context.abort(
+                    grpc.StatusCode.INVALID_ARGUMENT,
+                    f"Unsupported format: {request.format}"
                 )
+                return
+
+     
+            # Exclude columns if specified
+            exclude_columns = list(request.exclude_columns) if request.exclude_columns else []
+            if exclude_columns:
+                df = df.drop(columns=exclude_columns, errors='ignore')
+                logger.info(f"Excluded columns: {exclude_columns}")
+        
 
             errors = []
             warnings = []
@@ -369,26 +426,47 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             if null_percentage > 0.5:
                 warnings.append(f"Dataset has {null_percentage:.1%} missing values")
 
-            dataset_id = request.dataset_id or str(uuid.uuid4())
             if not errors:
                 self.datasets[dataset_id] = df
+                self._save_dataset_to_disk(dataset_id, df)  # ADD THIS
+
                 logger.info(f"✓ Stored dataset {dataset_id} ({len(df)} rows)")
                 logger.info(f"  Total datasets in memory: {len(self.datasets)}")
 
             dataset_info = self._build_dataset_info(dataset_id, df)
 
-            return data_service_pb2.ValidationResult(
+            self.datasets[dataset_id] = df
+
+            self._save_dataset_to_disk(dataset_id, df)
+
+            logger.info(f"✓ Stored uploaded dataset {dataset_id} ({len(df)} rows)")
+            logger.info(f"  Total datasets in memory: {len(self.datasets)}")
+
+            '''return data_service_pb2.ValidationResult(
                 is_valid=len(errors) == 0,
                 errors=errors,
                 warnings=warnings,
                 info=dataset_info
+            )'''
+            # Build dataset info
+            dataset_info = self._build_dataset_info(dataset_id, df)
+        
+            return data_service_pb2.ValidationResult(
+                is_valid=is_valid,
+                dataset_id=dataset_id if is_valid else "",
+                errors=errors,
+                warnings=warnings,
+                dataset_info=dataset_info
             )
 
+        #except Exception as e:
+        #    return data_service_pb2.ValidationResult(
+        #        is_valid=False,
+        #        errors=[f"Failed to parse dataset: {str(e)}"]
+        #    )
         except Exception as e:
-            return data_service_pb2.ValidationResult(
-                is_valid=False,
-                errors=[f"Failed to parse dataset: {str(e)}"]
-            )
+            logger.error(f"Validation error: {e}", exc_info=True)
+            context.abort(grpc.StatusCode.INTERNAL, str(e))
 
     def ApplyTransformation(self, request, context):
         """Apply transformations to dataset"""
@@ -422,6 +500,8 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
 
             new_id = f"{request.dataset_id}_transformed_{uuid.uuid4().hex[:8]}"
             self.datasets[new_id] = df
+            self._save_dataset_to_disk(new_id, df)  # ADD THIS
+
             logger.info(f"StreamDataset called for: {request.dataset_id}")
             logger.info(f"Available datasets: {list(self.datasets.keys())}")
 

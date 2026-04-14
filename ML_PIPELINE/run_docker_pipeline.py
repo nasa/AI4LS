@@ -4,8 +4,52 @@ import json
 import time
 import sys
 import argparse
+import grpc
+import sys
+from pathlib import Path
 
 BASE_URL = "http://localhost:8000"
+
+def get_feature_importance(model_id, dataset_id):
+    fi_service_path = Path(__file__).parent / "feature_importance_service"
+    sys.path.insert(0, str(fi_service_path))
+
+    from generated import feature_importance_service_pb2, feature_importance_service_pb2_grpc
+
+    # Use model ID WITHOUT .joblib extension
+
+    channel = grpc.insecure_channel('localhost:50053')
+    stub = feature_importance_service_pb2_grpc.FeatureImportanceServiceStub(channel)
+
+    request = feature_importance_service_pb2.ImportanceRequest(
+        model_id=model_id,
+        dataset_id=dataset_id,
+        methods=["built_in", "permutation"],
+        params={"n_repeats": "5"}
+    )
+
+    print(f"Computing feature importance for model: {model_id}")
+
+    try:
+        response = stub.ComputeImportance(request)
+        
+        print(f"Success: {response.success}")
+    
+        if response.success:
+            for method, importances in response.importances.items():
+                print(f"\n{method.upper()} Feature Importance:")
+                print(f"  Metadata: {dict(importances.metadata)}")
+                print(f"  Top 10 Features:")
+                for i, score in enumerate(importances.scores[:10]):
+                    print(f"    {i+1}. {score.feature_name}: {score.importance:.6f}")
+        else:
+            print(f"Error: {response.error_message}")
+        
+    except grpc.RpcError as e:
+        print(f"gRPC Error: {e.code()} - {e.details()}")
+    except Exception as e:
+        print(f"Error: {e}")
+
 
 
 def test_health():
@@ -345,8 +389,8 @@ def main():
     # Step 4: Get model info
     get_model_info(model_id)
 
-    # Step 5: List models
-    #list_models()
+    # Step 5: Get feature importance
+    get_feature_importance(model_id, dataset_id) 
 
     print("\n" + "=" * 60)
     print("  - Access Swagger UI: http://localhost:8000/docs")

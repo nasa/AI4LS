@@ -17,3 +17,8 @@ fi
 docker system prune -f
 docker-compose build $svc 
 docker-compose up -d $svc
+
+# rm -rf ~/Library/Containers/com.docker.docker/Data/vms/0/
+
+# docker volume rm ml-pipeline-model-storage 2>/dev/null || true
+# docker volume rm ml-pipeline-dataset-storage 2>/dev/null || true

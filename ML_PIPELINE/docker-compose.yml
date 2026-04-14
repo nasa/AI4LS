@@ -1,5 +1,5 @@
 # docker-compose.yml (in the parent MICRO directory)
-version: '3.8'
+#version: '3.8'
 
 services:
   data_service:
@@ -10,7 +10,7 @@ services:
     ports:
       - "50051:50051"
     volumes:
-      - dataset-storage:/data
+      - ./datasets:/app/datasets
     networks:
       - ml-pipeline-network
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
     ports:
       - "50052:50052"
     volumes:
-      - model-storage:/app/models
+      - ./models:/app/models 
     networks:
       - ml-pipeline-network
     depends_on:
@@ -64,12 +64,36 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+  feature_importance_service:
+    build:
+      context: ./feature_importance_service
+      dockerfile: Dockerfile
+    container_name: ml-pipeline-feature-importance
+    ports:
+      - "50053:50053"
+    volumes:
+      - ./models:/app/models 
+      - ./datasets:/app/datasets
+    networks:
+      - ml-pipeline-network
+    depends_on:
+      - data_service
+      - ml_service
+    restart: unless-stopped
+    environment:
+      - DATA_SERVICE_URL=data_service:50051
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-volumes:
-  dataset-storage:
-    driver: local
-  model-storage:
-    driver: local
+
+#volumes:
+#  dataset-storage:
+#    driver: local
+#  model-storage:
+#    driver: local
 
 networks:
   ml-pipeline-network:
