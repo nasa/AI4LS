@@ -93,7 +93,7 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
                 elif method == "permutation":
                     n_repeats = int(params.get("n_repeats", 10))
                     scores = self.importance_methods.permutation_feature_importance(
-                        model, X, y, n_repeats=n_repeats
+                        model, X, y, n_repeats=n_repeats, random_state=int(params.get("random_state"))
                     )
                     metadata = {
                         "execution_time": f"{time.time() - start_time:.2f}s",

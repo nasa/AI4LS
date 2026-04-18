@@ -92,6 +92,7 @@ class DownloadRequest(BaseModel):
     factor_name: str
     factor_values: List[str]
     min_features: int
+    exclude_columns: List[str]
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
@@ -131,7 +132,7 @@ async def health_check():
 
 # ── Dataset endpoints ─────────────────────────────────────────────────────────
 
-@app.post("/api/datasets/upload", response_model=ValidationResponse)
+'''@app.post("/api/datasets/upload", response_model=ValidationResponse)
 @app.post("/api/datasets/validate", response_model=ValidationResponse)  # kept for backwards compatibility
 async def upload_dataset(
     file: UploadFile = File(...),
@@ -146,11 +147,53 @@ async def upload_dataset(
         )
     
     format_type = "csv" if file.filename.endswith(".csv") else "json"
-    #exclude_columns = List[str] = Form([]) 
-    exclude_columns = List[str] 
+    #exclude_columns = List[str] 
+    exclude_columns = list() 
     
     try:
-        result = data_client.upload_dataset(content, format_type, exclude_columns=[])
+        result = data_client.upload_dataset(content, format_type, exclude_columns)
+
+        #logger(f"result in upload validate main.py {result}")
+        
+        response = ValidationResponse(
+            is_valid=result["is_valid"],
+            dataset_id=result["dataset_id"],
+            errors=result["errors"],
+            warnings=result["warnings"],
+            dataset_info=result["dataset_info"]
+                
+        )
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Validation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")'''
+
+@app.post("/api/datasets/upload", response_model=ValidationResponse)
+@app.post("/api/datasets/validate", response_model=ValidationResponse)  # kept for backwards compatibility
+async def upload_dataset(
+    file: UploadFile = File(...),
+    exclude_columns: str = "",  # ADD THIS - query parameter
+    settings: Settings = Depends(get_settings)
+):
+    """Upload a dataset to the data service for storage"""
+    content = await file.read()
+    if len(content) > settings.max_upload_size:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large. Maximum size: {settings.max_upload_size / 1024 / 1024}MB"
+        )
+    
+    format_type = "csv" if file.filename.endswith(".csv") else "json"
+    
+    # Parse exclude_columns from comma-separated string
+    exclude_cols_list = [col.strip() for col in exclude_columns.split(",") if col.strip()]
+    
+    try:
+        result = data_client.upload_dataset(content, format_type, exclude_cols_list)
+
+        logger.info(f"result in upload validate main.py {result}")  # Fix: logger.info, not logger()
         
         response = ValidationResponse(
             is_valid=result["is_valid"],
@@ -158,6 +201,7 @@ async def upload_dataset(
             warnings=result["warnings"]
         )
         
+        # Add dataset_info if present
         if result["dataset_info"]:
             info = result["dataset_info"]
             response.dataset_info = DatasetInfo(
@@ -171,9 +215,8 @@ async def upload_dataset(
         return response
         
     except Exception as e:
-        logger.error(f"Validation error: {e}")
+        logger.error(f"Validation error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
-
 
 @app.post("/api/datasets/download", response_model=ValidationResponse)
 async def download_dataset(request: DownloadRequest):
@@ -186,8 +229,16 @@ async def download_dataset(request: DownloadRequest):
     - **factor_name**: name of column in metadata to get factor values from 
     - **factor_values**: list of column values in metadata for target values 
     - **min_features**: minimum number of features to keep after dim reduction 
+    - **exclude_columns**: list of columns to exclude from df 
     """
     try:
+        logger.info(f"osd_id = {request.osd_id}") 
+        logger.info(f"patterns = {request.patterns}") 
+        logger.info(f"dataset_id = {request.dataset_id}") 
+        logger.info(f"factor_name = {request.factor_name}") 
+        logger.info(f"factor_values = {request.factor_values}") 
+        logger.info(f"min_features = {request.min_features}") 
+        logger.info(f"exclude_columns = {request.exclude_columns}") 
         result = data_client.download_dataset(
             osd_id=request.osd_id,
             patterns=request.patterns,
@@ -195,15 +246,25 @@ async def download_dataset(request: DownloadRequest):
             factor_name=request.factor_name,
             factor_values=request.factor_values,
             min_features=request.min_features,
+            exclude_columns=request.exclude_columns or []
         )
 
+        #logger.info(f"Received result from data_client: {result}")
+
+        if "dataset_id" in result:
+            dataset_id=result["dataset_id"]
+        else:
+            dataset_id=""
         response = ValidationResponse(
             is_valid=result["is_valid"],
+            dataset_id=dataset_id,
             errors=result["errors"],
-            warnings=result["warnings"]
+            warnings=result["warnings"],
+            dataset_info=result["dataset_info"]
+            
         )
 
-        if result["dataset_info"]:
+        '''if result["dataset_info"]:
             info = result["dataset_info"]
             response.dataset_info = DatasetInfo(
                 dataset_id=info["dataset_id"],
@@ -211,12 +272,12 @@ async def download_dataset(request: DownloadRequest):
                 num_columns=info["num_columns"],
                 size_bytes=info["size_bytes"],
                 columns=[ColumnInfo(**col) for col in info["columns"]]
-            )
+            )'''
 
         return response
 
     except Exception as e:
-        logger.error(f"Download error: {e}")
+        logger.error(f"Download error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
 
 
@@ -293,6 +354,7 @@ async def run_pipeline(request: PipelineRequest):
             factor_name = request.config.factor_name
             factor_values = request.config.factor_values
             min_features = request.config.min_features
+            #fi_methods = request.fi_methods
             
             if request.config.transformations:
                 logger.info(f"Pipeline {pipeline_id}: Applying transformations...")

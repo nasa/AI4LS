@@ -33,6 +33,10 @@ message DownloadRequest {
   string osd_id = 1;
   repeated string patterns = 2;
   string dataset_id = 3;
+  string factor_name = 4;
+  repeated string factor_values = 5;
+  int32 min_features = 6;
+  repeated string exclude_columns = 7;
 }
 
 message ValidateRequest {

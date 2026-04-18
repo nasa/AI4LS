@@ -12,6 +12,8 @@ import logging
 import os
 import zipfile
 from pathlib import Path
+import json
+import hashlib
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,6 +32,10 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         # Dataset persistence
         self.dataset_path = Path("/app/datasets")
         self.dataset_path.mkdir(parents=True, exist_ok=True)
+
+        # Cache mapping: stores download parameters -> dataset_id
+        self.download_cache_file = self.dataset_path / "download_cache.json"
+        self.download_cache = self._load_download_cache()
         
         # Load existing datasets from disk
         self._load_datasets_from_disk()
@@ -40,6 +46,51 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
     # ------------------------------------------------------------------
     # NASA OSDR helpers
     # ------------------------------------------------------------------
+
+    
+    def _load_download_cache(self) -> Dict:
+        """Load download cache from disk"""
+        try:
+            if self.download_cache_file.exists():
+                with open(self.download_cache_file, 'r') as f:
+                    cache = json.load(f)
+                logger.info(f"Loaded download cache: {len(cache)} entries")
+                return cache
+            return {}
+        except Exception as e:
+            logger.error(f"Error loading download cache: {e}")
+            return {}
+    
+    def _save_download_cache(self):
+        """Save download cache to disk"""
+        try:
+            with open(self.download_cache_file, 'w') as f:
+                json.dump(self.download_cache, f, indent=2)
+        except Exception as e:
+            logger.error(f"Error saving download cache: {e}")
+
+    
+    def _generate_cache_key(self, osd_id: str, patterns: list, factor_name: str, 
+                           factor_values: list, exclude_columns: list, min_features: int) -> str:
+        """
+        Generate a unique cache key based on download parameters
+        
+        This ensures that the same dataset with the same filters will reuse the cached version
+        """
+        cache_dict = {
+            "osd_id": osd_id,
+            "patterns": sorted(patterns),  # Sort for consistency
+            "factor_name": factor_name or "",
+            "factor_values": sorted(factor_values) if factor_values else [],
+            "exclude_columns": sorted(exclude_columns) if exclude_columns else [],
+            "min_features": min_features
+        }
+        
+        # Create a hash of the parameters
+        cache_str = json.dumps(cache_dict, sort_keys=True)
+        cache_hash = hashlib.md5(cache_str.encode()).hexdigest()
+        
+        return cache_hash
 
     def _load_datasets_from_disk(self):
         """Load all datasets from disk on startup"""
@@ -56,6 +107,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                 except Exception as e:
                     logger.error(f"✗ Failed to load {file.name}: {e}")
             
+            logger.info("in _load_datasets_from_disk()")
             logger.info(f"Total datasets in memory: {len(self.datasets)}")
             
         except Exception as e:
@@ -171,16 +223,67 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         dataset, and return a ValidationResult just like ValidateDataset.
         """
         logger.info(f"request in DownloadDataset: {request}")
-        osd_id   = request.osd_id
-        patterns = list(request.patterns) or ["Unnormalized", "RSEM"]
-        osd_key  = f"OSD-{osd_id}"
-        factor_name = request.factor_name
-        factor_values = list(request.factor_values)
-        min_features = request.min_features
-
         try:
+            osd_id   = request.osd_id
+            patterns = list(request.patterns) or ["Unnormalized", "RSEM"]
+            osd_key  = f"OSD-{osd_id}"
+            factor_name = request.factor_name
+            factor_values = list(request.factor_values)
+            min_features = request.min_features
+            exclude_columns = list(request.exclude_columns)
+
+            # Generate cache key based on download parameters
+            cache_key = self._generate_cache_key(
+                osd_id, patterns, factor_name, factor_values, exclude_columns, min_features
+            )
+        
+            # Check if we've already downloaded this exact dataset
+            if cache_key in self.download_cache:
+                cached_dataset_id = self.download_cache[cache_key]
+            
+                # Check if the cached dataset still exists
+                cached_file = self.dataset_path / f"{cached_dataset_id}.parquet"
+                if cached_file.exists():
+                    logger.info(f"✓ Found cached dataset for OSD-{osd_id}: {cached_dataset_id}")
+                    logger.info(f"  Cache key: {cache_key}")
+                    logger.info(f"  Reusing existing dataset instead of re-downloading")
+                
+                    # Load from disk if not in memory
+                    if cached_dataset_id not in self.datasets:
+                        df = pd.read_parquet(cached_file)
+                        self.datasets[cached_dataset_id] = df
+                        logger.info(f"  Loaded cached dataset into memory: {df.shape}")
+                        logger.info(f"  Loaded cached dataset into memory: {df.head()}")
+                    logger.info("right before reading in df from cache") 
+                    df = self.datasets[cached_dataset_id]
+                    logger.info("right after reading in df from cache") 
+                    # Verify df is valid before building info
+                    if df is None or df.empty:
+                        logger.error("Cached dataset is None or empty")
+                        context.abort(grpc.StatusCode.INTERNAL, "Cached dataset is invalid")
+                
+                    # build dataset info
+                    dataset_info=self._build_dataset_info(cached_dataset_id, df)
+                    logger.info("just built the dataset info")
+                    # Return the cached dataset
+                    logger.info("returning cached dataset")
+                    return data_service_pb2.ValidationResult(
+                        is_valid=True,
+                        dataset_id=cached_dataset_id,
+                        errors=[],
+                        warnings=["Using cached dataset from previous download"],
+                        dataset_info=dataset_info
+                    )
+                else:
+                    # Cache entry exists but file is gone - remove from cache
+                    logger.warning(f"Cached dataset file not found, will re-download")
+                    del self.download_cache[cache_key]
+                    self._save_download_cache()
+        
+            # Not in cache or cache invalid - proceed with download
+            logger.info(f"Downloading OSD-{osd_id} (cache key: {cache_key})")
+
             # Step 1: fetch file listing
-            logger.info(f"Fetching file list for {osd_key}")
             files = self._fetch_json(NASA_FILES_URL.format(osd_id=osd_id))
 
             # Step 2: find matching files
@@ -293,7 +396,15 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             if not errors:
                 self.datasets[dataset_id] = df
                 self._save_dataset_to_disk(dataset_id, df)  # ADD THIS
-
+        
+                # Add to download cache
+                self.download_cache[cache_key] = dataset_id
+                self._save_download_cache()
+        
+                logger.info("in DownloadDatasets()")
+                logger.info(f"✓ Downloaded and cached OSD-{osd_id} as {dataset_id}")
+                logger.info(f"  Future downloads with same parameters will reuse this dataset")
+        
                 logger.info(f"✓ Stored downloaded dataset {dataset_id} ({len(df)} rows) from {rna_file}")
                 logger.info(f"  Total datasets in memory: {len(self.datasets)}")
 
@@ -303,7 +414,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                 is_valid=len(errors) == 0,
                 errors=errors,
                 warnings=warnings,
-                info=dataset_info
+                dataset_info=dataset_info
             )
 
         except requests.HTTPError as e:
@@ -366,23 +477,31 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             if not errors:
                 self.datasets[dataset_id] = df
                 self._save_dataset_to_disk(dataset_id, df)  # ADD THIS
-
+                logger.info("in UploadDataset()")
                 logger.info(f"Uploaded dataset {dataset_id} ({len(df)} rows)")
                 logger.info(f"  Total datasets in memory: {len(self.datasets)}")
 
+            logger.info("building dataset info")
             dataset_info = self._build_dataset_info(dataset_id, df)
+            logger.info("dataset info built")
+            logger.info(f"length of errors = {len(errors)}")
 
             return data_service_pb2.ValidationResult(
                 is_valid=len(errors) == 0,
+                dataset_id = dataset_id,
                 errors=errors,
                 warnings=warnings,
-                info=dataset_info
+                dataset_info=dataset_info
             )
 
         except Exception as e:
+            logger.critical(f"encountered exception str({e})")
             return data_service_pb2.ValidationResult(
                 is_valid=False,
-                errors=[f"Failed to upload dataset: {str(e)}"]
+                dataset_id = dataset_id,
+                errors=[f"Failed to upload dataset: {str(e)}"],
+                warnings=warnings,
+                dataset_info=dataset_info
             )
 
 
@@ -396,15 +515,14 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             elif request.format == "json":
                 df = pd.read_json(BytesIO(request.dataset_content))
             else:
-                '''return data_service_pb2.ValidationResult(
+                return data_service_pb2.ValidationResult(
                     is_valid=False,
                     errors=[f"Unsupported format: {request.format}"]
-                )'''
-                context.abort(
+                )
+                '''context.abort(
                     grpc.StatusCode.INVALID_ARGUMENT,
                     f"Unsupported format: {request.format}"
-                )
-                return
+                )'''
 
      
             # Exclude columns if specified
@@ -430,24 +548,10 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                 self.datasets[dataset_id] = df
                 self._save_dataset_to_disk(dataset_id, df)  # ADD THIS
 
+                logger.info("in ValidateDataset()")
                 logger.info(f"✓ Stored dataset {dataset_id} ({len(df)} rows)")
                 logger.info(f"  Total datasets in memory: {len(self.datasets)}")
 
-            dataset_info = self._build_dataset_info(dataset_id, df)
-
-            self.datasets[dataset_id] = df
-
-            self._save_dataset_to_disk(dataset_id, df)
-
-            logger.info(f"✓ Stored uploaded dataset {dataset_id} ({len(df)} rows)")
-            logger.info(f"  Total datasets in memory: {len(self.datasets)}")
-
-            '''return data_service_pb2.ValidationResult(
-                is_valid=len(errors) == 0,
-                errors=errors,
-                warnings=warnings,
-                info=dataset_info
-            )'''
             # Build dataset info
             dataset_info = self._build_dataset_info(dataset_id, df)
         
@@ -459,11 +563,6 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                 dataset_info=dataset_info
             )
 
-        #except Exception as e:
-        #    return data_service_pb2.ValidationResult(
-        #        is_valid=False,
-        #        errors=[f"Failed to parse dataset: {str(e)}"]
-        #    )
         except Exception as e:
             logger.error(f"Validation error: {e}", exc_info=True)
             context.abort(grpc.StatusCode.INTERNAL, str(e))
@@ -592,8 +691,8 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
 
         return data_service_pb2.DatasetInfo(
             dataset_id=dataset_id,
-            num_rows=len(df),
-            num_columns=len(df.columns),
+            num_rows=int(len(df)),
+            num_columns=int(len(df.columns)),
             columns=columns_info,
-            size_bytes=df.memory_usage(deep=True).sum()
+            size_bytes=int(df.memory_usage(deep=True).sum())
         )

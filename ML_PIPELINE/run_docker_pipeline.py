@@ -10,7 +10,7 @@ from pathlib import Path
 
 BASE_URL = "http://localhost:8000"
 
-def get_feature_importance(model_id, dataset_id):
+def get_feature_importance(model_id, dataset_id, fi_methods, random_state):
     fi_service_path = Path(__file__).parent / "feature_importance_service"
     sys.path.insert(0, str(fi_service_path))
 
@@ -24,8 +24,8 @@ def get_feature_importance(model_id, dataset_id):
     request = feature_importance_service_pb2.ImportanceRequest(
         model_id=model_id,
         dataset_id=dataset_id,
-        methods=["built_in", "permutation"],
-        params={"n_repeats": "5"}
+        methods=fi_methods,
+        params={"n_repeats": "5", "random_state": str(random_state)}
     )
 
     print(f"Computing feature importance for model: {model_id}")
@@ -150,7 +150,7 @@ def upload_dataset(file_name, exclude_columns):
     return None, None
 
 
-def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list, factor_name, factor_values, min_features):
+def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list, factor_name, factor_values, min_features, fi_methods):
     """Run full ML pipeline"""
     print("\n" + "=" * 60)
     print("STEP 3: Run ML Pipeline")
@@ -185,6 +185,7 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
             "factor_name": factor_name,
             "factor_values": factor_values,
             "min_features": min_features,
+            "fi_methods": fi_methods,
         }
     }
 
@@ -291,6 +292,8 @@ def main():
     parser.add_argument('-fl', '--factor_name', help='metadata factor name', default='Factor Value[Spaceflight]', required=False)
     parser.add_argument('-fv', '--factor_values', help='metadata factor values', type=list_of_strings, default=['Ground Control', 'Space Flight'], required=False)
     parser.add_argument('-mf', '--min_features', help='minimum number of features to keep after CVS dimensionality reduction', default=1000, required=False)
+    parser.add_argument('-fi', '--fi_methods', help='list of feature importance methods to use', type=list_of_strings, default=['recursive', 'permutation', 'built_in'] , required=False)
+    parser.add_argument('-rs', '--random_state', help='random state(seed)', type=int, default=42, required=False)
 
     
     args = parser.parse_args()
@@ -309,6 +312,8 @@ def main():
     factor_name = args.factor_name
     factor_values = args.factor_values
     min_features = args.min_features
+    fi_methods = list(args.fi_methods)
+    random_state = int(args.random_state)
 
     if operation == 'upload':
         if input_file is None:
@@ -373,7 +378,7 @@ def main():
     model_id, metrics = run_pipeline(
         dataset_id, target_column, sample_column, 
         columns, task_type, algorithm, test_size, trans_list,
-        factor_name, factor_values,min_features
+        factor_name, factor_values,min_features, fi_methods
     )
     if not model_id:
         print("\n❌ Pipeline failed")
@@ -390,7 +395,7 @@ def main():
     get_model_info(model_id)
 
     # Step 5: Get feature importance
-    get_feature_importance(model_id, dataset_id) 
+    get_feature_importance(model_id, dataset_id, fi_methods, random_state) 
 
     print("\n" + "=" * 60)
     print("  - Access Swagger UI: http://localhost:8000/docs")

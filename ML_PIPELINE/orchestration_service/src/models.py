@@ -7,6 +7,9 @@ from enum import Enum
 # If you don't have an UploadRequest model, add it:
 class UploadRequest(BaseModel):
     """Request to upload a dataset"""
+    file_content: bytes
+    format: str
+    dataset_id: str
     exclude_columns: List[str] = []
 
 class TransformationType(str, Enum):
@@ -96,6 +99,7 @@ class PipelineConfig(BaseModel):
     factor_values: Optional[List[str]] = None
     min_features: Optional[int] = 1000
     exclude_columns: Optional[List[str]] = None
+    fi_methods: Optional[List[str]] = None
 
 class PipelineRequest(BaseModel):
     """Request to run full ML pipeline"""

@@ -37,19 +37,22 @@ message DownloadRequest {
   string factor_name = 4;
   repeated string factor_values = 5;
   int32 min_features = 6;
+  repeated string exclude_columns = 7;
 }
 
 message ValidateRequest {
   string dataset_id = 1;
   bytes dataset_content = 2;
   string format = 3;
+  repeated string exclude_columns = 4;
 }
 
 message ValidationResult {
   bool is_valid = 1;
-  repeated string errors = 2;
-  repeated string warnings = 3;
-  DatasetInfo info = 4;
+  string dataset_id = 2;
+  repeated string errors = 3;
+  repeated string warnings = 4;
+  DatasetInfo dataset_info = 5;
 }
 
 message DatasetInfo {

@@ -38,10 +38,10 @@ class DataServiceClient:
             "errors": list(response.errors),
             "warnings": list(response.warnings),
             "dataset_info": {
-                "dataset_id": response.info.dataset_id,
-                "num_rows": response.info.num_rows,
-                "num_columns": response.info.num_columns,
-                "size_bytes": response.info.size_bytes,
+                "dataset_id": response.dataset_id,
+                "num_rows": response.dataset_info.num_rows,
+                "num_columns": response.dataset_info.num_columns,
+                "size_bytes": response.dataset_info.size_bytes,
                 "columns": [
                     {
                         "name": col.name,
@@ -49,25 +49,36 @@ class DataServiceClient:
                         "null_count": col.null_count,
                         "sample_values": list(col.sample_values)
                     }
-                    for col in response.info.columns
+                    for col in response.dataset_info.columns
                 ]
             } if response.is_valid else None
         }
 
-    def upload_dataset(self, file_content: bytes, format: str,
-                       dataset_id: str = "", exclude_columns: List[str] = []) -> Dict:
-        """Upload raw file bytes to the data service for storage"""
+    def upload_dataset(
+        self, 
+        dataset_content: bytes, 
+        format: str = "csv",
+        dataset_id: str = "",
+        exclude_columns: List[str] = []
+    ) -> Dict:
+        """Upload and validate a dataset"""
         try:
             request = data_service_pb2.UploadRequest(
-                file_content=file_content,
+                file_content=dataset_content,  # Note: file_content, not dataset_content
                 format=format,
-                dataset_id=dataset_id,
+                dataset_id="",  # Empty = auto-generate
                 exclude_columns=exclude_columns
             )
-            response = self.stub.UploadDataset(request)
+
+            response = self.stub.UploadDataset(request)  # Note: UploadDataset, not ValidateDataset
             return self._validation_result_to_dict(response)
+            
+        
         except grpc.RpcError as e:
             logger.error(f"gRPC error in upload_dataset: {e.code()} - {e.details()}")
+            raise
+        except Exception as e:
+            logger.error(f"Error in upload_dataset: {e}", exc_info=True)
             raise
 
     def validate_dataset(self, dataset_content: bytes, format: str = "csv", exclude_columns: List[str] = []) -> Dict:
@@ -85,8 +96,7 @@ class DataServiceClient:
             raise
 
     def download_dataset(self, osd_id: str, patterns: List[str],
-                         dataset_id: str, factor_name: str, factor_values: List[str],
-                         min_features: int) -> Dict:
+                         dataset_id: str, factor_name: str, factor_values: List[str], min_features: int, exclude_columns: List[str]) -> Dict:
         """Download a dataset from NASA OSDR"""
         try:
             request = data_service_pb2.DownloadRequest(
@@ -95,7 +105,8 @@ class DataServiceClient:
                 dataset_id=dataset_id,
                 factor_name=factor_name,
                 factor_values=factor_values,
-                min_features=min_features
+                min_features=min_features,
+                exclude_columns=exclude_columns
             )
             response = self.stub.DownloadDataset(request)
             return self._validation_result_to_dict(response)
