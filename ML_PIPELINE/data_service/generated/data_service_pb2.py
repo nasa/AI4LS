@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x64\x61ta_service.proto\x12\x0b\x64\x61taservice\"b\n\rUploadRequest\x12\x14\n\x0c\x66ile_content\x18\x01 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\x12\x12\n\ndataset_id\x18\x03 \x01(\t\x12\x17\n\x0f\x65xclude_columns\x18\x04 \x03(\t\"\xa2\x01\n\x0f\x44ownloadRequest\x12\x0e\n\x06osd_id\x18\x01 \x01(\t\x12\x10\n\x08patterns\x18\x02 \x03(\t\x12\x12\n\ndataset_id\x18\x03 \x01(\t\x12\x13\n\x0b\x66\x61\x63tor_name\x18\x04 \x01(\t\x12\x15\n\rfactor_values\x18\x05 \x03(\t\x12\x14\n\x0cmin_features\x18\x06 \x01(\x05\x12\x17\n\x0f\x65xclude_columns\x18\x07 \x03(\t\"g\n\x0fValidateRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x17\n\x0f\x64\x61taset_content\x18\x02 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x03 \x01(\t\x12\x17\n\x0f\x65xclude_columns\x18\x04 \x03(\t\"\x8a\x01\n\x10ValidationResult\x12\x10\n\x08is_valid\x18\x01 \x01(\x08\x12\x12\n\ndataset_id\x18\x02 \x01(\t\x12\x0e\n\x06\x65rrors\x18\x03 \x03(\t\x12\x10\n\x08warnings\x18\x04 \x03(\t\x12.\n\x0c\x64\x61taset_info\x18\x05 \x01(\x0b\x32\x18.dataservice.DatasetInfo\"\x86\x01\n\x0b\x44\x61tasetInfo\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x10\n\x08num_rows\x18\x02 \x01(\x05\x12\x13\n\x0bnum_columns\x18\x03 \x01(\x05\x12(\n\x07\x63olumns\x18\x04 \x03(\x0b\x32\x17.dataservice.ColumnInfo\x12\x12\n\nsize_bytes\x18\x05 \x01(\x03\"T\n\nColumnInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05\x64type\x18\x02 \x01(\t\x12\x12\n\nnull_count\x18\x03 \x01(\x05\x12\x15\n\rsample_values\x18\x04 \x03(\t\"\\\n\x10TransformRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x34\n\x0ftransformations\x18\x02 \x03(\x0b\x32\x1b.dataservice.Transformation\"\x97\x01\n\x0eTransformation\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x63olumns\x18\x02 \x03(\t\x12\x37\n\x06params\x18\x03 \x03(\x0b\x32\'.dataservice.Transformation.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x92\x01\n\x14TransformationResult\x12\x1e\n\x16transformed_dataset_id\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x12\x15\n\rerror_message\x18\x03 \x01(\t\x12\x32\n\x10transformed_info\x18\x04 \x01(\x0b\x32\x18.dataservice.DatasetInfo\"7\n\rStreamRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x12\n\nchunk_size\x18\x02 \x01(\x05\"A\n\tDataChunk\x12\x14\n\x0c\x63hunk_number\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\x12\x10\n\x08is_final\x18\x03 \x01(\x08\"(\n\x12\x44\x61tasetInfoRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t2\xe6\x03\n\x0b\x44\x61taService\x12J\n\rUploadDataset\x12\x1a.dataservice.UploadRequest\x1a\x1d.dataservice.ValidationResult\x12N\n\x0fValidateDataset\x12\x1c.dataservice.ValidateRequest\x1a\x1d.dataservice.ValidationResult\x12W\n\x13\x41pplyTransformation\x12\x1d.dataservice.TransformRequest\x1a!.dataservice.TransformationResult\x12\x45\n\rStreamDataset\x12\x1a.dataservice.StreamRequest\x1a\x16.dataservice.DataChunk0\x01\x12K\n\x0eGetDatasetInfo\x12\x1f.dataservice.DatasetInfoRequest\x1a\x18.dataservice.DatasetInfo\x12N\n\x0f\x44ownloadDataset\x12\x1c.dataservice.DownloadRequest\x1a\x1d.dataservice.ValidationResultb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x64\x61ta_service.proto\x12\x0b\x64\x61taservice\"s\n\rUploadRequest\x12\x14\n\x0c\x66ile_content\x18\x01 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\x12\x12\n\ndataset_id\x18\x03 \x01(\t\x12\x17\n\x0f\x65xclude_columns\x18\x04 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x05 \x01(\x02\"\xb3\x01\n\x0f\x44ownloadRequest\x12\x0e\n\x06osd_id\x18\x01 \x01(\t\x12\x10\n\x08patterns\x18\x02 \x03(\t\x12\x12\n\ndataset_id\x18\x03 \x01(\t\x12\x13\n\x0b\x66\x61\x63tor_name\x18\x04 \x01(\t\x12\x15\n\rfactor_values\x18\x05 \x03(\t\x12\x14\n\x0cmin_features\x18\x06 \x01(\x05\x12\x17\n\x0f\x65xclude_columns\x18\x07 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x08 \x01(\x02\"x\n\x0fValidateRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x17\n\x0f\x64\x61taset_content\x18\x02 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x03 \x01(\t\x12\x17\n\x0f\x65xclude_columns\x18\x04 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x05 \x01(\x02\"\x8a\x01\n\x10ValidationResult\x12\x10\n\x08is_valid\x18\x01 \x01(\x08\x12\x12\n\ndataset_id\x18\x02 \x01(\t\x12\x0e\n\x06\x65rrors\x18\x03 \x03(\t\x12\x10\n\x08warnings\x18\x04 \x03(\t\x12.\n\x0c\x64\x61taset_info\x18\x05 \x01(\x0b\x32\x18.dataservice.DatasetInfo\"\x86\x01\n\x0b\x44\x61tasetInfo\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x10\n\x08num_rows\x18\x02 \x01(\x05\x12\x13\n\x0bnum_columns\x18\x03 \x01(\x05\x12(\n\x07\x63olumns\x18\x04 \x03(\x0b\x32\x17.dataservice.ColumnInfo\x12\x12\n\nsize_bytes\x18\x05 \x01(\x03\"T\n\nColumnInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05\x64type\x18\x02 \x01(\t\x12\x12\n\nnull_count\x18\x03 \x01(\x05\x12\x15\n\rsample_values\x18\x04 \x03(\t\"\\\n\x10TransformRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x34\n\x0ftransformations\x18\x02 \x03(\x0b\x32\x1b.dataservice.Transformation\"\x97\x01\n\x0eTransformation\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x63olumns\x18\x02 \x03(\t\x12\x37\n\x06params\x18\x03 \x03(\x0b\x32\'.dataservice.Transformation.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x92\x01\n\x14TransformationResult\x12\x1e\n\x16transformed_dataset_id\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x12\x15\n\rerror_message\x18\x03 \x01(\t\x12\x32\n\x10transformed_info\x18\x04 \x01(\x0b\x32\x18.dataservice.DatasetInfo\"7\n\rStreamRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x12\n\nchunk_size\x18\x02 \x01(\x05\"A\n\tDataChunk\x12\x14\n\x0c\x63hunk_number\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\x12\x10\n\x08is_final\x18\x03 \x01(\x08\"(\n\x12\x44\x61tasetInfoRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t2\xe6\x03\n\x0b\x44\x61taService\x12J\n\rUploadDataset\x12\x1a.dataservice.UploadRequest\x1a\x1d.dataservice.ValidationResult\x12N\n\x0fValidateDataset\x12\x1c.dataservice.ValidateRequest\x1a\x1d.dataservice.ValidationResult\x12W\n\x13\x41pplyTransformation\x12\x1d.dataservice.TransformRequest\x1a!.dataservice.TransformationResult\x12\x45\n\rStreamDataset\x12\x1a.dataservice.StreamRequest\x1a\x16.dataservice.DataChunk0\x01\x12K\n\x0eGetDatasetInfo\x12\x1f.dataservice.DatasetInfoRequest\x1a\x18.dataservice.DatasetInfo\x12N\n\x0f\x44ownloadDataset\x12\x1c.dataservice.DownloadRequest\x1a\x1d.dataservice.ValidationResultb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,31 +34,31 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_TRANSFORMATION_PARAMSENTRY']._loaded_options = None
   _globals['_TRANSFORMATION_PARAMSENTRY']._serialized_options = b'8\001'
   _globals['_UPLOADREQUEST']._serialized_start=35
-  _globals['_UPLOADREQUEST']._serialized_end=133
-  _globals['_DOWNLOADREQUEST']._serialized_start=136
-  _globals['_DOWNLOADREQUEST']._serialized_end=298
-  _globals['_VALIDATEREQUEST']._serialized_start=300
-  _globals['_VALIDATEREQUEST']._serialized_end=403
-  _globals['_VALIDATIONRESULT']._serialized_start=406
-  _globals['_VALIDATIONRESULT']._serialized_end=544
-  _globals['_DATASETINFO']._serialized_start=547
-  _globals['_DATASETINFO']._serialized_end=681
-  _globals['_COLUMNINFO']._serialized_start=683
-  _globals['_COLUMNINFO']._serialized_end=767
-  _globals['_TRANSFORMREQUEST']._serialized_start=769
-  _globals['_TRANSFORMREQUEST']._serialized_end=861
-  _globals['_TRANSFORMATION']._serialized_start=864
-  _globals['_TRANSFORMATION']._serialized_end=1015
-  _globals['_TRANSFORMATION_PARAMSENTRY']._serialized_start=970
-  _globals['_TRANSFORMATION_PARAMSENTRY']._serialized_end=1015
-  _globals['_TRANSFORMATIONRESULT']._serialized_start=1018
-  _globals['_TRANSFORMATIONRESULT']._serialized_end=1164
-  _globals['_STREAMREQUEST']._serialized_start=1166
-  _globals['_STREAMREQUEST']._serialized_end=1221
-  _globals['_DATACHUNK']._serialized_start=1223
-  _globals['_DATACHUNK']._serialized_end=1288
-  _globals['_DATASETINFOREQUEST']._serialized_start=1290
-  _globals['_DATASETINFOREQUEST']._serialized_end=1330
-  _globals['_DATASERVICE']._serialized_start=1333
-  _globals['_DATASERVICE']._serialized_end=1819
+  _globals['_UPLOADREQUEST']._serialized_end=150
+  _globals['_DOWNLOADREQUEST']._serialized_start=153
+  _globals['_DOWNLOADREQUEST']._serialized_end=332
+  _globals['_VALIDATEREQUEST']._serialized_start=334
+  _globals['_VALIDATEREQUEST']._serialized_end=454
+  _globals['_VALIDATIONRESULT']._serialized_start=457
+  _globals['_VALIDATIONRESULT']._serialized_end=595
+  _globals['_DATASETINFO']._serialized_start=598
+  _globals['_DATASETINFO']._serialized_end=732
+  _globals['_COLUMNINFO']._serialized_start=734
+  _globals['_COLUMNINFO']._serialized_end=818
+  _globals['_TRANSFORMREQUEST']._serialized_start=820
+  _globals['_TRANSFORMREQUEST']._serialized_end=912
+  _globals['_TRANSFORMATION']._serialized_start=915
+  _globals['_TRANSFORMATION']._serialized_end=1066
+  _globals['_TRANSFORMATION_PARAMSENTRY']._serialized_start=1021
+  _globals['_TRANSFORMATION_PARAMSENTRY']._serialized_end=1066
+  _globals['_TRANSFORMATIONRESULT']._serialized_start=1069
+  _globals['_TRANSFORMATIONRESULT']._serialized_end=1215
+  _globals['_STREAMREQUEST']._serialized_start=1217
+  _globals['_STREAMREQUEST']._serialized_end=1272
+  _globals['_DATACHUNK']._serialized_start=1274
+  _globals['_DATACHUNK']._serialized_end=1339
+  _globals['_DATASETINFOREQUEST']._serialized_start=1341
+  _globals['_DATASETINFOREQUEST']._serialized_end=1381
+  _globals['_DATASERVICE']._serialized_start=1384
+  _globals['_DATASERVICE']._serialized_end=1870
 # @@protoc_insertion_point(module_scope)

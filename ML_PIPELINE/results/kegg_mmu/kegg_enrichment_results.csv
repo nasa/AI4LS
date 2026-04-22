@@ -1,0 +1,10 @@
+"category","subcategory","ID","Description","GeneRatio","BgRatio","pvalue","p.adjust","qvalue","geneID","Count"
+NA,NA,"mmu04382","Cornified envelope formation - Mus musculus (house mouse)","2/8","222/11156",0.0101993712815,0.0766017845698085,0.044796365245502,"16688/631101",2
+"Environmental Information Processing","Signaling molecules and interaction","mmu04060","Cytokine-cytokine receptor interaction - Mus musculus (house mouse)","2/8","294/11156",0.0174488321362288,0.0766017845698085,0.044796365245502,"54450/54448",2
+"Organismal Systems","Endocrine system","mmu04614","Renin-angiotensin system - Mus musculus (house mouse)","1/8","36/11156",0.0255339281899362,0.0766017845698085,0.044796365245502,"16618",1
+"Organismal Systems","Excretory system","mmu04961","Endocrine and other factor-regulated calcium reabsorption - Mus musculus (house mouse)","1/8","61/11156",0.0429284375175272,0.0965889844144361,0.0564847862072726,"16618",1
+"Metabolism","Metabolism of cofactors and vitamins","mmu00830","Retinol metabolism - Mus musculus (house mouse)","1/8","102/11156",0.0708676644233791,0.111338349064633,0.0651101456518321,"242285",1
+"Human Diseases","Infectious disease: parasitic","mmu05146","Amoebiasis - Mus musculus (house mouse)","1/8","107/11156",0.0742255660430886,0.111338349064633,0.0651101456518321,"383548",1
+"Metabolism","Global and overview maps","mmu01240","Biosynthesis of cofactors - Mus musculus (house mouse)","1/8","153/11156",0.104623493159451,0.134515919776437,0.0786642805710158,"242285",1
+"Environmental Information Processing","Signaling molecules and interaction","mmu04080","Neuroactive ligand-receptor interaction - Mus musculus (house mouse)","1/8","392/11156",0.24892768500095,0.261124764606527,0.152704540705571,"57277",1
+NA,NA,"mmu04519","Cadherin signaling - Mus musculus (house mouse)","1/8","414/11156",0.261124764606527,0.261124764606527,0.152704540705571,"16688",1

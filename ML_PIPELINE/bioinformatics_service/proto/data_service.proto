@@ -1,0 +1,104 @@
+// proto/data_service.proto
+syntax = "proto3";
+
+package dataservice;
+
+service DataService {
+  // Upload and store a dataset from raw bytes
+  rpc UploadDataset(UploadRequest) returns (ValidationResult);
+
+  // Validate dataset structure and quality (kept for backwards compatibility)
+  rpc ValidateDataset(ValidateRequest) returns (ValidationResult);
+  
+  // Apply transformations to dataset
+  rpc ApplyTransformation(TransformRequest) returns (TransformationResult);
+  
+  // Stream large datasets in chunks
+  rpc StreamDataset(StreamRequest) returns (stream DataChunk);
+  
+  // Get dataset metadata
+  rpc GetDatasetInfo(DatasetInfoRequest) returns (DatasetInfo);
+
+  // Download a dataset from NASA OSDR by dataset ID
+  rpc DownloadDataset(DownloadRequest) returns (ValidationResult);
+}
+
+message UploadRequest {
+  bytes   file_content = 1;  // Raw CSV or JSON bytes
+  string  format       = 2;  // "csv" or "json"
+  string  dataset_id   = 3;  // optional; auto-generated if empty
+  repeated string exclude_columns = 4; // optional;  
+}
+
+message DownloadRequest {
+  string osd_id = 1;
+  repeated string patterns = 2;
+  string dataset_id = 3;
+  string factor_name = 4;
+  repeated string factor_values = 5;
+  int32 min_features = 6;
+  repeated string exclude_columns = 7;
+}
+
+message ValidateRequest {
+  string dataset_id = 1;
+  bytes dataset_content = 2;
+  string format = 3;
+  repeated string exclude_columns = 4;
+}
+
+message ValidationResult {
+  bool is_valid = 1;
+  string dataset_id = 2;
+  repeated string errors = 3;
+  repeated string warnings = 4;
+  DatasetInfo dataset_info = 5;
+}
+
+message DatasetInfo {
+  string dataset_id = 1;
+  int32 num_rows = 2;
+  int32 num_columns = 3;
+  repeated ColumnInfo columns = 4;
+  int64 size_bytes = 5;
+}
+
+message ColumnInfo {
+  string name = 1;
+  string dtype = 2;
+  int32 null_count = 3;
+  repeated string sample_values = 4;
+}
+
+message TransformRequest {
+  string dataset_id = 1;
+  repeated Transformation transformations = 2;
+}
+
+message Transformation {
+  string type = 1;
+  repeated string columns = 2;
+  map<string, string> params = 3;
+}
+
+message TransformationResult {
+  string transformed_dataset_id = 1;
+  bool success = 2;
+  string error_message = 3;
+  DatasetInfo transformed_info = 4;
+}
+
+message StreamRequest {
+  string dataset_id = 1;
+  int32 chunk_size = 2;
+}
+
+message DataChunk {
+  int32 chunk_number = 1;
+  bytes data = 2;
+  bool is_final = 3;
+}
+
+message DatasetInfoRequest {
+  string dataset_id = 1;
+}

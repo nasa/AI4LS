@@ -84,6 +84,7 @@ app.add_middleware(
 
 class UploadRequest(BaseModel):
     exclude_columns: Optional[List[str]] = []
+    cv_step: float = 0.25 
 
 class DownloadRequest(BaseModel):
     osd_id: str
@@ -93,6 +94,7 @@ class DownloadRequest(BaseModel):
     factor_values: List[str]
     min_features: int
     exclude_columns: List[str]
+    cv_step: float
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
@@ -148,13 +150,11 @@ async def upload_dataset(
     
     format_type = "csv" if file.filename.endswith(".csv") else "json"
     #exclude_columns = List[str] 
-    exclude_columns = list() 
+    #exclude_columns = list() 
     
     try:
         result = data_client.upload_dataset(content, format_type, exclude_columns)
 
-        #logger(f"result in upload validate main.py {result}")
-        
         response = ValidationResponse(
             is_valid=result["is_valid"],
             dataset_id=result["dataset_id"],
@@ -193,8 +193,6 @@ async def upload_dataset(
     try:
         result = data_client.upload_dataset(content, format_type, exclude_cols_list)
 
-        logger.info(f"result in upload validate main.py {result}")  # Fix: logger.info, not logger()
-        
         response = ValidationResponse(
             is_valid=result["is_valid"],
             errors=result["errors"],
@@ -239,6 +237,7 @@ async def download_dataset(request: DownloadRequest):
         logger.info(f"factor_values = {request.factor_values}") 
         logger.info(f"min_features = {request.min_features}") 
         logger.info(f"exclude_columns = {request.exclude_columns}") 
+        logger.info(f"cv_step = {request.cv_step}") 
         result = data_client.download_dataset(
             osd_id=request.osd_id,
             patterns=request.patterns,
@@ -246,7 +245,8 @@ async def download_dataset(request: DownloadRequest):
             factor_name=request.factor_name,
             factor_values=request.factor_values,
             min_features=request.min_features,
-            exclude_columns=request.exclude_columns or []
+            exclude_columns=request.exclude_columns or [],
+            cv_step=request.cv_step or 0.25
         )
 
         #logger.info(f"Received result from data_client: {result}")
@@ -263,16 +263,6 @@ async def download_dataset(request: DownloadRequest):
             dataset_info=result["dataset_info"]
             
         )
-
-        '''if result["dataset_info"]:
-            info = result["dataset_info"]
-            response.dataset_info = DatasetInfo(
-                dataset_id=info["dataset_id"],
-                num_rows=info["num_rows"],
-                num_columns=info["num_columns"],
-                size_bytes=info["size_bytes"],
-                columns=[ColumnInfo(**col) for col in info["columns"]]
-            )'''
 
         return response
 

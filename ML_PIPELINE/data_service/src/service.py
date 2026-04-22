@@ -71,7 +71,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
 
     
     def _generate_cache_key(self, osd_id: str, patterns: list, factor_name: str, 
-                           factor_values: list, exclude_columns: list, min_features: int) -> str:
+                           factor_values: list, exclude_columns: list, min_features: int, cv_step: float) -> str:
         """
         Generate a unique cache key based on download parameters
         
@@ -83,7 +83,8 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             "factor_name": factor_name or "",
             "factor_values": sorted(factor_values) if factor_values else [],
             "exclude_columns": sorted(exclude_columns) if exclude_columns else [],
-            "min_features": min_features
+            "min_features": min_features,
+            "cv_step": cv_step
         }
         
         # Create a hash of the parameters
@@ -163,7 +164,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         from sklearn.feature_selection import  mutual_info_regression
         return mutual_info_regression(X, y, random_state=seed)
 
-    def _filter_cvs(self, df, start, step, min_features):
+    def _filter_cvs(self, df, start, step=0.25, min_features=1000):
         # calculate coefficient of variation
         # assumes samples x genes
         if df.shape[1] <= min_features:
@@ -231,10 +232,11 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             factor_values = list(request.factor_values)
             min_features = request.min_features
             exclude_columns = list(request.exclude_columns)
+            cv_step = float(request.cv_step)
 
             # Generate cache key based on download parameters
             cache_key = self._generate_cache_key(
-                osd_id, patterns, factor_name, factor_values, exclude_columns, min_features
+                osd_id, patterns, factor_name, factor_values, exclude_columns, min_features, cv_step
             )
         
             # Check if we've already downloaded this exact dataset
@@ -324,8 +326,10 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             df = df.astype(float)
 
             # filter low CVS
+            logger.info(f"using cv_step: {cv_step}")
             logger.info(f"shape before filter_cvs: {df.shape}")
-            df = self._filter_cvs(df, start=1, step=0.25, min_features=min_features)
+            #df = self._filter_cvs(df, start=1, step=0.25, min_features=min_features)
+            df = self._filter_cvs(df, start=1, step=cv_step, min_features=min_features)
             logger.info(f"shape after filter_cvs: {df.shape}")
 
 
@@ -412,6 +416,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
 
             return data_service_pb2.ValidationResult(
                 is_valid=len(errors) == 0,
+                dataset_id=dataset_id,
                 errors=errors,
                 warnings=warnings,
                 dataset_info=dataset_info
@@ -439,6 +444,8 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         try:
             # Get exclude_columns from request
             exclude_columns = list(request.exclude_columns) if request.exclude_columns else []
+
+            cv_step = float(request.cv_step) if request.cv_step else 0.25
         
             if request.format == "csv":
                 df = pd.read_csv(BytesIO(request.file_content))

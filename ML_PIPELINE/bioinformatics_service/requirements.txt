@@ -1,0 +1,10 @@
+# bioinformatics_service/requirements.txt
+grpcio==1.62.0
+grpcio-tools==1.62.0
+protobuf==4.25.1
+pandas==2.1.4
+numpy==1.26.2
+rpy2==3.5.1
+scipy==1.11.4
+matplotlib==3.8.2
+seaborn==0.13.0

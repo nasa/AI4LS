@@ -28,6 +28,7 @@ message UploadRequest {
   string  format       = 2;  // "csv" or "json"
   string  dataset_id   = 3;  // optional; auto-generated if empty
   repeated string exclude_columns = 4; // optional;  
+  float cv_step= 5; // optional;  
 }
 
 message DownloadRequest {
@@ -38,6 +39,7 @@ message DownloadRequest {
   repeated string factor_values = 5;
   int32 min_features = 6;
   repeated string exclude_columns = 7;
+  float cv_step = 8;
 }
 
 message ValidateRequest {
@@ -45,6 +47,7 @@ message ValidateRequest {
   bytes dataset_content = 2;
   string format = 3;
   repeated string exclude_columns = 4;
+  float cv_step = 5;
 }
 
 message ValidationResult {

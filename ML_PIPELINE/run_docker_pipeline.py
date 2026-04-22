@@ -88,6 +88,7 @@ def download_dataset(args):
         "factor_name": args.factor_name,
         "factor_values": args.factor_values,
         "min_features": args.min_features,
+        "cv_step": args.cv_step,
     }
 
     response = requests.post(f"{BASE_URL}/api/datasets/download", json=payload)
@@ -121,7 +122,7 @@ def download_dataset(args):
     return None, None
 
 
-def upload_dataset(file_name, exclude_columns):
+def upload_dataset(file_name, exclude_columns, cv_step):
     """Upload and validate dataset from local file"""
     print("\n" + "=" * 60)
     print("STEP 2: Upload and Validate Dataset")
@@ -149,8 +150,7 @@ def upload_dataset(file_name, exclude_columns):
 
     return None, None
 
-
-def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list, factor_name, factor_values, min_features, fi_methods):
+def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list, factor_name, factor_values, min_features, fi_methods, exclude_columns, cv_step):
     """Run full ML pipeline"""
     print("\n" + "=" * 60)
     print("STEP 3: Run ML Pipeline")
@@ -186,6 +186,8 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
             "factor_values": factor_values,
             "min_features": min_features,
             "fi_methods": fi_methods,
+            "exclude_columns": exclude_columns,
+            "cv_step": cv_step,
         }
     }
 
@@ -286,6 +288,7 @@ def main():
     parser.add_argument('-oi', '--osd_id', help='OSDR dataset ID', default=None, required=False)
     parser.add_argument('-tl', '--trans_list', help='list of transformations', default=[], type=list_of_strings, required=False)
     parser.add_argument('-ec', '--exclude_columns', help='list of columns to exclude', default=[], type=list_of_strings, required=False)
+    parser.add_argument('-cs', '--cv_step', help='float value to start coef of variation dim reduction', default=0.25, type=float, required=False)
     parser.add_argument('-pa', '--patterns', help='string patterns to identify RNA-seq files', default=['unnormalized', 'RSEM'], type=list_of_strings, required=False)
     parser.add_argument('-sc', '--sample_column', help='sample column name', default=None, required=False)
     parser.add_argument('-tc', '--target_column', help='name of target column', default=None, required=False)
@@ -307,6 +310,7 @@ def main():
     test_size     = args.test_size 
     trans_list    = list(args.trans_list)
     exclude_columns    = list(args.exclude_columns)
+    cv_step    = float(args.cv_step)
     patterns      = list(args.patterns) 
     input_file = args.input_file
     factor_name = args.factor_name
@@ -363,7 +367,7 @@ def main():
     if operation == 'download':
         dataset_id, columns = download_dataset(args)
     elif operation == 'upload':
-        dataset_id, columns = upload_dataset(input_file, exclude_columns)
+        dataset_id, columns = upload_dataset(input_file, exclude_columns, cv_step)
     else:
         print("unknown operation: ", operation)
         sys.exit(1)
@@ -378,7 +382,8 @@ def main():
     model_id, metrics = run_pipeline(
         dataset_id, target_column, sample_column, 
         columns, task_type, algorithm, test_size, trans_list,
-        factor_name, factor_values,min_features, fi_methods
+        factor_name, factor_values,min_features, fi_methods,
+        exclude_columns, cv_step
     )
     if not model_id:
         print("\n❌ Pipeline failed")

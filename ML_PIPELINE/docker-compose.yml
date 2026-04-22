@@ -2,6 +2,28 @@
 #version: '3.8'
 
 services:
+  bioinformatics_service:
+    build:
+      context: ./bioinformatics_service
+      dockerfile: Dockerfile
+    container_name: ml-pipeline-bioinformatics
+    ports:
+      - "50054:50054"
+    volumes:
+      - ./datasets:/app/datasets  # Access datasets
+      - ./results:/app/results     # Store analysis results
+    networks:
+      - ml-pipeline-network
+    depends_on:
+      - data_service
+    restart: unless-stopped
+    environment:
+      - DATA_SERVICE_URL=data_service:50051
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
   data_service:
     build:
       context: ./data_service

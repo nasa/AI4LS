@@ -1,0 +1,121 @@
+// bioinformatics_service/proto/bioinformatics_service.proto
+syntax = "proto3";
+
+package bioinformatics;
+
+service BioinformaticsService {
+  // Differential expression analysis with DESeq2
+  rpc RunDESeq2(DESeq2Request) returns (DESeq2Response);
+  
+  // KEGG pathway enrichment analysis
+  rpc RunKEGGEnrichment(KEGGRequest) returns (KEGGResponse);
+  
+  // Gene set enrichment analysis (generic)
+  rpc RunGSEA(GSEARequest) returns (GSEAResponse);
+}
+
+// DESeq2 Analysis
+message DESeq2Request {
+  string dataset_id = 1;               // Dataset from data_service
+  string condition_column = 2;          // Column with experimental conditions
+  string control_group = 3;             // Reference/control condition
+  string treatment_group = 4;           // Treatment condition to compare
+  double padj_threshold = 5;            // Adjusted p-value threshold (default: 0.05)
+  double log2fc_threshold = 6;          // Log2 fold change threshold (default: 1.0)
+  repeated string covariates = 7;       // Additional covariates for design formula
+}
+
+message DESeq2Response {
+  bool success = 1;
+  string analysis_id = 2;
+  DESeq2Results results = 3;
+  string error_message = 4;
+}
+
+message DESeq2Results {
+  int32 num_genes = 1;
+  int32 num_upregulated = 2;            // Genes with positive log2FC
+  int32 num_downregulated = 3;          // Genes with negative log2FC
+  int32 num_significant = 4;            // Genes passing thresholds
+  repeated DEGene differential_genes = 5; // Top DE genes
+  string volcano_plot_path = 6;         // Path to volcano plot
+  string ma_plot_path = 7;              // Path to MA plot
+  map<string, string> metadata = 8;     // Additional info
+}
+
+message DEGene {
+  string gene_id = 1;
+  double base_mean = 2;                 // Mean normalized counts
+  double log2_fold_change = 3;
+  double lfcse = 4;                     // Log2FC standard error
+  double stat = 5;                      // Wald statistic
+  double pvalue = 6;
+  double padj = 7;                      // Adjusted p-value
+  int32 rank = 8;                       // Rank by significance
+}
+
+// KEGG Enrichment
+message KEGGRequest {
+  string analysis_id = 1;               // From DESeq2 analysis
+  repeated string gene_list = 2;        // Or provide gene list directly
+  string organism = 3;                  // KEGG organism code (e.g., "mmu" for mouse, "hsa" for human)
+  double pvalue_cutoff = 4;             // P-value threshold (default: 0.05)
+  double qvalue_cutoff = 5;             // Q-value threshold (default: 0.2)
+}
+
+message KEGGResponse {
+  bool success = 1;
+  KEGGResults results = 2;
+  string error_message = 3;
+}
+
+message KEGGResults {
+  int32 num_pathways = 1;
+  repeated KEGGPathway pathways = 2;
+  string dotplot_path = 3;              // Path to dotplot
+  string barplot_path = 4;              // Path to barplot
+}
+
+message KEGGPathway {
+  string pathway_id = 1;
+  string description = 2;
+  double pvalue = 3;
+  double padj = 4;
+  int32 gene_count = 5;                 // Number of DE genes in pathway
+  double gene_ratio = 6;                // Proportion of DE genes
+  int32 bg_ratio = 7;                   // Background gene count
+  repeated string genes = 8;            // Gene IDs in pathway
+  int32 rank = 9;
+}
+
+// Gene Set Enrichment Analysis (GSEA)
+message GSEARequest {
+  string dataset_id = 1;
+  string ranking_metric = 2;            // "log2fc", "stat", "pvalue"
+  string gene_set_database = 3;         // "KEGG", "GO", "Reactome", "MSigDB"
+  string organism = 4;
+  int32 permutations = 5;               // Number of permutations (default: 1000)
+}
+
+message GSEAResponse {
+  bool success = 1;
+  GSEAResults results = 2;
+  string error_message = 3;
+}
+
+message GSEAResults {
+  int32 num_gene_sets = 1;
+  repeated EnrichedGeneSet gene_sets = 2;
+  string enrichment_plot_path = 3;
+}
+
+message EnrichedGeneSet {
+  string gene_set_id = 1;
+  string description = 2;
+  double enrichment_score = 3;
+  double normalized_enrichment_score = 4;
+  double pvalue = 5;
+  double padj = 6;
+  int32 size = 7;                       // Number of genes in set
+  int32 rank = 8;
+}

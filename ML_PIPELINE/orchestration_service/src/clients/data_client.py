@@ -59,7 +59,9 @@ class DataServiceClient:
         dataset_content: bytes, 
         format: str = "csv",
         dataset_id: str = "",
-        exclude_columns: List[str] = []
+        exclude_columns: List[str] = [],
+        cv_step=0.25
+
     ) -> Dict:
         """Upload and validate a dataset"""
         try:
@@ -67,7 +69,8 @@ class DataServiceClient:
                 file_content=dataset_content,  # Note: file_content, not dataset_content
                 format=format,
                 dataset_id="",  # Empty = auto-generate
-                exclude_columns=exclude_columns
+                exclude_columns=exclude_columns,
+                cv_step=cv_step
             )
 
             response = self.stub.UploadDataset(request)  # Note: UploadDataset, not ValidateDataset
@@ -96,7 +99,7 @@ class DataServiceClient:
             raise
 
     def download_dataset(self, osd_id: str, patterns: List[str],
-                         dataset_id: str, factor_name: str, factor_values: List[str], min_features: int, exclude_columns: List[str]) -> Dict:
+                         dataset_id: str, factor_name: str, factor_values: List[str], min_features: int, exclude_columns: List[str], cv_step: float) -> Dict:
         """Download a dataset from NASA OSDR"""
         try:
             request = data_service_pb2.DownloadRequest(
@@ -106,7 +109,8 @@ class DataServiceClient:
                 factor_name=factor_name,
                 factor_values=factor_values,
                 min_features=min_features,
-                exclude_columns=exclude_columns
+                exclude_columns=exclude_columns,
+                cv_step=cv_step
             )
             response = self.stub.DownloadDataset(request)
             return self._validation_result_to_dict(response)
