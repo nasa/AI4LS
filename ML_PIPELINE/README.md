@@ -124,6 +124,6 @@ cd AI4LS/ML_PIPELINE
 3. Run the `run_docker_pipeline.py` script against the data in OSD-511 to do classification using the random_forest algorithm.
 
 ```console
-python run_docker_pipeline.py   -op upload   -tt classification   -al random_forest -if DATA/X_hne_class_nosample_100.csv -tc class -ec sample -sc sample -pv 0.9 -qv 0.9 
+python run_docker_pipeline.py   -op upload   -tt classification   -al random_forest -if DATA/X_hne_class_nosample_100.csv -tc "Factor Value[Spaceflight]" -ec sample -sc sample -pv 0.9 -qv 0.9 
 ```
 
