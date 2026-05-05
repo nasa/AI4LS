@@ -2,20 +2,44 @@
 
 run_deseq2 <- function(count_matrix_path, metadata_path, condition_column, 
                        control_group, treatment_group, output_dir,
-                       padj_threshold, log2fc_threshold) {
+                       padj_threshold = 0.05, log2fc_threshold = 1.0) {
   
   library(DESeq2)
   library(ggplot2)
-
-  cat("padj_threshold in run_deseq2:", padj_threshold, "\n")
-  cat("log2fc_threshold in run_deseq2:", log2fc_threshold, "\n")
   
   # Load data
   counts <- read.csv(count_matrix_path, row.names = 1, check.names = FALSE)
   metadata <- read.csv(metadata_path, row.names = 1, check.names = FALSE)
   
+  cat("Initial counts shape:", nrow(counts), "genes x", ncol(counts), "samples\n")
+  cat("Metadata shape:", nrow(metadata), "samples x", ncol(metadata), "columns\n")
+  
+  # Check sample names match
+  cat("Count sample names (first 5):", head(colnames(counts), 5), "\n")
+  cat("Metadata sample names (first 5):", head(rownames(metadata), 5), "\n")
+  
+  # Ensure metadata and counts have matching samples
+  common_samples <- intersect(colnames(counts), rownames(metadata))
+  cat("Common samples:", length(common_samples), "\n")
+  
+  if (length(common_samples) == 0) {
+    stop("No common samples between counts and metadata!")
+  }
+  
+  # Subset to common samples
+  counts <- counts[, common_samples]
+  metadata <- metadata[common_samples, , drop = FALSE]
+  
+  cat("After matching - counts:", ncol(counts), "samples, metadata:", nrow(metadata), "samples\n")
+  
   # Ensure counts are integer
   counts <- round(counts)
+  
+  # Filter out genes with all zeros or very low counts
+  cat("Filtering low-count genes...\n")
+  keep <- rowSums(counts) >= 10
+  counts <- counts[keep, ]
+  cat("After filtering:", nrow(counts), "genes remaining\n")
   
   # Clean column name for formula
   clean_condition_column <- gsub(" ", "_", condition_column)
@@ -31,68 +55,171 @@ run_deseq2 <- function(count_matrix_path, metadata_path, condition_column,
     colnames(metadata)[colnames(metadata) == condition_column] <- clean_condition_column
   }
   
+  # Check if column exists
+  if (!(clean_condition_column %in% colnames(metadata))) {
+    stop(paste("Column", clean_condition_column, "not found in metadata. Available columns:", 
+               paste(colnames(metadata), collapse=", ")))
+  }
+  
   # Convert to factor
   cat("Converting condition column to factor...\n")
-  cat("Unique values before factor:", unique(metadata[[clean_condition_column]]), "\n")
+  cat("Values before conversion:\n")
+  print(table(metadata[[clean_condition_column]]))
   
   metadata[[clean_condition_column]] <- as.factor(metadata[[clean_condition_column]])
   factor_levels <- levels(metadata[[clean_condition_column]])
+
+  cat("conditions in deseq2: ")
+  print(metadata[[clean_condition_column]])
+  
   
   cat("Factor levels:", paste(factor_levels, collapse=", "), "\n")
-  cat("Requested control_group:", control_group, "\n")
-  cat("Requested treatment_group:", treatment_group, "\n")
+  cat("Number of levels:", length(factor_levels), "\n")
   
-  # Find matching level for control group (case-insensitive, partial match)
-  control_match <- factor_levels[grep(control_group, factor_levels, ignore.case = TRUE)]
-  treatment_match <- factor_levels[grep(treatment_group, factor_levels, ignore.case = TRUE)]
-  
-  # If exact match not found, try first character match or use first/last levels
-  if (length(control_match) == 0) {
-    cat("WARNING: Control group not found, trying alternatives...\n")
-    # Try case-insensitive exact match
-    control_match <- factor_levels[tolower(factor_levels) == tolower(control_group)]
-    if (length(control_match) == 0) {
-      cat("Using first level as control:", factor_levels[1], "\n")
-      control_match <- factor_levels[1]
-    }
-  } else {
-    control_match <- control_match[1]  # Take first match
+  if (length(factor_levels) < 2) {
+    stop("Need at least 2 factor levels for comparison")
   }
   
-  if (length(treatment_match) == 0) {
-    cat("WARNING: Treatment group not found, trying alternatives...\n")
-    treatment_match <- factor_levels[tolower(factor_levels) == tolower(treatment_group)]
-    if (length(treatment_match) == 0) {
-      # Use the level that's not control
-      treatment_match <- factor_levels[factor_levels != control_match][1]
-      cat("Using alternative treatment:", treatment_match, "\n")
-    }
+  # Find matching level for control group
+  control_match <- NULL
+  treatment_match <- NULL
+  
+  # Try exact match first
+  if (control_group %in% factor_levels) {
+    control_match <- control_group
+    cat("Exact match for control:", control_match, "\n")
   } else {
-    treatment_match <- treatment_match[1]
+    # Try case-insensitive match
+    idx <- which(tolower(factor_levels) == tolower(control_group))
+    if (length(idx) > 0) {
+      control_match <- factor_levels[idx[1]]
+      cat("Case-insensitive match for control:", control_match, "\n")
+    } else {
+      # Try grep (partial match)
+      idx <- grep(control_group, factor_levels, ignore.case = TRUE)
+      if (length(idx) > 0) {
+        control_match <- factor_levels[idx[1]]
+        cat("Partial match for control:", control_match, "\n")
+      } else {
+        # Default to first level
+        control_match <- factor_levels[1]
+        cat("WARNING: No match found for control '", control_group, "', using first level:", control_match, "\n")
+      }
+    }
   }
   
-  cat("Actual control_group:", control_match, "\n")
-  cat("Actual treatment_group:", treatment_match, "\n")
+  # Try exact match for treatment
+  if (treatment_group %in% factor_levels) {
+    treatment_match <- treatment_group
+    cat("Exact match for treatment:", treatment_match, "\n")
+  } else {
+    # Try case-insensitive match
+    idx <- which(tolower(factor_levels) == tolower(treatment_group))
+    if (length(idx) > 0) {
+      treatment_match <- factor_levels[idx[1]]
+      cat("Case-insensitive match for treatment:", treatment_match, "\n")
+    } else {
+      # Try grep (partial match)
+      idx <- grep(treatment_group, factor_levels, ignore.case = TRUE)
+      if (length(idx) > 0) {
+        treatment_match <- factor_levels[idx[1]]
+        cat("Partial match for treatment:", treatment_match, "\n")
+      } else {
+        # Default to second level
+        other_levels <- factor_levels[factor_levels != control_match]
+        if (length(other_levels) > 0) {
+          treatment_match <- other_levels[1]
+        } else {
+          treatment_match <- factor_levels[2]
+        }
+        cat("WARNING: No match found for treatment '", treatment_group, "', using:", treatment_match, "\n")
+      }
+    }
+  }
+  
+  # Validate matches are not NULL or NA
+  cat("Validating matches...\n")
+  cat("control_match:", control_match, "is.null:", is.null(control_match), "is.na:", is.na(control_match), "\n")
+  cat("treatment_match:", treatment_match, "is.null:", is.null(treatment_match), "is.na:", is.na(treatment_match), "\n")
+  
+  if (is.null(control_match) || length(control_match) == 0) {
+    stop(paste("Control match is NULL. Available levels:", paste(factor_levels, collapse=", ")))
+  }
+  
+  if (is.na(control_match)) {
+    stop(paste("Control match is NA. Available levels:", paste(factor_levels, collapse=", ")))
+  }
+  
+  if (!(control_match %in% factor_levels)) {
+    stop(paste("Control match", control_match, "not in factor levels:", paste(factor_levels, collapse=", ")))
+  }
+  
+  if (is.null(treatment_match) || length(treatment_match) == 0) {
+    stop(paste("Treatment match is NULL. Available levels:", paste(factor_levels, collapse=", ")))
+  }
+  
+  if (is.na(treatment_match)) {
+    stop(paste("Treatment match is NA. Available levels:", paste(factor_levels, collapse=", ")))
+  }
+  
+  if (!(treatment_match %in% factor_levels)) {
+    stop(paste("Treatment match", treatment_match, "not in factor levels:", paste(factor_levels, collapse=", ")))
+  }
+  
+  if (control_match == treatment_match) {
+    stop(paste("Control and treatment groups are the same:", control_match))
+  }
+  
+  cat("Final validation passed!\n")
+  cat("Using control:", control_match, "\n")
+  cat("Using treatment:", treatment_match, "\n")
   
   # Create design formula
   design_formula <- as.formula(paste0("~ ", clean_condition_column))
+  cat("Design formula:", as.character(design_formula), "\n")
   
   # Create DESeq2 dataset
+  cat("Creating DESeqDataSet...\n")
   dds <- DESeqDataSetFromMatrix(
     countData = counts,
     colData = metadata,
     design = design_formula
   )
   
-  # Set reference level with matched control group
-  cat("Setting reference level...\n")
+  cat("DESeqDataSet created successfully\n")
+  cat("Condition factor in dds:\n")
+  print(table(dds[[clean_condition_column]]))
+  
+  # Set reference level
+  cat("Setting reference level to:", control_match, "\n")
+  cat("Current levels:", levels(dds[[clean_condition_column]]), "\n")
+  
   dds[[clean_condition_column]] <- relevel(dds[[clean_condition_column]], ref = control_match)
   
-  # Run DESeq2
-  cat("Running DESeq2...\n")
-  dds <- DESeq(dds)
+  cat("Reference level set successfully\n")
+  cat("New levels:", levels(dds[[clean_condition_column]]), "\n")
   
-  # Get results with matched groups
+  # Run DESeq2
+  cat("Running DESeq2 analysis...\n")
+  dds <- tryCatch({
+    DESeq(dds)
+  }, error = function(e) {
+    if (grepl("every gene contains at least one zero", e$message)) {
+      cat("Standard normalization failed, using alternative method...\n")
+      # Use alternative size factor estimation
+      dds <- estimateSizeFactors(dds, type = "poscounts")
+      dds <- estimateDispersions(dds)
+      dds <- nbinomWaldTest(dds)
+      return(dds)  # ← CRITICAL: Must return dds here
+    } else {
+      stop(e)
+    }
+  }) 
+
+  cat("DESeq2 analysis complete\n")
+  
+  # Get results
+  cat("Extracting results...\n")
   res <- results(dds, contrast = c(clean_condition_column, treatment_match, control_match))
   
   # Order by adjusted p-value
@@ -136,7 +263,7 @@ run_deseq2 <- function(count_matrix_path, metadata_path, condition_column,
   num_significant <- nrow(sig_genes)
   
   cat("Analysis complete!\n")
-  cat("Total genes:", num_genes, "\n")
+  cat("Total genes analyzed:", num_genes, "\n")
   cat("Significant genes:", num_significant, "\n")
   cat("Upregulated:", num_upregulated, "\n")
   cat("Downregulated:", num_downregulated, "\n")

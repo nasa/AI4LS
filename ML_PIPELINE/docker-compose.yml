@@ -12,6 +12,8 @@ services:
     volumes:
       - ./datasets:/app/datasets  # Access datasets
       - ./results:/app/results     # Store analysis results
+      - ./bioinformatics_service/src:/app/src
+      - ./bioinformatics_service/r_scripts:/app/r_scripts
     networks:
       - ml-pipeline-network
     depends_on:

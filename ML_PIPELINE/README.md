@@ -33,7 +33,7 @@ conda create -n mlpipe python=3.10 -c conda-forge --override-channels
 conda activate mlpipe 
 ```
 
-5. Install the Python requirements. 
+6. Install the Python requirements. 
 
 ```console
 pip install -r requirements.txt
@@ -91,7 +91,7 @@ docker container list
 docker-compose logs -f
 ```
 
-## Run a classification algorithm against OSD-511 
+## Run a classification algorithm against OSD-48 
 
 1. Open another terminal window.
 
@@ -100,16 +100,16 @@ docker-compose logs -f
 ```console
 cd AI4LS/ML_PIPELINE
 ```
-3. Run the `run_docker_pipeline.py` script against the data in OSD-511 to do classification using the random_forest algorithm.
+3. Run the `run_docker_pipeline.py` script against the data in OSD-48 to do classification using the random_forest algorithm.
 
 ```console
-python run_docker_pipeline.py --operation=download --osd_id=511 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=random_forest --test_size=0.2 --trans_list=n,s,l,t --fi_methods=built_in,rfe -pv 0.9 -qv 0.9 
+python run_docker_pipeline.py --operation=download --osd_id=48 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=random_forest --test_size=0.2 --trans_list=n,s,l,t --fi_methods=built_in,rfe -pv 0.9 -qv 0.9 
 ```
 
-4. Run the `run_docker_pipeline.py` script against the data in OSD-137 to do classification using the logistic_regression algorithm.
+4. Run the `run_docker_pipeline.py` script against the data in OSD-137 to do classification using the random_forest algorithm.
 
 ```console
-python run_docker_pipeline.py --operation=download --osd_id=137 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=logistic_regression --test_size=0.2 --trans_list=l,t --fi_methods=pfi,rfe --patterns=unnormalized -pv 0.9 -qv 0.9 
+python run_docker_pipeline.py --operation=download --osd_id=137 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=random_forest --test_size=0.2 --trans_list=l,t --fi_methods=built_in,pfi,rfe --patterns=unnormalized -pv 0.9 -qv 0.9
 ```
 
 ## Run a regression algorithm against an uploaded data file. 
@@ -121,9 +121,9 @@ python run_docker_pipeline.py --operation=download --osd_id=137 --target_column=
 ```console
 cd AI4LS/ML_PIPELINE
 ```
-3. Run the `run_docker_pipeline.py` script against the data in OSD-511 to do classification using the random_forest algorithm.
+3. Run the `run_docker_pipeline.py` script to upload a CSV file and do classification using the random_forest algorithm.
 
 ```console
-python run_docker_pipeline.py   -op upload   -tt classification   -al random_forest -if DATA/X_hne_class_nosample_100.csv -tc "Factor Value[Spaceflight]" -ec sample -sc sample -pv 0.9 -qv 0.9 
+python run_docker_pipeline.py   -op upload   -tt classification   -al random_forest -if DATA/X_hne_class_nosample_100.csv -tc "Factor Value[Spaceflight]" -ec sample -sc sample -pv 0.9 -qv 0.9 -fi built_in 
 ```
 

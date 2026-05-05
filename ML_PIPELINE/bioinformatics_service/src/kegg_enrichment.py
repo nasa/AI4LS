@@ -56,14 +56,6 @@ class KEGGEnrichmentAnalyzer:
                 pvalue_cutoff,
                 qvalue_cutoff
             )[0]
-            '''with localconverter(pandas2ri.converter):
-                num_pathways = run_kegg_func(
-                    str(gene_list_path),
-                    organism,
-                    str(output_dir),
-                    pvalue_cutoff,
-                    qvalue_cutoff
-                )[0]'''
             
             # Load gene conversion results
             conversion_file = output_dir / "gene_id_conversion.csv"

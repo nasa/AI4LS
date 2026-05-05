@@ -23,28 +23,23 @@ BASE_URL = "http://localhost:8000"
 
 
 def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group="Ground Control", treatment_group="Space Flight", padj_threshold=0.1, log2fc_threshold=0):
-    # Add path
-    '''bio_service_path = Path(__file__).parent / "bioinformatics_service"
-    print("sys.path before insert: ", sys.path) 
-    sys.path.insert(0, str(bio_service_path))
-    print("sys.path after insert: ", sys.path) 
-    from generated import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc'''
+    print("\n" + "=" * 60)
+    print("STEP 6: Run DESEQ2")
+    print("=" * 60)
     # Connect to service
     channel = grpc.insecure_channel('localhost:50054')
     stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(channel)
     
-    # First, you need a dataset with count data and conditions
+    # you need a dataset with non-zero count data and conditions
+    
     
     padj_threshold=padj_threshold
     log2fc_threshold=log2fc_threshold
     # Run DESeq2
     request = bioinformatics_service_pb2.DESeq2Request(
         dataset_id=dataset_id,
-        #condition_column="Factor Value[Spaceflight]",  # Your condition column
         condition_column=target_column,
-        #control_group="Ground Control",
         control_group=control_group,
-        #treatment_group="Space Flight",
         treatment_group=treatment_group,
         padj_threshold=padj_threshold,
         log2fc_threshold=log2fc_threshold,
@@ -63,9 +58,8 @@ def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_gr
         print(f"  Downregulated: {response.results.num_downregulated}")
         
         print(f"\nTop 10 Differentially Expressed Genes:")
-        for gene in response.results.differential_genes[:100]:
-            #if gene.log2_fold_change >= log2fc_threshold and gene.padj <= padj_threshold:
-            if gene.padj <= padj_threshold:
+        for gene in response.results.differential_genes[:10]:
+            if gene.log2_fold_change >= log2fc_threshold and gene.padj <= padj_threshold:
                 print(f"  {gene.gene_id}: log2FC={gene.log2_fold_change:.2f}, padj={gene.padj:.2e}")
         
         print(f"\nPlots:")
@@ -74,18 +68,15 @@ def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_gr
 
         return response
 
-def run_kegg_analysis(response, organism="mmu", pvalue_cutoff=0.1, qvalue_cutoff=0.1):
+'''def run_kegg_analysis(response, organism="mmu", pvalue_cutoff=0.1, qvalue_cutoff=0.1):
     # Add path
-    '''bio_service_path = Path(__file__).parent / "bioinformatics_service"
-    sys.path.insert(0, str(bio_service_path))
-    from generated import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc'''
-
+    print("\n" + "=" * 60)
+    print("STEP 7: RUN KEGG ANALYSIS")
+    print("=" * 60)
     # Connect to service
     channel = grpc.insecure_channel('localhost:50054')
     stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(channel) 
     # Now run KEGG enrichment on these results
-    print("\n" + "="*60)
-    print("Running KEGG Enrichment...")
     kegg_request = bioinformatics_service_pb2.KEGGRequest(
         analysis_id=response.analysis_id,
         #organism="mmu",  # Mouse (use "hsa" for human)
@@ -113,14 +104,133 @@ def run_kegg_analysis(response, organism="mmu", pvalue_cutoff=0.1, qvalue_cutoff
             print("  No significantly enriched pathways found")
     else:
         print(f"✗ KEGG enrichment failed: {kegg_response.error_message}")
+ 
+    return kegg_response'''
 
+def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=0.05, qvalue_cutoff=0.2, max_genes=500, method="built_in", min_importance=0.0):
+    """Run KEGG pathway enrichment on important features from ML model"""
+    import grpc
+    import sys
+    sys.path.insert(0, 'bioinformatics_service')
+    from generated import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc
+    
+    channel = grpc.insecure_channel('localhost:50054')
+    stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(channel)
+    
+    print("\n" + "=" * 60)
+    print("KEGG PATHWAY ENRICHMENT")
+    print("=" * 60)
+    
+    # Extract gene list from feature importance results
+    gene_list = []
+    
+    # Get the importances for the specified method
+    if not hasattr(feature_importance_response, 'importances'):
+        print("ERROR: Response doesn't have importances")
+        return None
+    
+    if method not in feature_importance_response.importances:
+        available_methods = list(feature_importance_response.importances.keys())
+        print(f"ERROR: Method '{method}' not found")
+        print(f"Available methods: {available_methods}")
+        if len(available_methods) > 0:
+            method = available_methods[0]
+            print(f"Using first available method: {method}")
+        else:
+            return None
+    
+    # Get the FeatureImportances object for this method
+    feature_importances = feature_importance_response.importances[method]
+    
+    # Extract scores (list of FeatureScore objects)
+    scores = list(feature_importances.scores)
+    
+    print(f"Method: {method}")
+    print(f"Total features: {len(scores)}")
+    
+    # Filter by minimum importance if specified
+    if min_importance > 0:
+        filtered_scores = [s for s in scores if s.importance >= min_importance]
+        print(f"Features above importance threshold ({min_importance}): {len(filtered_scores)}")
+    else:
+        filtered_scores = scores
+    
+    # Sort by importance (descending) - should already be sorted by rank, but just in case
+    sorted_scores = sorted(filtered_scores, key=lambda x: x.importance, reverse=True)
+    
+    # Take top N
+    top_scores = sorted_scores[:max_genes]
+    gene_list = [s.feature_name for s in top_scores]
+    
+    if len(gene_list) == 0:
+        print("ERROR: No genes passed filters")
+        print(f"Try lowering min_importance (current: {min_importance})")
+        return None
+    
+    print(f"Using top {len(gene_list)} genes for enrichment")
+    if len(top_scores) > 0:
+        print(f"Importance range: {top_scores[0].importance:.6f} to {top_scores[-1].importance:.6f}")
+    
+    print(f"\nTop 10 genes by importance:")
+    for i, score in enumerate(top_scores[:10], 1):
+        print(f"  {i}. {score.feature_name}: {score.importance:.6f} (rank {score.rank})")
+    
+    # Run KEGG enrichment
+    print(f"\nRunning KEGG enrichment...")
+    print(f"  Organism: {organism}")
+    print(f"  Number of genes: {len(gene_list)}")
+    print(f"  P-value cutoff: {pvalue_cutoff}")
+    print(f"  Q-value cutoff: {qvalue_cutoff}")
+    
+    kegg_request = bioinformatics_service_pb2.KEGGRequest(
+        analysis_id="",  # Empty - using gene_list directly
+        gene_list=gene_list,
+        organism=organism,
+        pvalue_cutoff=pvalue_cutoff,
+        qvalue_cutoff=qvalue_cutoff
+    )
+    
+    kegg_response = stub.RunKEGGEnrichment(kegg_request)
+    
+    if kegg_response.success:
+        print(f"\n✓ KEGG Enrichment Complete!")
+        print(f"  Enriched pathways: {kegg_response.results.num_pathways}")
+        
+        if kegg_response.results.num_pathways > 0:
+            print(f"\nTop Enriched KEGG Pathways:")
+            for i, pathway in enumerate(kegg_response.results.pathways[:15], 1):
+                print(f"\n{i}. {pathway.pathway_id}: {pathway.description}")
+                print(f"   P-value: {pathway.pvalue:.2e}, Adjusted p-value: {pathway.padj:.2e}")
+                print(f"   Genes in pathway: {pathway.gene_count}/{len(gene_list)}")
+                print(f"   Genes: {', '.join(pathway.genes[:5])}{'...' if len(pathway.genes) > 5 else ''}")
+            
+            print(f"\n📊 Visualization files:")
+            print(f"  {kegg_response.results.dotplot_path}")
+            print(f"  {kegg_response.results.barplot_path}")
+            if hasattr(kegg_response.results, 'conversion_path') and kegg_response.results.conversion_path:
+                print(f"  {kegg_response.results.conversion_path}")
+        else:
+            print("\n  ⚠️  No significantly enriched pathways found")
+            print("\n  Possible reasons:")
+            print("    - Gene IDs may not be in the correct format (need ENSEMBL or Gene Symbols)")
+            print("    - Not enough genes for statistical power")
+            print("    - Genes are not involved in well-characterized pathways")
+            print("\n  Suggestions:")
+            print(f"    - Relax p-value cutoff (current: {pvalue_cutoff})")
+            print(f"    - Relax q-value cutoff (current: {qvalue_cutoff})")
+            print(f"    - Include more genes (current: {len(gene_list)})")
+            print(f"    - Check gene ID conversion file for issues")
+    else:
+        print(f"\n✗ KEGG enrichment failed: {kegg_response.error_message}")
+    
+    return kegg_response
 
 def get_feature_importance(model_id, dataset_id, fi_methods, random_state):
-    '''fi_service_path = Path(__file__).parent / "feature_importance_service"
-    sys.path.insert(0, str(fi_service_path))
-    from generated import feature_importance_service_pb2, feature_importance_service_pb2_grpc'''
 
     # Use model ID WITHOUT .joblib extension
+    print("\n" + "=" * 60)
+    print("STEP 5: Get Feature Importance")
+    print("=" * 60)
 
     channel = grpc.insecure_channel('localhost:50053')
     stub = feature_importance_service_pb2_grpc.FeatureImportanceServiceStub(channel)
@@ -139,22 +249,13 @@ def get_feature_importance(model_id, dataset_id, fi_methods, random_state):
         
         print(f"Success: {response.success}")
     
-        if response.success:
-            for method, importances in response.importances.items():
-                print(f"\n{method.upper()} Feature Importance:")
-                print(f"  Metadata: {dict(importances.metadata)}")
-                print(f"  Top 10 Features:")
-                for i, score in enumerate(importances.scores[:10]):
-                    print(f"    {i+1}. {score.feature_name}: {score.importance:.6f}")
-        else:
-            print(f"Error: {response.error_message}")
         
     except grpc.RpcError as e:
         print(f"gRPC Error: {e.code()} - {e.details()}")
     except Exception as e:
         print(f"Error: {e}")
 
-
+    return response
 
 def test_health():
     """Test health endpoint"""
@@ -510,16 +611,31 @@ def main():
     get_model_info(model_id)
 
     # Step 5: Get feature importance
-    get_feature_importance(model_id, dataset_id, fi_methods, random_state) 
+    feature_importance_response = get_feature_importance(model_id, dataset_id, fi_methods, random_state) 
+    if feature_importance_response.success:
+        for method, importances in feature_importance_response.importances.items():
+            print(f"\n{method.upper()} Feature Importance:")
+            print(f"  Metadata: {dict(importances.metadata)}")
+            print(f"  Top 10 Features:")
+            for i, score in enumerate(importances.scores[:10]):
+                print(f"    {i+1}. {score.feature_name}: {score.importance:.6f}")
+    else:
+        print(f"Error: {response.error_message}")
+    
 
-    print("\n" + "=" * 60)
-    print("  - Access Swagger UI: http://localhost:8000/docs")
-    print("  - View logs: docker-compose logs -f")
-    print("  - Stop services: docker-compose down")
-    print()
 
-    # Step 6: run deseq2
-    response = run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group=factor_values[0], treatment_group=factor_values[1], padj_threshold=pvalue_threshold, log2fc_threshold=l2fc_threshold)
+    '''# Step 6: run deseq2
+    deseq2_response = run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group=factor_values[0], treatment_group=factor_values[1], padj_threshold=pvalue_threshold, log2fc_threshold=l2fc_threshold)
+
+    print("deseq2 response: ", deseq2_response)'''
+
+    # Step 7: run kegg
+    '''if not deseq2_response is None:
+    	kegg_response = run_kegg_analysis(deseq2_response, organism="mmu", pvalue_cutoff=pvalue_threshold, qvalue_cutoff=qvalue_threshold)
+    else:
+        print('skipping kegg analysis since no differentially expressed genes')'''
+
+    kegg_response = run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=pvalue_threshold, qvalue_cutoff=qvalue_threshold)
 
 if __name__ == "__main__":
     main()

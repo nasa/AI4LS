@@ -48,10 +48,15 @@ class DESeq2Analyzer:
             logger.info(f"  Comparison: {treatment_group} vs {control_group}")
             logger.info(f"  Condition column: {condition_column}")
             logger.info(f"  Genes: {count_data.shape[0]}, Samples: {count_data.shape[1]}")
+
+            logger.info(f"head of count_data.csv: {count_data.head()}")
             
             # Prepare input files
             count_matrix_path = output_dir / "count_matrix.csv"
             metadata_path = output_dir / "metadata.csv"
+
+            logger.info(f"count_matrix head: {count_data.head()}") 
+            logger.info(f"metadata head: {metadata.head()}") 
             
             count_data.to_csv(count_matrix_path)
             metadata.to_csv(metadata_path)
