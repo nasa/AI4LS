@@ -18,6 +18,10 @@ fi_service_path = Path(__file__).parent / "feature_importance_service"
 sys.path.insert(0, str(fi_service_path))
 from feature_importance_service.generated import feature_importance_service_pb2, feature_importance_service_pb2_grpc
 
+ec_service_path = Path(__file__).parent / "experiment_service"
+sys.path.insert(0, str(ec_service_path))
+from experiment_service.src.experiment_client import ExperimentClient
+
 
 BASE_URL = "http://localhost:8000"
 
@@ -68,51 +72,13 @@ def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_gr
 
         return response
 
-'''def run_kegg_analysis(response, organism="mmu", pvalue_cutoff=0.1, qvalue_cutoff=0.1):
-    # Add path
-    print("\n" + "=" * 60)
-    print("STEP 7: RUN KEGG ANALYSIS")
-    print("=" * 60)
-    # Connect to service
-    channel = grpc.insecure_channel('localhost:50054')
-    stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(channel) 
-    # Now run KEGG enrichment on these results
-    kegg_request = bioinformatics_service_pb2.KEGGRequest(
-        analysis_id=response.analysis_id,
-        #organism="mmu",  # Mouse (use "hsa" for human)
-        organism=organism,
-        pvalue_cutoff=pvalue_cutoff,
-        qvalue_cutoff=qvalue_cutoff
-    )
-        
-    kegg_response = stub.RunKEGGEnrichment(kegg_request)
-        
-    if kegg_response.success:
-        print(f"\n✓ KEGG Enrichment Complete!")
-        print(f"  Enriched pathways: {kegg_response.results.num_pathways}")
-            
-        if kegg_response.results.num_pathways > 0:
-            print(f"\nTop 10 Enriched KEGG Pathways:")
-            for pathway in kegg_response.results.pathways[:10]:
-                print(f"  {pathway.pathway_id}: {pathway.description}")
-                print(f"    P-value: {pathway.pvalue:.2e}, Gene count: {pathway.gene_count}")
-                
-            print(f"\nPlots:")
-            print(f"  Dotplot: {kegg_response.results.dotplot_path}")
-            print(f"  Barplot: {kegg_response.results.barplot_path}")
-        else:
-            print("  No significantly enriched pathways found")
-    else:
-        print(f"✗ KEGG enrichment failed: {kegg_response.error_message}")
- 
-    return kegg_response'''
 
 def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=0.05, qvalue_cutoff=0.2, max_genes=500, method="built_in", min_importance=0.0):
     """Run KEGG pathway enrichment on important features from ML model"""
     import grpc
     import sys
-    sys.path.insert(0, 'bioinformatics_service')
-    from generated import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc
+    #sys.path.insert(0, 'bioinformatics_service')
+    #from generated import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc
     
     channel = grpc.insecure_channel('localhost:50054')
     stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(channel)
@@ -121,6 +87,11 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     print("KEGG PATHWAY ENRICHMENT")
     print("=" * 60)
     
+    # Extract model_id to use as analysis_id
+    model_id = feature_importance_response.model_id
+    print(f"Model ID: {model_id}") 
+
+ 
     # Extract gene list from feature importance results
     gene_list = []
     
@@ -175,23 +146,23 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     for i, score in enumerate(top_scores[:10], 1):
         print(f"  {i}. {score.feature_name}: {score.importance:.6f} (rank {score.rank})")
     
-    # Run KEGG enrichment
+    # Run KEGG enrichment with model_id as analysis_id
     print(f"\nRunning KEGG enrichment...")
+    print(f"  Analysis ID: {model_id}")
     print(f"  Organism: {organism}")
     print(f"  Number of genes: {len(gene_list)}")
     print(f"  P-value cutoff: {pvalue_cutoff}")
     print(f"  Q-value cutoff: {qvalue_cutoff}")
     
     kegg_request = bioinformatics_service_pb2.KEGGRequest(
-        analysis_id="",  # Empty - using gene_list directly
+        analysis_id=model_id,  # ← USE MODEL_ID HERE
         gene_list=gene_list,
         organism=organism,
         pvalue_cutoff=pvalue_cutoff,
         qvalue_cutoff=qvalue_cutoff
     )
     
-    kegg_response = stub.RunKEGGEnrichment(kegg_request)
-    
+    kegg_response = stub.RunKEGGEnrichment(kegg_request) 
     if kegg_response.success:
         print(f"\n✓ KEGG Enrichment Complete!")
         print(f"  Enriched pathways: {kegg_response.results.num_pathways}")
@@ -560,11 +531,6 @@ def main():
     print(f"  min_features: {min_features}")
     print()
 
-    print("\n")
-    print("╔" + "=" * 58 + "╗")
-    print("║" + " " * 8 + "DOCKER ML PIPELINE TEST" + " " * 27 + "║")
-    print("╚" + "=" * 58 + "╝")
-    print()
 
     # Step 1: Health check
     if not test_health():
@@ -574,68 +540,127 @@ def main():
 
     time.sleep(2)
 
-    # Step 2: Get dataset (download or upload)
-    if operation == 'download':
-        dataset_id, columns = download_dataset(args)
-    elif operation == 'upload':
-        dataset_id, columns = upload_dataset(input_file, exclude_columns, cv_step)
-    else:
-        print("unknown operation: ", operation)
-        sys.exit(1)
 
-    if not dataset_id:
-        print("\n❌ Failed to load dataset")
-        return
-
-    print(f"\n✓ Dataset ready: {dataset_id}")
-
-    # Step 3: Run pipeline
-    model_id, metrics = run_pipeline(
-        dataset_id, target_column, sample_column, 
-        columns, task_type, algorithm, test_size, trans_list,
-        factor_name, factor_values,min_features, fi_methods,
-        exclude_columns, cv_step
-    )
-    if not model_id:
-        print("\n❌ Pipeline failed")
-        return
-
-    print(f"\n✓ Model trained: {model_id}")
-    if metrics:
-        if task_type == 'classification':
-            print(f"✓ Test Accuracy: {metrics.get('accuracy', 0):.4f}")
-        elif task_type == 'regression':
-            print(f"✓ Test RMSE: {metrics.get('rmse', 0):.4f}")
-
-    # Step 4: Get model info
-    get_model_info(model_id)
-
-    # Step 5: Get feature importance
-    feature_importance_response = get_feature_importance(model_id, dataset_id, fi_methods, random_state) 
-    if feature_importance_response.success:
-        for method, importances in feature_importance_response.importances.items():
-            print(f"\n{method.upper()} Feature Importance:")
-            print(f"  Metadata: {dict(importances.metadata)}")
-            print(f"  Top 10 Features:")
-            for i, score in enumerate(importances.scores[:10]):
-                print(f"    {i+1}. {score.feature_name}: {score.importance:.6f}")
-    else:
-        print(f"Error: {response.error_message}")
+    # create experiment client
+    experiment_client = ExperimentClient('localhost:50055')
     
+    # Create new experiment
+    experiment_name = f"Pipeline Run - OSD-{osd_id} - {task_type} - {algorithm}"
+    experiment_description = f"Dataset OSD-{osd_id}, Algorithm: {algorithm}, Target: {target_column}"
+    
+    metadata = {
+        "osd_id": str(osd_id),
+        "algorithm": algorithm,
+        "task_type": task_type,
+        "target_column": target_column,
+        "pattern": ",".join(patterns)
+    }
+    experiment_id = experiment_client.create_experiment(
+        name=experiment_name,
+        description=experiment_description,
+        metadata=metadata
+    )
+    
+    if not experiment_id:
+        print("Failed to create experiment")
+        return
+    
+    print("\n" + "=" * 60)
+    print(f"EXPERIMENT ID: {experiment_id}")
+    print("=" * 60)    
+     
+
+    try:
+        # Update status
+        experiment_client.update_experiment(experiment_id, status="running")
+
+        # Step 2: Get dataset (download or upload)
+        if operation == 'download':
+            dataset_id, columns = download_dataset(args)
+        elif operation == 'upload':
+            dataset_id, columns = upload_dataset(input_file, exclude_columns, cv_step)
+        else:
+            print("unknown operation: ", operation)
+            sys.exit(1)
+
+        if not dataset_id:
+            print("\n❌ Failed to load dataset")
+            return
+
+        print(f"\n✓ Dataset ready: {dataset_id}")
+
+        # Update experiment with dataset_id
+        experiment_client.update_experiment(experiment_id, dataset_id=dataset_id)
+
+        # Step 3: Run pipeline
+        model_id, metrics = run_pipeline(
+            dataset_id, target_column, sample_column, 
+            columns, task_type, algorithm, test_size, trans_list,
+            factor_name, factor_values,min_features, fi_methods,
+            exclude_columns, cv_step
+        )
+        if not model_id:
+            print("\n❌ Pipeline failed")
+            return
+
+        print(f"\n✓ Model trained: {model_id}")
+        if metrics:
+            if task_type == 'classification':
+                print(f"✓ Test Accuracy: {metrics.get('accuracy', 0):.4f}")
+            elif task_type == 'regression':
+                print(f"✓ Test RMSE: {metrics.get('rmse', 0):.4f}")
+
+        # Step 4: Get model info
+        get_model_info(model_id)
+
+        # Update experiment with model_id
+        experiment_client.update_experiment(experiment_id, model_id=model_id)
+
+        # Step 5: Get feature importance
+        feature_importance_response = get_feature_importance(model_id, dataset_id, fi_methods, random_state) 
+        if feature_importance_response.success:
+            for method, importances in feature_importance_response.importances.items():
+                print(f"\n{method.upper()} Feature Importance:")
+                print(f"  Metadata: {dict(importances.metadata)}")
+                print(f"  Top 10 Features:")
+                for i, score in enumerate(importances.scores[:10]):
+                    print(f"    {i+1}. {score.feature_name}: {score.importance:.6f}")
+        else:
+            print(f"Error: {response.error_message}")
+   
+        # Update experiment with feature_importance_id (use model_id as proxy)
+        experiment_client.update_experiment(
+            experiment_id, 
+            feature_importance_id=model_id
+        ) 
 
 
-    '''# Step 6: run deseq2
-    deseq2_response = run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group=factor_values[0], treatment_group=factor_values[1], padj_threshold=pvalue_threshold, log2fc_threshold=l2fc_threshold)
+        '''# Step 6: run deseq2
+        deseq2_response = run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group=factor_values[0], treatment_group=factor_values[1], padj_threshold=pvalue_threshold, log2fc_threshold=l2fc_threshold)
 
-    print("deseq2 response: ", deseq2_response)'''
+        print("deseq2 response: ", deseq2_response)'''
 
-    # Step 7: run kegg
-    '''if not deseq2_response is None:
-    	kegg_response = run_kegg_analysis(deseq2_response, organism="mmu", pvalue_cutoff=pvalue_threshold, qvalue_cutoff=qvalue_threshold)
-    else:
-        print('skipping kegg analysis since no differentially expressed genes')'''
+        # Step 7: run kegg
+        '''if not deseq2_response is None:
+    	    kegg_response = run_kegg_analysis(deseq2_response, organism="mmu", pvalue_cutoff=pvalue_threshold, qvalue_cutoff=qvalue_threshold)
+        else:
+            print('skipping kegg analysis since no differentially expressed genes')'''
+    
+        kegg_response = run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=pvalue_threshold, qvalue_cutoff=qvalue_threshold)
 
-    kegg_response = run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=pvalue_threshold, qvalue_cutoff=qvalue_threshold)
+        # Update experiment with kegg_analysis_id
+        organism='mmu'
+        kegg_analysis_id = f"kegg_{organism}_{model_id}"
+        experiment_client.update_experiment(
+            experiment_id,
+            kegg_analysis_id=kegg_analysis_id,
+            status="completed"
+        )
+
+    except Exception as e:
+        print(f"\n✗ Pipeline failed: {e}")
+        experiment_client.update_experiment(experiment_id, status="failed")
+        raise
 
 if __name__ == "__main__":
     main()

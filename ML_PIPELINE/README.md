@@ -144,3 +144,17 @@ python run_docker_pipeline.py   -op upload   -tt classification   -al random_for
 ```console
 ls -R results/
 ```
+
+## Check experiments that you've run
+
+1. Get list of experiments
+
+```console
+python view_experiments.py 
+```
+
+2. Check specific experiment
+
+```console
+python view_experiments.py  <experiment_id>
+``` 
