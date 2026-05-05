@@ -105,14 +105,25 @@ cd AI4LS/ML_PIPELINE
 ```console
 python run_docker_pipeline.py --operation=download --osd_id=48 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=random_forest --test_size=0.2 --trans_list=n,s,l,t --fi_methods=built_in,rfe -pv 0.9 -qv 0.9 
 ```
+4. Check the results directory for the CSV and PNG files 
+ 
+```console
+ls -R results/
+```
 
-4. Run the `run_docker_pipeline.py` script against the data in OSD-137 to do classification using the random_forest algorithm.
+5. Run the `run_docker_pipeline.py` script against the data in OSD-137 to do classification using the random_forest algorithm.
 
 ```console
 python run_docker_pipeline.py --operation=download --osd_id=137 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=random_forest --test_size=0.2 --trans_list=l,t --fi_methods=built_in,pfi,rfe --patterns=unnormalized -pv 0.9 -qv 0.9
+
+6. Check the results directory for the CSV and PNG files 
+ 
+```console
+ls -R results/
 ```
 
-## Run a regression algorithm against an uploaded data file. 
+
+## Run a classification algorithm against an uploaded data file. 
 
 1. Open another terminal window.
 
@@ -121,9 +132,15 @@ python run_docker_pipeline.py --operation=download --osd_id=137 --target_column=
 ```console
 cd AI4LS/ML_PIPELINE
 ```
+
 3. Run the `run_docker_pipeline.py` script to upload a CSV file and do classification using the random_forest algorithm.
 
 ```console
 python run_docker_pipeline.py   -op upload   -tt classification   -al random_forest -if DATA/X_hne_class_nosample_100.csv -tc "Factor Value[Spaceflight]" -ec sample -sc sample -pv 0.9 -qv 0.9 -fi built_in 
 ```
 
+4. Check the results directory for the CSV and PNG files 
+
+```console
+ls -R results/
+```

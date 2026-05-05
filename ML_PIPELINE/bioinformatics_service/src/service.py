@@ -142,21 +142,21 @@ class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsSe
                 success=False,
                 error_message=str(e)
             )
-    
+   # bioinformatics_service/src/service.py
+
     def RunKEGGEnrichment(self, request, context):
         """Run KEGG pathway enrichment analysis"""
         try:
-            logger.info(f" request in RunKEGGEnrichment: {request}")
             analysis_id = request.analysis_id
             gene_list = list(request.gene_list) if request.gene_list else []
             organism = request.organism or "mmu"
             pvalue_cutoff = request.pvalue_cutoff or 0.05
             qvalue_cutoff = request.qvalue_cutoff or 0.2
-            
+        
             logger.info(f"KEGG enrichment request")
             logger.info(f"  Analysis ID: {analysis_id}")
             logger.info(f"  Organism: {organism}")
-            
+        
             # Get gene list from DESeq2 results or use provided list
             if analysis_id and analysis_id in self.analysis_cache:
                 # Extract significant genes from DESeq2 results
@@ -169,20 +169,22 @@ class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsSe
                     success=False,
                     error_message="No gene list provided and analysis_id not found"
                 )
-            
+        
             if len(gene_list) == 0:
                 return bioinformatics_service_pb2.KEGGResponse(
                     success=False,
                     error_message="Gene list is empty"
                 )
-            
-            # Run KEGG enrichment
+        
+            # Run KEGG enrichment with analysis_id for unique directory
             results = self.kegg_analyzer.run_enrichment(
                 gene_list=gene_list,
                 organism=organism,
                 pvalue_cutoff=pvalue_cutoff,
-                qvalue_cutoff=qvalue_cutoff
+                qvalue_cutoff=qvalue_cutoff,
+                analysis_id=analysis_id  # ← PASS IT HERE
             )
+        
             
             # Convert to protobuf
             pathways = []

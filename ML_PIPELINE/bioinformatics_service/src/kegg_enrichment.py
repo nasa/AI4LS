@@ -1,4 +1,5 @@
 # bioinformatics_service/src/kegg_enrichment.py
+# bioinformatics_service/src/kegg_enrichment.py
 
 import pandas as pd
 from pathlib import Path
@@ -23,24 +24,31 @@ class KEGGEnrichmentAnalyzer:
         # Source R script ONCE at initialization
         r.source(str(self.r_script_path))
         logger.info(f"R script sourced: {self.r_script_path}")
-    
+
     def run_enrichment(
         self,
         gene_list: List[str],
         organism: str = "mmu",
         pvalue_cutoff: float = 0.05,
-        qvalue_cutoff: float = 0.2
+        qvalue_cutoff: float = 0.2,
+        analysis_id: str = None
     ) -> Dict:
         """Run KEGG pathway enrichment analysis"""
         try:
             logger.info(f"Running KEGG enrichment for {len(gene_list)} genes")
             logger.info(f"  Organism: {organism}")
+            logger.info(f"  Analysis ID: {analysis_id}")
             logger.info(f"  Gene IDs (first 5): {gene_list[:5]}")
-            
-            # Create output directory
-            output_dir = self.output_base_path / f"kegg_{organism}"
+        
+            # Create output directory with analysis_id if provided
+            if analysis_id:
+                output_dir = self.output_base_path / f"kegg_{organism}_{analysis_id}"
+            else:
+                output_dir = self.output_base_path / f"kegg_{organism}"
+        
             output_dir.mkdir(parents=True, exist_ok=True)
-            
+            logger.info(f"Output directory: {output_dir}")
+        
             # Save gene list
             gene_list_path = output_dir / "gene_list.csv"
             pd.DataFrame({"gene_id": gene_list}).to_csv(gene_list_path, index=False)
@@ -48,15 +56,37 @@ class KEGGEnrichmentAnalyzer:
             # Get the function from R global environment
             run_kegg_func = ro.globalenv['run_kegg_enrichment']
             
-            # Call R function with localconverter
-            num_pathways = run_kegg_func(
-                str(gene_list_path),
-                organism,
-                str(output_dir),
-                pvalue_cutoff,
-                qvalue_cutoff
-            )[0]
+            # Convert parameters to R objects explicitly
+            from rpy2.robjects import StrVector, FloatVector
             
+            r_gene_list_path = str(gene_list_path)
+            r_organism = str(organism)
+            r_output_dir = str(output_dir)
+            r_pvalue = float(pvalue_cutoff)
+            r_qvalue = float(qvalue_cutoff)
+            
+            # Call R function with localconverter
+            with localconverter(pandas2ri.converter):
+                '''num_pathways = run_kegg_func(
+                    r_gene_list_path,
+                    r_organism,
+                    r_output_dir,
+                    r_pvalue,
+                    r_qvalue
+                )[0]'''
+
+            # Use r() to call the function with string interpolation
+            r_code = f'''
+            run_kegg_enrichment(
+                "{str(gene_list_path)}",
+                "{str(organism)}",
+                "{str(output_dir)}",
+                {float(pvalue_cutoff)},
+                {float(qvalue_cutoff)}
+            )
+            '''
+            num_pathways = r(r_code)[0]            
+
             # Load gene conversion results
             conversion_file = output_dir / "gene_id_conversion.csv"
             if conversion_file.exists():
