@@ -1,4 +1,4 @@
-# bioinformatics_service/src/server.py
+# src/server.py
 
 import grpc
 from concurrent import futures
@@ -13,13 +13,12 @@ logger = logging.getLogger(__name__)
 
 def serve():
     """Start the gRPC server"""
-    # Get data service URL from environment
-    data_service_url = os.environ.get('DATA_SERVICE_URL', 'data_service:50051')
+    results_path = os.environ.get('RESULTS_PATH', '/app/results')
     
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     
     bioinformatics_service_pb2_grpc.add_BioinformaticsServiceServicer_to_server(
-        BioinformaticsServiceImpl(data_service_url=data_service_url),
+        BioinformaticsServiceImpl(results_path=results_path),
         server
     )
     
@@ -28,7 +27,7 @@ def serve():
     server.start()
     
     logger.info(f"Bioinformatics Service started on port {port}")
-    logger.info(f"Connecting to Data Service at: {data_service_url}")
+    logger.info(f"Results path: {results_path}")
     server.wait_for_termination()
 
 if __name__ == "__main__":

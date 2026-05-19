@@ -73,12 +73,13 @@ def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_gr
         return response
 
 
-def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=0.05, qvalue_cutoff=0.2, max_genes=500, method="built_in", min_importance=0.0):
+def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=0.05, qvalue_cutoff=0.2, 
+                     max_genes=500, method=None, min_importance=0.0):  # ← method is now optional
     """Run KEGG pathway enrichment on important features from ML model"""
     import grpc
     import sys
-    #sys.path.insert(0, 'bioinformatics_service')
-    #from generated import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc
+    sys.path.insert(0, 'bioinformatics_service')
+    from generated import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc
     
     channel = grpc.insecure_channel('localhost:50054')
     stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(channel)
@@ -89,26 +90,28 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     
     # Extract model_id to use as analysis_id
     model_id = feature_importance_response.model_id
-    print(f"Model ID: {model_id}") 
-
- 
-    # Extract gene list from feature importance results
-    gene_list = []
+    print(f"Model ID: {model_id}")
     
-    # Get the importances for the specified method
+    # Get available methods
     if not hasattr(feature_importance_response, 'importances'):
         print("ERROR: Response doesn't have importances")
         return None
     
-    if method not in feature_importance_response.importances:
-        available_methods = list(feature_importance_response.importances.keys())
+    available_methods = list(feature_importance_response.importances.keys())
+    print(f"Available methods: {available_methods}")
+    
+    if len(available_methods) == 0:
+        print("ERROR: No feature importance methods computed")
+        return None
+    
+    # Use specified method or first available
+    if method is None:
+        method = available_methods[0]
+        print(f"No method specified, using: {method}")
+    elif method not in available_methods:
         print(f"ERROR: Method '{method}' not found")
-        print(f"Available methods: {available_methods}")
-        if len(available_methods) > 0:
-            method = available_methods[0]
-            print(f"Using first available method: {method}")
-        else:
-            return None
+        print(f"Using first available method: {available_methods[0]}")
+        method = available_methods[0]
     
     # Get the FeatureImportances object for this method
     feature_importances = feature_importance_response.importances[method]
@@ -116,7 +119,7 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     # Extract scores (list of FeatureScore objects)
     scores = list(feature_importances.scores)
     
-    print(f"Method: {method}")
+    print(f"\nMethod: {method}")
     print(f"Total features: {len(scores)}")
     
     # Filter by minimum importance if specified
@@ -126,7 +129,7 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     else:
         filtered_scores = scores
     
-    # Sort by importance (descending) - should already be sorted by rank, but just in case
+    # Sort by importance (descending)
     sorted_scores = sorted(filtered_scores, key=lambda x: x.importance, reverse=True)
     
     # Take top N
@@ -146,7 +149,7 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     for i, score in enumerate(top_scores[:10], 1):
         print(f"  {i}. {score.feature_name}: {score.importance:.6f} (rank {score.rank})")
     
-    # Run KEGG enrichment with model_id as analysis_id
+    # Run KEGG enrichment
     print(f"\nRunning KEGG enrichment...")
     print(f"  Analysis ID: {model_id}")
     print(f"  Organism: {organism}")
@@ -155,14 +158,15 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     print(f"  Q-value cutoff: {qvalue_cutoff}")
     
     kegg_request = bioinformatics_service_pb2.KEGGRequest(
-        analysis_id=model_id,  # ← USE MODEL_ID HERE
+        analysis_id=model_id,
         gene_list=gene_list,
         organism=organism,
         pvalue_cutoff=pvalue_cutoff,
         qvalue_cutoff=qvalue_cutoff
     )
     
-    kegg_response = stub.RunKEGGEnrichment(kegg_request) 
+    kegg_response = stub.RunKEGGEnrichment(kegg_request)
+    
     if kegg_response.success:
         print(f"\n✓ KEGG Enrichment Complete!")
         print(f"  Enriched pathways: {kegg_response.results.num_pathways}")
@@ -190,42 +194,76 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
             print(f"    - Relax p-value cutoff (current: {pvalue_cutoff})")
             print(f"    - Relax q-value cutoff (current: {qvalue_cutoff})")
             print(f"    - Include more genes (current: {len(gene_list)})")
-            print(f"    - Check gene ID conversion file for issues")
     else:
         print(f"\n✗ KEGG enrichment failed: {kegg_response.error_message}")
     
     return kegg_response
 
-def get_feature_importance(model_id, dataset_id, fi_methods, random_state):
+def compute_feature_importance(model_id, dataset_id, methods=['built_in']):
+    """Compute feature importance for a trained model"""
+    import grpc
+    import sys
 
-    # Use model ID WITHOUT .joblib extension
-    print("\n" + "=" * 60)
-    print("STEP 5: Get Feature Importance")
-    print("=" * 60)
-
+    # Import ModelStore to get feature count
+    ml_service_path = Path(__file__).parent / "ml_service"
+    sys.path.insert(0, str(ml_service_path))
+    from ml_service.generated import ml_service_pb2, ml_service_pb2_grpc
+    from src.model_store import ModelStore  # ← ADD THIS
+    
     channel = grpc.insecure_channel('localhost:50053')
     stub = feature_importance_service_pb2_grpc.FeatureImportanceServiceStub(channel)
+    
+    print("\n" + "=" * 60)
+    print("STEP 5: COMPUTE FEATURE IMPORTANCE")
+    print("=" * 60)
+    
+    print(f"Computing feature importance for model: {model_id}")
+    print(f"Methods: {methods}")
+    
+    # Set default parameters for each method
+    params = {}
+    
+    if 'permutation' in methods:
+        params['n_repeats'] = '10'
+        params['random_state'] = '42'
 
+    if 'recursive' in methods:
+        # Get number of features to calculate better defaults
+        model_store = ModelStore(base_path="./models")
+        model_info = model_store.get_model_info(model_id)
+        num_features = len(model_info.get('feature_columns', []))
+        step = max(1, num_features // 10)
+        n_features_to_select = min(100, max(10, num_features // 10))
+        params['step'] = str(step)
+        params['n_features_to_select'] = str(n_features_to_select)
+    
     request = feature_importance_service_pb2.ImportanceRequest(
         model_id=model_id,
         dataset_id=dataset_id,
-        methods=fi_methods,
-        params={"n_repeats": "5", "random_state": str(random_state)}
-    )
-
-    print(f"Computing feature importance for model: {model_id}")
-
-    try:
-        response = stub.ComputeImportance(request)
-        
-        print(f"Success: {response.success}")
+        methods=methods,
+        params=params
+    ) 
+    response = stub.ComputeImportance(request)
     
+    print(f"Success: {response.success}")
+    
+    if response.success:
+        print(f"Computed importance using methods: {list(response.importances.keys())}")
         
-    except grpc.RpcError as e:
-        print(f"gRPC Error: {e.code()} - {e.details()}")
-    except Exception as e:
-        print(f"Error: {e}")
-
+        # Show summary for each method
+        for method_name, importances in response.importances.items():
+            num_features = len(importances.scores)
+            print(f"\n{method_name.upper()}:")
+            print(f"  Total features: {num_features}")
+            
+            if num_features > 0:
+                top_5 = list(importances.scores)[:5]
+                print(f"  Top 5 features:")
+                for i, score in enumerate(top_5, 1):
+                    print(f"    {i}. {score.feature_name}: {score.importance:.6f}")
+    else:
+        print(f"Error: {response.error_message}")
+    
     return response
 
 def test_health():
@@ -473,12 +511,42 @@ def main():
     parser.add_argument('-mf', '--min_features', help='minimum number of features to keep after CVS dimensionality reduction', default=1000, required=False)
     parser.add_argument('-fi', '--fi_methods', help='list of feature importance methods to use', type=list_of_strings, default=['recursive', 'permutation', 'built_in'] , required=False)
     parser.add_argument('-rs', '--random_state', help='random state(seed)', type=int, default=42, required=False)
+    parser.add_argument('-de', '--dgea', help='do DGEA', type=bool, default=False, required=False)
     parser.add_argument('-pv', '--pvalue_threshold', help='pvalue cutoff', type=float, default=0.1, required=False)
     parser.add_argument('-qv', '--qvalue_threshold', help='FDR cutoff', type=float, default=0.1, required=False)
     parser.add_argument('-fc', '--l2fc_threshold', help='log2 fold change', type=float, default=0.0, required=False)
+    parser.add_argument('-ka', '--kegg_analysis', help='do kegg analysis', type=bool, default=False, required=False)
 
-    
+
     args = parser.parse_args()
+
+
+    # Map short names to full method names
+    METHOD_ALIASES = {
+        'bi': 'built_in',
+        'builtin': 'built_in',
+        'built_in': 'built_in',
+        'pfi': 'permutation',
+        'permutation': 'permutation',
+        'rfe': 'recursive',
+        'recursive': 'recursive'
+    }
+
+    # Parse feature importance methods
+    fi_methods_input = list(args.fi_methods)
+    fi_methods = []
+    for method in fi_methods_input:
+        method_lower = method.strip().lower()
+        if method_lower in METHOD_ALIASES:
+            fi_methods.append(METHOD_ALIASES[method_lower])
+        else:
+            print(f"WARNING: Unknown feature importance method '{method}', skipping")
+
+    if not fi_methods:
+        fi_methods = []
+
+    print(f"Feature importance methods: {fi_methods}")
+    
 
     operation = args.operation
     osd_id        = args.osd_id 
@@ -495,7 +563,9 @@ def main():
     factor_name = args.factor_name
     factor_values = args.factor_values
     min_features = args.min_features
-    fi_methods = list(args.fi_methods)
+    do_kegg_analysis = bool(args.kegg_analysis)
+    dgea = bool(args.dgea)
+
     random_state = int(args.random_state)
     pvalue_threshold = float(args.pvalue_threshold) 
     qvalue_threshold = float(args.qvalue_threshold) 
@@ -518,6 +588,8 @@ def main():
         if target_column is None:
             target_column = factor_name
             print(f"  ℹ️  Using factor_name as target_column: {target_column}")
+
+
     # Add after argument parsing
     print(f"DEBUG - Arguments:")
     print(f"  operation: {operation}")
@@ -616,46 +688,33 @@ def main():
         # Update experiment with model_id
         experiment_client.update_experiment(experiment_id, model_id=model_id)
 
-        # Step 5: Get feature importance
-        feature_importance_response = get_feature_importance(model_id, dataset_id, fi_methods, random_state) 
-        if feature_importance_response.success:
-            for method, importances in feature_importance_response.importances.items():
-                print(f"\n{method.upper()} Feature Importance:")
-                print(f"  Metadata: {dict(importances.metadata)}")
-                print(f"  Top 10 Features:")
-                for i, score in enumerate(importances.scores[:10]):
-                    print(f"    {i+1}. {score.feature_name}: {score.importance:.6f}")
-        else:
-            print(f"Error: {response.error_message}")
-   
-        # Update experiment with feature_importance_id (use model_id as proxy)
-        experiment_client.update_experiment(
-            experiment_id, 
-            feature_importance_id=model_id
-        ) 
-
-
-        '''# Step 6: run deseq2
-        deseq2_response = run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group=factor_values[0], treatment_group=factor_values[1], padj_threshold=pvalue_threshold, log2fc_threshold=l2fc_threshold)
-
-        print("deseq2 response: ", deseq2_response)'''
-
-        # Step 7: run kegg
-        '''if not deseq2_response is None:
-    	    kegg_response = run_kegg_analysis(deseq2_response, organism="mmu", pvalue_cutoff=pvalue_threshold, qvalue_cutoff=qvalue_threshold)
-        else:
-            print('skipping kegg analysis since no differentially expressed genes')'''
+        # Step 5: Feature Importance
+        #if do_feature_importance:
+        if len(fi_methods) != 0:
+            feature_importance_response = compute_feature_importance(
+                model_id=model_id,
+                dataset_id=dataset_id,
+                methods=fi_methods  # ← Pass the parsed methods
+            )
+        
+            if feature_importance_response:
+                experiment_client.update_experiment(
+                    experiment_id,
+                    feature_importance_id=model_id
+                )
     
-        kegg_response = run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=pvalue_threshold, qvalue_cutoff=qvalue_threshold)
+        # Step 6: KEGG Analysis
+        if do_kegg_analysis and feature_importance_response:
+            kegg_response = run_kegg_analysis(
+                feature_importance_response,
+                organism=organism,
+                pvalue_cutoff=pvalue_threshold,
+                qvalue_cutoff=qvalue_threshold,
+                max_genes=500,
+                method=None,  # ← Auto-select first available method
+                min_importance=0.0
+            )
 
-        # Update experiment with kegg_analysis_id
-        organism='mmu'
-        kegg_analysis_id = f"kegg_{organism}_{model_id}"
-        experiment_client.update_experiment(
-            experiment_id,
-            kegg_analysis_id=kegg_analysis_id,
-            status="completed"
-        )
 
     except Exception as e:
         print(f"\n✗ Pipeline failed: {e}")

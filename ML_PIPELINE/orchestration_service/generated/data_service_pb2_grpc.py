@@ -14,79 +14,106 @@ class DataServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.HealthCheck = channel.unary_unary(
+                '/data.DataService/HealthCheck',
+                request_serializer=data__service__pb2.HealthCheckRequest.SerializeToString,
+                response_deserializer=data__service__pb2.HealthCheckResponse.FromString,
+                _registered_method=True)
+        self.ValidateDataset = channel.unary_unary(
+                '/data.DataService/ValidateDataset',
+                request_serializer=data__service__pb2.ValidationRequest.SerializeToString,
+                response_deserializer=data__service__pb2.ValidationResult.FromString,
+                _registered_method=True)
+        self.DownloadDataset = channel.unary_unary(
+                '/data.DataService/DownloadDataset',
+                request_serializer=data__service__pb2.DownloadRequest.SerializeToString,
+                response_deserializer=data__service__pb2.ValidationResult.FromString,
+                _registered_method=True)
         self.UploadDataset = channel.unary_unary(
-                '/dataservice.DataService/UploadDataset',
+                '/data.DataService/UploadDataset',
                 request_serializer=data__service__pb2.UploadRequest.SerializeToString,
                 response_deserializer=data__service__pb2.ValidationResult.FromString,
                 _registered_method=True)
-        self.ValidateDataset = channel.unary_unary(
-                '/dataservice.DataService/ValidateDataset',
-                request_serializer=data__service__pb2.ValidateRequest.SerializeToString,
-                response_deserializer=data__service__pb2.ValidationResult.FromString,
-                _registered_method=True)
         self.ApplyTransformation = channel.unary_unary(
-                '/dataservice.DataService/ApplyTransformation',
-                request_serializer=data__service__pb2.TransformRequest.SerializeToString,
+                '/data.DataService/ApplyTransformation',
+                request_serializer=data__service__pb2.ApplyTransformationRequest.SerializeToString,
                 response_deserializer=data__service__pb2.TransformationResult.FromString,
                 _registered_method=True)
+        self.TransformDataset = channel.unary_unary(
+                '/data.DataService/TransformDataset',
+                request_serializer=data__service__pb2.TransformRequest.SerializeToString,
+                response_deserializer=data__service__pb2.TransformResponse.FromString,
+                _registered_method=True)
+        self.GetDataset = channel.unary_stream(
+                '/data.DataService/GetDataset',
+                request_serializer=data__service__pb2.GetDatasetRequest.SerializeToString,
+                response_deserializer=data__service__pb2.DataChunk.FromString,
+                _registered_method=True)
         self.StreamDataset = channel.unary_stream(
-                '/dataservice.DataService/StreamDataset',
-                request_serializer=data__service__pb2.StreamRequest.SerializeToString,
+                '/data.DataService/StreamDataset',
+                request_serializer=data__service__pb2.StreamDatasetRequest.SerializeToString,
                 response_deserializer=data__service__pb2.DataChunk.FromString,
                 _registered_method=True)
         self.GetDatasetInfo = channel.unary_unary(
-                '/dataservice.DataService/GetDatasetInfo',
-                request_serializer=data__service__pb2.DatasetInfoRequest.SerializeToString,
+                '/data.DataService/GetDatasetInfo',
+                request_serializer=data__service__pb2.GetDatasetInfoRequest.SerializeToString,
                 response_deserializer=data__service__pb2.DatasetInfo.FromString,
-                _registered_method=True)
-        self.DownloadDataset = channel.unary_unary(
-                '/dataservice.DataService/DownloadDataset',
-                request_serializer=data__service__pb2.DownloadRequest.SerializeToString,
-                response_deserializer=data__service__pb2.ValidationResult.FromString,
                 _registered_method=True)
 
 
 class DataServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def UploadDataset(self, request, context):
-        """Upload and store a dataset from raw bytes
-        """
+    def HealthCheck(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ValidateDataset(self, request, context):
-        """Validate dataset structure and quality (kept for backwards compatibility)
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def ApplyTransformation(self, request, context):
-        """Apply transformations to dataset
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def StreamDataset(self, request, context):
-        """Stream large datasets in chunks
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetDatasetInfo(self, request, context):
-        """Get dataset metadata
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def DownloadDataset(self, request, context):
-        """Download a dataset from NASA OSDR by dataset ID
-        """
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UploadDataset(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ApplyTransformation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def TransformDataset(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetDataset(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamDataset(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetDatasetInfo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -94,41 +121,56 @@ class DataServiceServicer(object):
 
 def add_DataServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'UploadDataset': grpc.unary_unary_rpc_method_handler(
-                    servicer.UploadDataset,
-                    request_deserializer=data__service__pb2.UploadRequest.FromString,
-                    response_serializer=data__service__pb2.ValidationResult.SerializeToString,
+            'HealthCheck': grpc.unary_unary_rpc_method_handler(
+                    servicer.HealthCheck,
+                    request_deserializer=data__service__pb2.HealthCheckRequest.FromString,
+                    response_serializer=data__service__pb2.HealthCheckResponse.SerializeToString,
             ),
             'ValidateDataset': grpc.unary_unary_rpc_method_handler(
                     servicer.ValidateDataset,
-                    request_deserializer=data__service__pb2.ValidateRequest.FromString,
+                    request_deserializer=data__service__pb2.ValidationRequest.FromString,
                     response_serializer=data__service__pb2.ValidationResult.SerializeToString,
-            ),
-            'ApplyTransformation': grpc.unary_unary_rpc_method_handler(
-                    servicer.ApplyTransformation,
-                    request_deserializer=data__service__pb2.TransformRequest.FromString,
-                    response_serializer=data__service__pb2.TransformationResult.SerializeToString,
-            ),
-            'StreamDataset': grpc.unary_stream_rpc_method_handler(
-                    servicer.StreamDataset,
-                    request_deserializer=data__service__pb2.StreamRequest.FromString,
-                    response_serializer=data__service__pb2.DataChunk.SerializeToString,
-            ),
-            'GetDatasetInfo': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetDatasetInfo,
-                    request_deserializer=data__service__pb2.DatasetInfoRequest.FromString,
-                    response_serializer=data__service__pb2.DatasetInfo.SerializeToString,
             ),
             'DownloadDataset': grpc.unary_unary_rpc_method_handler(
                     servicer.DownloadDataset,
                     request_deserializer=data__service__pb2.DownloadRequest.FromString,
                     response_serializer=data__service__pb2.ValidationResult.SerializeToString,
             ),
+            'UploadDataset': grpc.unary_unary_rpc_method_handler(
+                    servicer.UploadDataset,
+                    request_deserializer=data__service__pb2.UploadRequest.FromString,
+                    response_serializer=data__service__pb2.ValidationResult.SerializeToString,
+            ),
+            'ApplyTransformation': grpc.unary_unary_rpc_method_handler(
+                    servicer.ApplyTransformation,
+                    request_deserializer=data__service__pb2.ApplyTransformationRequest.FromString,
+                    response_serializer=data__service__pb2.TransformationResult.SerializeToString,
+            ),
+            'TransformDataset': grpc.unary_unary_rpc_method_handler(
+                    servicer.TransformDataset,
+                    request_deserializer=data__service__pb2.TransformRequest.FromString,
+                    response_serializer=data__service__pb2.TransformResponse.SerializeToString,
+            ),
+            'GetDataset': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetDataset,
+                    request_deserializer=data__service__pb2.GetDatasetRequest.FromString,
+                    response_serializer=data__service__pb2.DataChunk.SerializeToString,
+            ),
+            'StreamDataset': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamDataset,
+                    request_deserializer=data__service__pb2.StreamDatasetRequest.FromString,
+                    response_serializer=data__service__pb2.DataChunk.SerializeToString,
+            ),
+            'GetDatasetInfo': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetDatasetInfo,
+                    request_deserializer=data__service__pb2.GetDatasetInfoRequest.FromString,
+                    response_serializer=data__service__pb2.DatasetInfo.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'dataservice.DataService', rpc_method_handlers)
+            'data.DataService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('dataservice.DataService', rpc_method_handlers)
+    server.add_registered_method_handlers('data.DataService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
@@ -136,7 +178,7 @@ class DataService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def UploadDataset(request,
+    def HealthCheck(request,
             target,
             options=(),
             channel_credentials=None,
@@ -149,9 +191,9 @@ class DataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/dataservice.DataService/UploadDataset',
-            data__service__pb2.UploadRequest.SerializeToString,
-            data__service__pb2.ValidationResult.FromString,
+            '/data.DataService/HealthCheck',
+            data__service__pb2.HealthCheckRequest.SerializeToString,
+            data__service__pb2.HealthCheckResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -176,8 +218,62 @@ class DataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/dataservice.DataService/ValidateDataset',
-            data__service__pb2.ValidateRequest.SerializeToString,
+            '/data.DataService/ValidateDataset',
+            data__service__pb2.ValidationRequest.SerializeToString,
+            data__service__pb2.ValidationResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DownloadDataset(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.DataService/DownloadDataset',
+            data__service__pb2.DownloadRequest.SerializeToString,
+            data__service__pb2.ValidationResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UploadDataset(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.DataService/UploadDataset',
+            data__service__pb2.UploadRequest.SerializeToString,
             data__service__pb2.ValidationResult.FromString,
             options,
             channel_credentials,
@@ -203,9 +299,63 @@ class DataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/dataservice.DataService/ApplyTransformation',
-            data__service__pb2.TransformRequest.SerializeToString,
+            '/data.DataService/ApplyTransformation',
+            data__service__pb2.ApplyTransformationRequest.SerializeToString,
             data__service__pb2.TransformationResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def TransformDataset(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.DataService/TransformDataset',
+            data__service__pb2.TransformRequest.SerializeToString,
+            data__service__pb2.TransformResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetDataset(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/data.DataService/GetDataset',
+            data__service__pb2.GetDatasetRequest.SerializeToString,
+            data__service__pb2.DataChunk.FromString,
             options,
             channel_credentials,
             insecure,
@@ -230,8 +380,8 @@ class DataService(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/dataservice.DataService/StreamDataset',
-            data__service__pb2.StreamRequest.SerializeToString,
+            '/data.DataService/StreamDataset',
+            data__service__pb2.StreamDatasetRequest.SerializeToString,
             data__service__pb2.DataChunk.FromString,
             options,
             channel_credentials,
@@ -257,36 +407,9 @@ class DataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/dataservice.DataService/GetDatasetInfo',
-            data__service__pb2.DatasetInfoRequest.SerializeToString,
+            '/data.DataService/GetDatasetInfo',
+            data__service__pb2.GetDatasetInfoRequest.SerializeToString,
             data__service__pb2.DatasetInfo.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def DownloadDataset(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/dataservice.DataService/DownloadDataset',
-            data__service__pb2.DownloadRequest.SerializeToString,
-            data__service__pb2.ValidationResult.FromString,
             options,
             channel_credentials,
             insecure,

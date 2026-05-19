@@ -2,6 +2,25 @@
 #version: '3.8'
 
 services:
+  
+  experiment_service:
+    build:
+      context: ./experiment_service
+      dockerfile: Dockerfile
+    container_name: ml-pipeline-experiment
+    ports:
+      - "50055:50055"
+    volumes:
+      - ./experiments:/app/experiments  # Persistent storage for experiments
+    networks:
+      - ml-pipeline-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   bioinformatics_service:
     build:
       context: ./bioinformatics_service
