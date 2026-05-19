@@ -34,6 +34,10 @@ RUN mkdir -p generated && \
         ./proto/data_service.proto && \
     sed -i 's/^import data_service_pb2/from . import data_service_pb2/' generated/data_service_pb2_grpc.py
 
+# Copy data_service proto files (they'll be copied from host)
+#COPY generated/data_service_pb2.py ./generated/
+#COPY generated/data_service_pb2_grpc.py ./generated/
+
 # Set PYTHONPATH
 ENV PYTHONPATH=/app
 

@@ -15,7 +15,7 @@ else
 fi
 
 docker system prune -f
-docker-compose build $svc 
+docker-compose build --no-cache $svc 
 docker-compose up -d $svc
 
 # rm -rf ~/Library/Containers/com.docker.docker/Data/vms/0/

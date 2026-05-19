@@ -80,6 +80,14 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
             )
             
             # Prepare data
+            # remove sample column
+            logger.info(f"head of df in ml: {df.head()}")
+            #df = df.drop(columns=['sample']) 
+            #logger.info(f"head of df after sample: {df.head()}")
+            #logger.info(f"column list of df.columns : {list(df.columns)}")
+            logger.info(f"target col: {request.target_column}") 
+            logger.info(f"Target values (no index): {df[request.target_column].values}")
+
             X_train, y_train, X_test, y_test = ModelTrainer.prepare_data(
                 df,
                 request.target_column,
@@ -87,6 +95,9 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 request.test_size or 0.2,
                 request.random_state or 42
             )
+
+            logger.info(f"here is y_train: {y_train}")
+            logger.info(f"here is y_test: {y_test}")
             
             yield ml_service_pb2.TrainingProgress(
                 model_id=model_id,
