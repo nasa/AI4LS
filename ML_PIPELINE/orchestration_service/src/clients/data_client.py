@@ -1,8 +1,17 @@
 # orchestration-service/src/clients/data_client.py
 import grpc
 from typing import List, Dict, Optional
-from generated import data_service_pb2, data_service_pb2_grpc
 import logging
+import sys
+from pathlib import Path
+
+#from generated import data_service_pb2, data_service_pb2_grpc
+# Add parent directory (orchestration_service) to path
+_orchestration_path = Path(__file__).resolve().parent.parent.parent
+if str(_orchestration_path) not in sys.path:
+    sys.path.insert(0, str(_orchestration_path))
+
+from generated import data_service_pb2, data_service_pb2_grpc
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +125,32 @@ class DataServiceClient:
             return self._validation_result_to_dict(response)
         except grpc.RpcError as e:
             logger.error(f"gRPC error in download_dataset: {e.code()} - {e.details()}")
+            raise
+
+    def filter_dataset(self, dataset_id: str, cv_step: float = 0.25, min_features: int = 1000) -> Dict:
+        """Filter dataset with CV filtering (no transformations)"""
+        try:
+            request = data_service_pb2.FilterRequest(
+                dataset_id=dataset_id,
+                cv_step=cv_step,
+                min_features=min_features
+            )
+        
+            response = self.stub.FilterDataset(request)
+        
+            return {
+                "success": response.success,
+                "filtered_dataset_id": response.filtered_dataset_id if response.success else None,
+                "error_message": response.error_message if not response.success else None,
+                "dataset_info": {
+                    "dataset_id": response.dataset_info.dataset_id,
+                    "num_rows": response.dataset_info.num_rows,
+                    "num_columns": response.dataset_info.num_columns,
+                    "size_bytes": response.dataset_info.size_bytes
+                } if response.success else None
+            }
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error in filter_dataset: {e.code()} - {e.details()}")
             raise
 
     def apply_transformations(self, dataset_id: str,

@@ -40,6 +40,7 @@ class DESeq2Analysis:
             logger.info(f"Running DESeq2 analysis")
             logger.info(f"  Dataset: {dataset_id}")
             logger.info(f"  Comparison: {treatment_group} vs {control_group}")
+            logger.info(f"  using padj: {padj_threshold} and l2fc: {log2fc_threshold}")
             
             # Create output directory
             analysis_id = f"deseq2_{dataset_id}"
@@ -54,51 +55,90 @@ class DESeq2Analysis:
             df = pd.read_parquet(dataset_path)
             logger.info(f"Loaded dataset: {df.shape}")
             
-            # Save as CSV for R (genes as rows, samples as columns)
+            # Step 1: Extract condition column
+            condition_cols = [col for col in df.columns if 'Factor' in col or 'Condition' in col]
+            if not condition_cols:
+                raise ValueError("No condition column found in dataset")
+            
+            condition_col_name = condition_cols[0]
+            conditions = df[condition_col_name].copy()
+            logger.info(f"Found condition column: {condition_col_name}")
+            logger.info(f"Condition values: {conditions.value_counts().to_dict()}")
+            
+            # Step 2: Drop condition column
+            df = df.drop(columns=condition_cols)
+            logger.info(f"After dropping condition: {df.shape}")
+            
+            # Step 3: Transpose to genes × samples (DESeq2 expects genes as rows)
+            df = df.T
+            logger.info(f"After transpose: {df.shape} (genes × samples)")
+            
+            # Step 4: Save count matrix (genes × samples, NO condition column)
             count_matrix_path = output_dir / "count_matrix.csv"
             df.to_csv(count_matrix_path)
+            logger.info(f"Saved count matrix to {count_matrix_path}")
             
-            # Call R function
-            with localconverter(pandas2ri.converter):
-                r_code = f'''
-                run_deseq2(
-                    "{str(count_matrix_path)}",
-                    "{condition_column}",
-                    "{control_group}",
-                    "{treatment_group}",
-                    "{str(output_dir)}",
-                    {float(padj_threshold)},
-                    {float(log2fc_threshold)}
-                )
-                '''
-                result = ro.r(r_code)
+            # Step 5: Save condition metadata with sample names
+            condition_df = pd.DataFrame({
+                'sample': conditions.index,
+                'condition': conditions.values
+            })
+            condition_path = output_dir / "condition_metadata.csv"
+            condition_df.to_csv(condition_path, index=False)
+            logger.info(f"Saved condition metadata to {condition_path}")
+            logger.info(f"  Samples: {list(condition_df['sample'])}")
+            logger.info(f"  Conditions: {list(condition_df['condition'])}")
             
-            # Extract results
-            num_genes = int(result.rx2('num_genes')[0])
-            num_significant = int(result.rx2('num_significant')[0])
-            num_upregulated = int(result.rx2('num_upregulated')[0])
-            num_downregulated = int(result.rx2('num_downregulated')[0])
+            # Step 6: Call R function with condition file path
+            r_code = f'''
+result <- run_deseq2(
+    "{str(count_matrix_path)}",
+    "{str(condition_path)}",
+    "{control_group}",
+    "{treatment_group}",
+    "{str(output_dir)}",
+    {float(padj_threshold)},
+    {float(log2fc_threshold)}
+)
+# Return just numeric values as a vector
+c(result$num_genes, result$num_significant, result$num_upregulated, result$num_downregulated)
+            '''
             
-            # Load differential genes
+            # Execute R code and get numeric vector
+            result_vec = ro.r(r_code)
+            
+            # Extract values from the vector
+            num_genes = int(result_vec[0])
+            num_significant = int(result_vec[1])
+            num_upregulated = int(result_vec[2])
+            num_downregulated = int(result_vec[3])
+            
+            logger.info(f"DESeq2 results: {num_genes} genes, {num_significant} significant")
+            
+            # Load differential genes from the CSV file R created
             results_file = output_dir / "deseq2_all_results.csv"
-            results_df = pd.read_csv(results_file, index_col=0)
-            
-            # Filter significant genes
-            sig_genes = results_df[
-                (results_df['padj'] < padj_threshold) & 
-                (abs(results_df['log2FoldChange']) > log2fc_threshold)
-            ].sort_values('padj')
-            
-            differential_genes = []
-            for idx, (gene_id, row) in enumerate(sig_genes.iterrows(), 1):
-                differential_genes.append({
-                    "gene_id": gene_id,
-                    "log2_fold_change": float(row['log2FoldChange']),
-                    "pvalue": float(row['pvalue']) if not pd.isna(row['pvalue']) else 1.0,
-                    "padj": float(row['padj']) if not pd.isna(row['padj']) else 1.0,
-                    "base_mean": float(row['baseMean']),
-                    "rank": idx
-                })
+            if not results_file.exists():
+                logger.error(f"Results file not found: {results_file}")
+                differential_genes = []
+            else:
+                results_df = pd.read_csv(results_file, index_col=0)
+                
+                # Filter significant genes
+                sig_genes = results_df[
+                    (results_df['padj'] < padj_threshold) & 
+                    (abs(results_df['log2FoldChange']) > log2fc_threshold)
+                ].sort_values('padj')
+                
+                differential_genes = []
+                for idx, (gene_id, row) in enumerate(sig_genes.iterrows(), 1):
+                    differential_genes.append({
+                        "gene_id": gene_id,
+                        "log2_fold_change": float(row['log2FoldChange']),
+                        "pvalue": float(row['pvalue']) if not pd.isna(row['pvalue']) else 1.0,
+                        "padj": float(row['padj']) if not pd.isna(row['padj']) else 1.0,
+                        "base_mean": float(row['baseMean']),
+                        "rank": idx
+                    })
             
             results = {
                 "analysis_id": analysis_id,

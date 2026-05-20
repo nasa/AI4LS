@@ -6,30 +6,57 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-run_deseq2 <- function(count_matrix_path, condition_column, control_group, treatment_group, 
+run_deseq2 <- function(count_matrix_path, condition_metadata_path, control_group, treatment_group, 
                        output_dir, padj_threshold, log2fc_threshold) {
   tryCatch({
-    # Read count matrix
+    # Read count matrix (genes × samples)
     count_data <- read.csv(count_matrix_path, row.names = 1, check.names = FALSE)
     
     cat(sprintf("Count matrix: %d genes x %d samples\n", nrow(count_data), ncol(count_data)))
     
-    # Extract condition from column names (assumes last column or specific pattern)
-    # This is a simplified version - adjust based on your metadata structure
-    conditions <- rep(control_group, ncol(count_data))
-    # Mark treatment samples (this logic may need adjustment)
-    treatment_indices <- grep(treatment_group, colnames(count_data), ignore.case = TRUE)
-    conditions[treatment_indices] <- treatment_group
+    # Read condition metadata
+    metadata <- read.csv(condition_metadata_path, stringsAsFactors = FALSE)
+    cat(sprintf("Metadata: %d samples\n", nrow(metadata)))
+    cat("Sample names from metadata:\n")
+    print(head(metadata$sample))
+    cat("Conditions from metadata:\n")
+    print(table(metadata$condition))
+    
+    # Match metadata to count data columns
+    # Reorder metadata to match count_data column order
+    metadata <- metadata[match(colnames(count_data), metadata$sample), ]
+    
+    # Map condition values to control/treatment
+    # Handle both numeric (0/1) and text conditions
+    conditions <- rep(control_group, nrow(metadata))
+    
+    # Check if conditions are numeric
+    if (all(metadata$condition %in% c(0, 1))) {
+      # Numeric: 1 = treatment, 0 = control
+      conditions[metadata$condition == 1] <- treatment_group
+    } else {
+      # Text: match treatment_group in condition string
+      treatment_indices <- grep(treatment_group, metadata$condition, ignore.case = TRUE)
+      conditions[treatment_indices] <- treatment_group
+    }
     
     # Create metadata
     col_data <- data.frame(
       condition = factor(conditions, levels = c(control_group, treatment_group)),
-      row.names = colnames(count_data)
+      row.names = metadata$sample
     )
     
     cat(sprintf("Samples: %d control, %d treatment\n", 
                 sum(col_data$condition == control_group),
                 sum(col_data$condition == treatment_group)))
+    
+    # Verify we have both groups
+    if (sum(col_data$condition == control_group) == 0) {
+      stop(paste("No control samples found. Looking for:", control_group))
+    }
+    if (sum(col_data$condition == treatment_group) == 0) {
+      stop(paste("No treatment samples found. Looking for:", treatment_group))
+    }
     
     # Create DESeq2 object
     dds <- DESeqDataSetFromMatrix(
@@ -57,6 +84,8 @@ run_deseq2 <- function(count_matrix_path, condition_column, control_group, treat
     # Save all results
     results_file <- file.path(output_dir, "deseq2_all_results.csv")
     write.csv(as.data.frame(res_ordered), results_file)
+
+    cat(sprintf("inside R script - padj: %f l2fc: %f \n", padj_threshold, log2fc_threshold))
     
     # Count significant genes
     sig_genes <- sum(res$padj < padj_threshold & abs(res$log2FoldChange) > log2fc_threshold, na.rm = TRUE)

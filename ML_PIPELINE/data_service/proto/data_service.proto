@@ -128,6 +128,22 @@ message HealthCheckResponse {
     string version = 2;
 }
 
+
+message FilterRequest {
+    string dataset_id = 1;
+    double cv_step = 2;
+    int32 min_features = 3;
+}
+
+message FilterResponse {
+    bool success = 1;
+    string filtered_dataset_id = 2;
+    DatasetInfo dataset_info = 3;
+    string error_message = 4;
+}
+
+
+
 service DataService {
     rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
     rpc ValidateDataset(ValidationRequest) returns (ValidationResult);
@@ -138,4 +154,5 @@ service DataService {
     rpc GetDataset(GetDatasetRequest) returns (stream DataChunk);
     rpc StreamDataset(StreamDatasetRequest) returns (stream DataChunk);
     rpc GetDatasetInfo(GetDatasetInfoRequest) returns (DatasetInfo);
+    rpc FilterDataset(FilterRequest) returns (FilterResponse);
 }

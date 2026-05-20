@@ -170,20 +170,21 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         
         return df
     
-    '''def transpose_df(self, df: pd.DataFrame):
-        """Transpose if genes are columns instead of rows"""
-        # Heuristic: if there are more columns than rows, likely needs transpose
-        if len(df.columns) > len(df):
-            logger.info("Transposing DataFrame (genes as columns -> genes as rows)")
-            df = df.T
-        return df'''
-
     def _filter_cvs(self, df, start, step=0.25, min_features=1000):
         # calculate coefficient of variation
         # assumes samples x genes
         if df.shape[1] <= min_features:
             logger.info(f"len(df) is less than min_features {min_features}") 
             return df 
+
+        # first remove low-count genes
+        logger.info(f"shape before removing low-count: {df.shape}")
+        min_count = df.shape[0] * 50 
+        numeric_sums = df.sum(numeric_only=True)
+        cols_to_drop = numeric_sums[numeric_sums < min_count].index
+        df.drop(columns=cols_to_drop, inplace=True)
+        logger.info(f"shape after removing low-count: {df.shape}")
+        
         keep_columns_use = list(df.columns)
         while True: 
             keep_columns = list() 
@@ -203,41 +204,6 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
 
         return df[keep_columns_use]
     
-    '''def _filter_cvs(self, df: pd.DataFrame, start: float = 1, step: float = 0.25, 
-                    min_features: int = 1000):
-        """
-        Filter features by coefficient of variation (CV).
-        Keeps features with CV above a threshold.
-        """
-        logger.info(f"Filtering features: start={start}, step={step}, min_features={min_features}")
-        
-        # Calculate CV for each feature (column)
-        means = df.mean(axis=0)
-        stds = df.std(axis=0)
-        
-        # Avoid division by zero
-        cvs = stds / (means + 1e-10)
-        
-        # Start with high threshold and reduce until we have enough features
-        threshold = start
-        while True:
-            selected = cvs >= threshold
-            num_selected = selected.sum()
-            
-            logger.info(f"  CV threshold {threshold:.2f}: {num_selected} features")
-            
-            if num_selected >= min_features or threshold <= 0:
-                break
-            
-            threshold -= step
-        
-        # Keep features above threshold
-        filtered_df = df.loc[:, selected]
-        
-        logger.info(f"CV filtering: {df.shape[1]} → {filtered_df.shape[1]} features")
-        
-        return filtered_df'''
-
     def transpose_df(self, df):
         # if num cols > num rows, assume cols = genes and rows = samples 
         logger.info(f"before transpose: head is {df.head()}")
@@ -576,7 +542,73 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             msg = f"DownloadDataset failed: {e}"
             logger.error(msg, exc_info=True)
             return data_service_pb2.ValidationResult(is_valid=False, errors=[msg])
+    def FilterDataset(self, request, context):
+        """
+        Apply CV filtering to raw dataset WITHOUT any transformations.
+        For DESeq2 which needs raw counts but can benefit from feature filtering.
+        """
+        try:
+            dataset_id = request.dataset_id
+            cv_step = request.cv_step or 0.25
+            min_features = request.min_features or 1000
+        
+            # Load raw dataset
+            if dataset_id not in self.datasets:
+                dataset_file = self.dataset_path / f"{dataset_id}.parquet"
+                if not dataset_file.exists():
+                    return data_service_pb2.FilterResponse(
+                        success=False,
+                        error_message=f"Dataset {dataset_id} not found"
+                    )
+                df = pd.read_parquet(dataset_file)
+                self.datasets[dataset_id] = df
+        
+            df = self.datasets[dataset_id].copy()
+            logger.info(f"Original shape: {df.shape}")
+        
+            # Extract condition column
+            condition_cols = [col for col in df.columns if 'Factor' in col or 'Condition' in col]
+            if condition_cols:
+                condition_col_name = condition_cols[0]
+                condition_values = df[condition_col_name].copy()
+                df = df.drop(columns=condition_cols)
+            else:
+                condition_col_name = None
+                condition_values = None
 
+           
+        
+            # Apply CV filtering (samples × genes)
+            if cv_step > 0 and min_features > 0:
+                logger.info(f"Applying CV filtering...")
+                df = self._filter_cvs(df, start=1, step=cv_step, min_features=min_features)
+                logger.info(f"After CV filtering: {df.shape}")
+        
+            # Add condition back (NO transformations)
+            if condition_values is not None and condition_col_name is not None:
+                df[condition_col_name] = condition_values.values
+        
+            # Save filtered dataset
+            new_id = f"{dataset_id}_filtered_{uuid.uuid4().hex[:8]}"
+            self.datasets[new_id] = df
+            self._save_dataset_to_disk(new_id, df)
+        
+            logger.info(f"✓ Created filtered dataset: {new_id}")
+        
+            dataset_info = self._build_dataset_info(new_id, df)
+        
+            return data_service_pb2.FilterResponse(
+                success=True,
+                filtered_dataset_id=new_id,
+                dataset_info=dataset_info
+            )
+        
+        except Exception as e:
+            logger.error(f"FilterDataset failed: {e}", exc_info=True)
+            return data_service_pb2.FilterResponse(
+                success=False,
+                error_message=str(e)
+            )
 
     def TransformDataset(self, request, context):
         """

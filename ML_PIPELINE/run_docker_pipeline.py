@@ -8,6 +8,7 @@ import grpc
 import sys
 from pathlib import Path
 import pandas as pd
+import os
 
 # Add paths
 bio_service_path = Path(__file__).parent / "bioinformatics_service"
@@ -23,25 +24,88 @@ sys.path.insert(0, str(ec_service_path))
 from experiment_service.src.experiment_client import ExperimentClient
 
 
+
 BASE_URL = "http://localhost:8000"
 
 
-def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group="Ground Control", treatment_group="Space Flight", padj_threshold=0.1, log2fc_threshold=0):
+def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group="Ground Control", treatment_group="Space Flight", padj_threshold=0.05, log2fc_threshold=0, cv_step=0.25, min_features=1000):
+    import importlib.util
+    import sys
+    import os
     print("\n" + "=" * 60)
     print("STEP 6: Run DESEQ2")
     print("=" * 60)
+
+    # filter dataset for deseq2 (keep raw counts, just filter genes)
+    '''script_dir = os.path.dirname(os.path.abspath(__file__))
+    orchestration_path = os.path.join(script_dir, "orchestration_service")
+
+    print(f"Adding to path: {orchestration_path}")
+    print(f"Path exists: {os.path.exists(orchestration_path)}")
+
+    # Add to path
+    sys.path.insert(0, orchestration_path)
+
+    # Verify the module exists
+    data_client_path = os.path.join(orchestration_path, "src", "clients", "data_client.py")
+    print(f"data_client.py exists: {os.path.exists(data_client_path)}")
+
+    # Now try to import
+    try:
+        from src.clients.data_client import DataServiceClient
+        print("✓ Import successful")
+    except ImportError as e:
+        print(f"✗ Import failed: {e}")
+        print(f"sys.path: {sys.path[:3]}")
+        raise'''
+
+    # REMOVE experiment_service and ml_service from sys.path temporarily
+    paths_to_remove = [p for p in sys.path if 'experiment_service' in p or 'ml_service' in p]
+    for path in paths_to_remove:
+        sys.path.remove(path)
+
+    # Add orchestration_service to the FRONT of sys.path
+    orchestration_path = "/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service"
+    sys.path.insert(0, orchestration_path)
+
+    print(f"sys.path after cleanup: {sys.path[:3]}")
+
+
+    # Load data_client module directly
+    data_client_path = orchestration_path + "/src/clients/data_client.py"
+    spec = importlib.util.spec_from_file_location("data_client", data_client_path)
+    data_client_module = importlib.util.module_from_spec(spec)
+
+
+    # Now execute the module
+    spec.loader.exec_module(data_client_module)
+
+    # Get the class
+    DataServiceClient = data_client_module.DataServiceClient
+
+    # CREATE the data_client object
+    #data_client = DataServiceClient(service_url="data_service:50051")
+    data_client = DataServiceClient(service_url="localhost:50051")
+
+
+
+    filter_response = data_client.filter_dataset(
+        dataset_id = dataset_id,
+        cv_step=cv_step,
+        min_features=min_features
+    )
+
+    filtered_dataset_id = filter_response['filtered_dataset_id']
+
     # Connect to service
     channel = grpc.insecure_channel('localhost:50054')
     stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(channel)
     
     # you need a dataset with non-zero count data and conditions
     
-    
-    padj_threshold=padj_threshold
-    log2fc_threshold=log2fc_threshold
     # Run DESeq2
     request = bioinformatics_service_pb2.DESeq2Request(
-        dataset_id=dataset_id,
+        dataset_id=filtered_dataset_id,
         condition_column=target_column,
         control_group=control_group,
         treatment_group=treatment_group,
@@ -73,8 +137,7 @@ def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_gr
         return response
 
 
-def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=0.05, qvalue_cutoff=0.2, 
-                     max_genes=500, method=None, min_importance=0.0):  # ← method is now optional
+def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff=0.05, qvalue_cutoff=0.2, max_genes=500, method=None, min_importance=0.0):  # ← method is now optional
     """Run KEGG pathway enrichment on important features from ML model"""
     import grpc
     import sys
@@ -509,13 +572,14 @@ def main():
     parser.add_argument('-fl', '--factor_name', help='metadata factor name', default='Factor Value[Spaceflight]', required=False)
     parser.add_argument('-fv', '--factor_values', help='metadata factor values', type=list_of_strings, default=['Ground Control', 'Space Flight'], required=False)
     parser.add_argument('-mf', '--min_features', help='minimum number of features to keep after CVS dimensionality reduction', default=1000, required=False)
-    parser.add_argument('-fi', '--fi_methods', help='list of feature importance methods to use', type=list_of_strings, default=['recursive', 'permutation', 'built_in'] , required=False)
+    parser.add_argument('-fi', '--fi_methods', help='list of feature importance methods to use', type=list_of_strings, default=['built_in'] , required=False)
     parser.add_argument('-rs', '--random_state', help='random state(seed)', type=int, default=42, required=False)
     parser.add_argument('-de', '--dgea', help='do DGEA', type=bool, default=False, required=False)
     parser.add_argument('-pv', '--pvalue_threshold', help='pvalue cutoff', type=float, default=0.1, required=False)
     parser.add_argument('-qv', '--qvalue_threshold', help='FDR cutoff', type=float, default=0.1, required=False)
     parser.add_argument('-fc', '--l2fc_threshold', help='log2 fold change', type=float, default=0.0, required=False)
     parser.add_argument('-ka', '--kegg_analysis', help='do kegg analysis', type=bool, default=False, required=False)
+    parser.add_argument('-on', '--organism_name', help='name of org (e.g. mmu)', default='mmu', required=False)
 
 
     args = parser.parse_args()
@@ -565,6 +629,7 @@ def main():
     min_features = args.min_features
     do_kegg_analysis = bool(args.kegg_analysis)
     dgea = bool(args.dgea)
+    organism_name = bool(args.organism_name)
 
     random_state = int(args.random_state)
     pvalue_threshold = float(args.pvalue_threshold) 
@@ -649,6 +714,7 @@ def main():
         # Step 2: Get dataset (download or upload)
         if operation == 'download':
             dataset_id, columns = download_dataset(args)
+            
         elif operation == 'upload':
             dataset_id, columns = upload_dataset(input_file, exclude_columns, cv_step)
         else:
@@ -707,13 +773,21 @@ def main():
         if do_kegg_analysis and feature_importance_response:
             kegg_response = run_kegg_analysis(
                 feature_importance_response,
-                organism=organism,
+                organism=organism_name,
                 pvalue_cutoff=pvalue_threshold,
                 qvalue_cutoff=qvalue_threshold,
                 max_genes=500,
                 method=None,  # ← Auto-select first available method
                 min_importance=0.0
             )
+
+        # Step 7: do DGEA analysis
+        if dgea:
+            dgea_response = run_deseq2(dataset_id, target_column=target_column, control_group=factor_values[0], treatment_group=factor_values[1], padj_threshold=pvalue_threshold, log2fc_threshold=l2fc_threshold, cv_step=cv_step, min_features=min_features) 
+
+        # Step 8a: do KEGG analysis for ML
+        # Step 8b: do KEGG analysis for DESeq2
+
 
 
     except Exception as e:
