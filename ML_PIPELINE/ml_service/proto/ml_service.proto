@@ -15,6 +15,9 @@ service MLService {
   
   // List all trained models
   rpc ListModels(ListModelsRequest) returns (ModelList);
+
+  // Train an ensemble of models 
+  rpc TrainEnsemble(EnsembleRequest) returns (EnsembleResponse);
 }
 
 message TrainRequest {
@@ -87,3 +90,29 @@ message ModelList {
   repeated ModelInfo models = 1;
   int32 total_count = 2;
 }
+
+// Request to train ensemble of models
+message EnsembleRequest {
+    string dataset_id = 1;
+    string target_column = 2;
+    repeated string algorithms = 3;  // e.g., ["random_forest", "xgboost", "svm"]
+}
+
+// Individual model result
+message ModelResult {
+    string model_id = 1;
+    string algorithm = 2;
+    double accuracy = 3;
+    double precision = 4;
+    double recall = 5;
+    double f1_score = 6;
+}
+
+// Response from ensemble training
+message EnsembleResponse {
+    bool success = 1;
+    repeated ModelResult models = 2;
+    int32 num_models = 3;
+    string error_message = 4;
+}
+

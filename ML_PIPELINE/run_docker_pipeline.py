@@ -8,6 +8,7 @@ import grpc
 import sys
 from pathlib import Path
 import pandas as pd
+from typing import List
 
 # Add paths
 bio_service_path = Path(__file__).parent / "bioinformatics_service"
@@ -22,8 +23,94 @@ ec_service_path = Path(__file__).parent / "experiment_service"
 sys.path.insert(0, str(ec_service_path))
 from experiment_service.src.experiment_client import ExperimentClient
 
+ml_service_path = Path(__file__).parent / "ml_service"
+sys.path.insert(0, str(ml_service_path))
+from ml_service.src.consensus import compute_consensus_features 
+
 
 BASE_URL = "http://localhost:8000"
+
+# In run_docker_pipeline.py
+
+def run_ensemble_pipeline(dataset_id, target_column, factor_values, 
+                          top_n=100, consensus_threshold=3):
+    """Run ensemble training and compute consensus features"""
+    logger.info(f"running ensemble pipeline")
+    
+    # 1. Train ensemble of models
+    ml_channel = grpc.insecure_channel('localhost:50052')
+    ml_stub = ml_service_pb2_grpc.MLServiceStub(ml_channel)
+    
+    ensemble_request = ml_service_pb2.EnsembleRequest(
+        dataset_id=dataset_id,
+        target_column=target_column,
+        algorithms=["random_forest", "xgboost", "svm", "logistic_regression", "mlp"]
+    )
+    
+    ensemble_response = ml_stub.TrainEnsemble(ensemble_request)
+    
+    if not ensemble_response.success:
+        print(f"✗ Ensemble training failed: {ensemble_response.error_message}")
+        return None
+    
+    print(f"✓ Trained {ensemble_response.num_models} models")
+    
+    # 2. Compute feature importance for each model
+    fi_channel = grpc.insecure_channel('localhost:50053')
+    fi_stub = feature_importance_pb2_grpc.FeatureImportanceServiceStub(fi_channel)
+    
+    feature_importance_results = []
+    
+    for model_result in ensemble_response.models:
+        print(f"Computing importance for {model_result.algorithm} ({model_result.model_id})...")
+        
+        fi_request = feature_importance_pb2.FeatureImportanceRequest(
+            model_id=model_result.model_id,
+            dataset_id=dataset_id,
+            methods=["permutation"]
+        )
+        
+        fi_response = fi_stub.ComputeImportance(fi_request)
+        
+        if fi_response.success:
+            # Convert to dict
+            features = [
+                {
+                    'feature': f.feature_name,
+                    'importance': f.importance_score,
+                    'rank': f.rank
+                }
+                for f in fi_response.features
+            ]
+            
+            feature_importance_results.append({
+                'model_id': model_result.model_id,
+                'algorithm': model_result.algorithm,
+                'features': features
+            })
+    
+    # 3. Compute consensus features
+    from consensus import compute_consensus_features
+    
+    consensus_result = compute_consensus_features(
+        feature_importance_results,
+        top_n=top_n,
+        consensus_threshold=consensus_threshold
+    )
+    
+    print(f"\n✓ Consensus Analysis:")
+    print(f"  Total models: {consensus_result['total_models']}")
+    print(f"  Consensus features: {consensus_result['num_consensus']}")
+    print(f"  Perfect consensus: {consensus_result['summary']['perfect_consensus']}")
+    print(f"  High consensus: {consensus_result['summary']['high_consensus']}")
+    
+    print(f"\nTop 10 Consensus Features:")
+    for i, feature in enumerate(consensus_result['consensus_features'][:10], 1):
+        print(f"  {i}. {feature['feature']}")
+        print(f"     - Selected by {feature['num_models']}/{consensus_result['total_models']} models")
+        print(f"     - Avg rank: {feature['avg_rank']:.1f} (best: {feature['best_rank']})")
+    
+    return consensus_result
 
 
 def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group="Ground Control", treatment_group="Space Flight", padj_threshold=0.1, log2fc_threshold=0):
@@ -655,6 +742,15 @@ def main():
             experiment_id,
             kegg_analysis_id=kegg_analysis_id,
             status="completed"
+        )
+
+        # Call the ensemble pipeline function I provided earlier
+        consensus_result = run_ensemble_pipeline(
+            dataset_id=transformed_dataset_id,
+            target_column=target_column,
+            factor_values=factor_values,
+            top_n=100,
+            consensus_threshold=3
         )
 
     except Exception as e:
