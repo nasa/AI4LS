@@ -1,30 +1,31 @@
-# bioinformatics_service/src/kegg_enrichment.py
-# bioinformatics_service/src/kegg_enrichment.py
+# src/kegg_enrichment.py
 
+import logging
 import pandas as pd
 from pathlib import Path
-import logging
-from typing import Dict, List
-
-from rpy2.robjects import r
+from typing import List, Dict
+import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
-import rpy2.robjects as ro
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class KEGGEnrichmentAnalyzer:
-    """Wrapper for KEGG pathway enrichment analysis"""
+class KEGGEnrichment:
+    """KEGG pathway enrichment using R clusterProfiler"""
     
     def __init__(self, output_base_path: str = "/app/results"):
         self.output_base_path = Path(output_base_path)
         self.output_base_path.mkdir(parents=True, exist_ok=True)
-        self.r_script_path = Path("/app/r_scripts/kegg_enrichment.R")
         
-        # Source R script ONCE at initialization
-        r.source(str(self.r_script_path))
-        logger.info(f"R script sourced: {self.r_script_path}")
-
+        # Source R script once during initialization (outside converter context)
+        r_script_path = Path("/app/r_scripts/kegg_enrichment.R")
+        if not r_script_path.exists():
+            raise FileNotFoundError(f"R script not found: {r_script_path}")
+        
+        ro.r(f'source("{r_script_path}")')
+        logger.info(f"Sourced R script: {r_script_path}")
+    
     def run_enrichment(
         self,
         gene_list: List[str],
@@ -39,54 +40,34 @@ class KEGGEnrichmentAnalyzer:
             logger.info(f"  Organism: {organism}")
             logger.info(f"  Analysis ID: {analysis_id}")
             logger.info(f"  Gene IDs (first 5): {gene_list[:5]}")
-        
+            
             # Create output directory with analysis_id if provided
             if analysis_id:
                 output_dir = self.output_base_path / f"kegg_{organism}_{analysis_id}"
             else:
                 output_dir = self.output_base_path / f"kegg_{organism}"
-        
+            
             output_dir.mkdir(parents=True, exist_ok=True)
             logger.info(f"Output directory: {output_dir}")
-        
+            
             # Save gene list
             gene_list_path = output_dir / "gene_list.csv"
             pd.DataFrame({"gene_id": gene_list}).to_csv(gene_list_path, index=False)
             
-            # Get the function from R global environment
-            run_kegg_func = ro.globalenv['run_kegg_enrichment']
-            
-            # Convert parameters to R objects explicitly
-            from rpy2.robjects import StrVector, FloatVector
-            
-            r_gene_list_path = str(gene_list_path)
-            r_organism = str(organism)
-            r_output_dir = str(output_dir)
-            r_pvalue = float(pvalue_cutoff)
-            r_qvalue = float(qvalue_cutoff)
-            
-            # Call R function with localconverter
+            # Call R function using r() to execute code as string
+            # This avoids py2rpy conversion issues
             with localconverter(pandas2ri.converter):
-                '''num_pathways = run_kegg_func(
-                    r_gene_list_path,
-                    r_organism,
-                    r_output_dir,
-                    r_pvalue,
-                    r_qvalue
-                )[0]'''
-
-            # Use r() to call the function with string interpolation
-            r_code = f'''
-            run_kegg_enrichment(
-                "{str(gene_list_path)}",
-                "{str(organism)}",
-                "{str(output_dir)}",
-                {float(pvalue_cutoff)},
-                {float(qvalue_cutoff)}
-            )
-            '''
-            num_pathways = r(r_code)[0]            
-
+                r_code = f'''
+                run_kegg_enrichment(
+                    "{str(gene_list_path)}",
+                    "{str(organism)}",
+                    "{str(output_dir)}",
+                    {float(pvalue_cutoff)},
+                    {float(qvalue_cutoff)}
+                )
+                '''
+                num_pathways = ro.r(r_code)[0]
+            
             # Load gene conversion results
             conversion_file = output_dir / "gene_id_conversion.csv"
             if conversion_file.exists():

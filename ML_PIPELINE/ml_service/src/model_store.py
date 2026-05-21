@@ -39,6 +39,7 @@ class ModelStore:
             
             # Save metadata
             self.metadata[model_id] = {
+                "model_id": model_id,
                 **model_info,
                 "model_path": str(model_path),
                 "created_at": datetime.utcnow().isoformat()

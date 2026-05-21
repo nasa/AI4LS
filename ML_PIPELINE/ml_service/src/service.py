@@ -22,7 +22,13 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
         self.data_client = DataServiceClient(data_service_url)
         # Cache datasets in memory to avoid repeated fetches
         self.dataset_cache: Dict[str, pd.DataFrame] = {}
+        # Import the ModelTrainer class
+        from src.trainers import ModelTrainer
+        self.model_trainer = ModelTrainer()
     
+        logger.info("MLServiceImpl initialized") 
+
+
     def _get_dataset(self, dataset_id: str) -> Optional[pd.DataFrame]:
         """Get dataset from cache or fetch from Data Service"""
         if dataset_id in self.dataset_cache:
@@ -248,114 +254,108 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
             )
 
     def TrainEnsemble(self, request, context):
-        """
-        Train multiple models (ensemble) on the same dataset.
-        Returns a list of trained model IDs.
-        """
+        """Train multiple models (ensemble) on the same dataset."""
         try:
             dataset_id = request.dataset_id
             target_column = request.target_column
             algorithms = list(request.algorithms) if request.algorithms else [
-                "random_forest", "xgboost", "svm", "logistic_regression", "mlp"
+                "random_forest", "xgboost", "svm", "logistic_regression", "neural_network"
             ]
-            
+        
             logger.info(f"Training ensemble with {len(algorithms)} algorithms")
-            logger.info(f"  Algorithms: {algorithms}")
-            logger.info(f"  Dataset: {dataset_id}")
-            logger.info(f"  Target: {target_column}")
-            
-            # Fetch dataset once (shared across all models)
+        
+            # Fetch dataset
             df = self.data_client.get_dataset(dataset_id)
             if df is None:
-                return data_service_pb2.EnsembleResponse(
+                return ml_service_pb2.EnsembleResponse(
                     success=False,
                     error_message=f"Failed to fetch dataset {dataset_id}"
                 )
-            
+        
             logger.info(f"Dataset shape: {df.shape[0]} samples × {df.shape[1]} features")
-            
-            # Prepare data once
-            if target_column not in df.columns:
-                return data_service_pb2.EnsembleResponse(
-                    success=False,
-                    error_message=f"Target column '{target_column}' not found"
-                )
-            
+        
+            # Prepare data
             X = df.drop(columns=[target_column])
             y = df[target_column]
-            
-            # Split data once (same split for all models)
+        
             from sklearn.model_selection import train_test_split
             X_train, X_test, y_train, y_test = train_test_split(
                 X, y, test_size=0.2, random_state=42, stratify=y
             )
-            
+        
             logger.info(f"Train: {len(X_train)} samples, Test: {len(X_test)} samples")
-            
+        
             # Train each model
             model_results = []
             
             for algorithm in algorithms:
                 try:
                     logger.info(f"Training {algorithm}...")
-                    
-                    # Get trainer
-                    if algorithm not in self.trainers:
-                        logger.warning(f"Unknown algorithm: {algorithm}, skipping")
-                        continue
-                    
-                    trainer = self.trainers[algorithm]
-                    
+                
+                    # Create model using ModelTrainer factory
+                    model = self.model_trainer.create_model(
+                        algorithm=algorithm,
+                        task_type="classification",
+                        hyperparameters={}  # Use defaults
+                    )
+                
                     # Train model
-                    model, metrics = trainer.train(X_train, y_train, X_test, y_test)
-                    
+                    trained_model, train_metrics, test_metrics = self.model_trainer.train_model(
+                        model, X_train, y_train, X_test, y_test, task_type="classification"
+                    )
+                
                     # Generate model ID
                     model_id = f"model_{uuid.uuid4().hex[:12]}"
                     
                     # Store model
-                    self.model_store.save_model(model_id, model, {
+                    self.model_store.save_model(model_id, trained_model, {
                         'algorithm': algorithm,
+                        'task_type': 'classification',  # Add this
                         'dataset_id': dataset_id,
                         'target_column': target_column,
+                        'feature_columns': list(X.columns),  # Add this
+                        'num_samples': len(X_train) + len(X_test),  # Add this
+                        'num_features': len(X.columns),  # Add this
+                        'hyperparameters': {},  # Add this
                         'train_size': len(X_train),
                         'test_size': len(X_test),
-                        'metrics': metrics,
+                        'training_metrics': train_metrics,  # Change from train_metrics
+                        'test_metrics': test_metrics,
                         'feature_names': list(X.columns)
-                    })
-                    
+                    }) 
                     logger.info(f"✓ {algorithm} trained: {model_id}")
-                    logger.info(f"  Accuracy: {metrics.get('accuracy', 0):.4f}")
-                    
+                    logger.info(f"  Accuracy: {test_metrics.get('accuracy', 0):.4f}")
+                
                     # Add to results
                     model_results.append(
                         ml_service_pb2.ModelResult(
                             model_id=model_id,
                             algorithm=algorithm,
-                            accuracy=metrics.get('accuracy', 0),
-                            precision=metrics.get('precision', 0),
-                            recall=metrics.get('recall', 0),
-                            f1_score=metrics.get('f1', 0)
+                            accuracy=test_metrics.get('accuracy', 0),
+                            precision=test_metrics.get('precision', 0),
+                            recall=test_metrics.get('recall', 0),
+                            f1_score=test_metrics.get('f1_score', 0)
                         )
                     )
-                    
+                
                 except Exception as e:
-                    logger.error(f"Failed to train {algorithm}: {e}")
+                    logger.error(f"Failed to train {algorithm}: {e}", exc_info=True)
                     continue
-            
+        
             if not model_results:
                 return ml_service_pb2.EnsembleResponse(
                     success=False,
                     error_message="No models were successfully trained"
                 )
-            
+        
             logger.info(f"✓ Ensemble training complete: {len(model_results)} models")
-            
+        
             return ml_service_pb2.EnsembleResponse(
                 success=True,
                 models=model_results,
                 num_models=len(model_results)
             )
-            
+        
         except Exception as e:
             logger.error(f"Ensemble training error: {e}", exc_info=True)
             return ml_service_pb2.EnsembleResponse(

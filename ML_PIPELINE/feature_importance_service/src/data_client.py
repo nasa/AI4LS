@@ -8,11 +8,11 @@ from pathlib import Path
 import logging
 
 # Add path to data-service generated code
-#data_service_path = Path(__file__).parent.parent.parent / "data-service" / "generated"
-#sys.path.insert(0, str(data_service_path))
+data_service_path = Path(__file__).parent.parent.parent / "data-service" / "generated"
+sys.path.insert(0, str(data_service_path))
 
 from generated import data_service_pb2, data_service_pb2_grpc
-from generated.data_service_pb2 import StreamRequest
+from generated.data_service_pb2 import StreamDatasetRequest
 from generated.data_service_pb2_grpc import DataServiceStub
 
 logger = logging.getLogger(__name__)
@@ -38,21 +38,21 @@ class DataServiceClient:
      try:
          logger.info(f"Fetching dataset {dataset_id} from Data Service...")
 
-         request = StreamRequest(
+         request = StreamDatasetRequest(
              dataset_id=dataset_id,
              chunk_size=10000
          )
 
          frames = []
          for chunk in self.stub.StreamDataset(request):
-             chunk_df = pd.read_csv(StringIO(chunk.data.decode("utf-8")))
+             chunk_df = pd.read_csv(StringIO(chunk.data.decode("utf-8")), index_col=0)
              frames.append(chunk_df)
 
          if not frames:
              logger.error(f"No data received for dataset {dataset_id}")
              return None
 
-         df = pd.concat(frames, ignore_index=True)
+         df = pd.concat(frames, ignore_index=False)
          logger.info(f"Dataset {dataset_id} loaded: {len(df)} rows, {len(df.columns)} columns")
          return df
 

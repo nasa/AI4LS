@@ -24,41 +24,55 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x64\x61ta_service.proto\x12\x0b\x64\x61taservice\"s\n\rUploadRequest\x12\x14\n\x0c\x66ile_content\x18\x01 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\x12\x12\n\ndataset_id\x18\x03 \x01(\t\x12\x17\n\x0f\x65xclude_columns\x18\x04 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x05 \x01(\x02\"\xb3\x01\n\x0f\x44ownloadRequest\x12\x0e\n\x06osd_id\x18\x01 \x01(\t\x12\x10\n\x08patterns\x18\x02 \x03(\t\x12\x12\n\ndataset_id\x18\x03 \x01(\t\x12\x13\n\x0b\x66\x61\x63tor_name\x18\x04 \x01(\t\x12\x15\n\rfactor_values\x18\x05 \x03(\t\x12\x14\n\x0cmin_features\x18\x06 \x01(\x05\x12\x17\n\x0f\x65xclude_columns\x18\x07 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x08 \x01(\x02\"x\n\x0fValidateRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x17\n\x0f\x64\x61taset_content\x18\x02 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x03 \x01(\t\x12\x17\n\x0f\x65xclude_columns\x18\x04 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x05 \x01(\x02\"\x8a\x01\n\x10ValidationResult\x12\x10\n\x08is_valid\x18\x01 \x01(\x08\x12\x12\n\ndataset_id\x18\x02 \x01(\t\x12\x0e\n\x06\x65rrors\x18\x03 \x03(\t\x12\x10\n\x08warnings\x18\x04 \x03(\t\x12.\n\x0c\x64\x61taset_info\x18\x05 \x01(\x0b\x32\x18.dataservice.DatasetInfo\"\x86\x01\n\x0b\x44\x61tasetInfo\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x10\n\x08num_rows\x18\x02 \x01(\x05\x12\x13\n\x0bnum_columns\x18\x03 \x01(\x05\x12(\n\x07\x63olumns\x18\x04 \x03(\x0b\x32\x17.dataservice.ColumnInfo\x12\x12\n\nsize_bytes\x18\x05 \x01(\x03\"T\n\nColumnInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05\x64type\x18\x02 \x01(\t\x12\x12\n\nnull_count\x18\x03 \x01(\x05\x12\x15\n\rsample_values\x18\x04 \x03(\t\"\\\n\x10TransformRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x34\n\x0ftransformations\x18\x02 \x03(\x0b\x32\x1b.dataservice.Transformation\"\x97\x01\n\x0eTransformation\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x63olumns\x18\x02 \x03(\t\x12\x37\n\x06params\x18\x03 \x03(\x0b\x32\'.dataservice.Transformation.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x92\x01\n\x14TransformationResult\x12\x1e\n\x16transformed_dataset_id\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x12\x15\n\rerror_message\x18\x03 \x01(\t\x12\x32\n\x10transformed_info\x18\x04 \x01(\x0b\x32\x18.dataservice.DatasetInfo\"7\n\rStreamRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x12\n\nchunk_size\x18\x02 \x01(\x05\"A\n\tDataChunk\x12\x14\n\x0c\x63hunk_number\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\x12\x10\n\x08is_final\x18\x03 \x01(\x08\"(\n\x12\x44\x61tasetInfoRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t2\xe6\x03\n\x0b\x44\x61taService\x12J\n\rUploadDataset\x12\x1a.dataservice.UploadRequest\x1a\x1d.dataservice.ValidationResult\x12N\n\x0fValidateDataset\x12\x1c.dataservice.ValidateRequest\x1a\x1d.dataservice.ValidationResult\x12W\n\x13\x41pplyTransformation\x12\x1d.dataservice.TransformRequest\x1a!.dataservice.TransformationResult\x12\x45\n\rStreamDataset\x12\x1a.dataservice.StreamRequest\x1a\x16.dataservice.DataChunk0\x01\x12K\n\x0eGetDatasetInfo\x12\x1f.dataservice.DatasetInfoRequest\x1a\x18.dataservice.DatasetInfo\x12N\n\x0f\x44ownloadDataset\x12\x1c.dataservice.DownloadRequest\x1a\x1d.dataservice.ValidationResultb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x64\x61ta_service.proto\x12\x04\x64\x61ta\"T\n\nColumnInfo\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05\x64type\x18\x02 \x01(\t\x12\x12\n\nnull_count\x18\x03 \x01(\x05\x12\x15\n\rsample_values\x18\x04 \x03(\t\"\xab\x01\n\x0b\x44\x61tasetInfo\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x10\n\x08num_rows\x18\x02 \x01(\x05\x12\x13\n\x0bnum_columns\x18\x03 \x01(\x05\x12\x14\n\x0c\x63olumn_names\x18\x04 \x03(\t\x12\x14\n\x0csample_names\x18\x05 \x03(\t\x12\x12\n\nsize_bytes\x18\x06 \x01(\x03\x12!\n\x07\x63olumns\x18\x07 \x03(\x0b\x32\x10.data.ColumnInfo\"a\n\x11ValidationRequest\x12\x0e\n\x06osd_id\x18\x01 \x01(\t\x12\x10\n\x08patterns\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x61\x63tor_name\x18\x03 \x01(\t\x12\x15\n\rfactor_values\x18\x04 \x03(\t\"\xb3\x01\n\x0f\x44ownloadRequest\x12\x0e\n\x06osd_id\x18\x01 \x01(\t\x12\x10\n\x08patterns\x18\x02 \x03(\t\x12\x13\n\x0b\x66\x61\x63tor_name\x18\x03 \x01(\t\x12\x15\n\rfactor_values\x18\x04 \x03(\t\x12\x17\n\x0f\x65xclude_columns\x18\x05 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x06 \x01(\x01\x12\x14\n\x0cmin_features\x18\x07 \x01(\x05\x12\x12\n\ndataset_id\x18\x08 \x01(\t\"s\n\rUploadRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x14\n\x0c\x66ile_content\x18\x02 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x03 \x01(\t\x12\x17\n\x0f\x65xclude_columns\x18\x04 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x05 \x01(\x01\"\x83\x01\n\x10ValidationResult\x12\x10\n\x08is_valid\x18\x01 \x01(\x08\x12\x12\n\ndataset_id\x18\x02 \x01(\t\x12\x0e\n\x06\x65rrors\x18\x03 \x03(\t\x12\x10\n\x08warnings\x18\x04 \x03(\t\x12\'\n\x0c\x64\x61taset_info\x18\x05 \x01(\x0b\x32\x11.data.DatasetInfo\"f\n\x10TransformRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x17\n\x0ftransformations\x18\x02 \x03(\t\x12\x0f\n\x07\x63v_step\x18\x03 \x01(\x01\x12\x14\n\x0cmin_features\x18\x04 \x01(\x05\"\x84\x01\n\x11TransformResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x1e\n\x16transformed_dataset_id\x18\x02 \x01(\t\x12\x15\n\rerror_message\x18\x03 \x01(\t\x12\'\n\x0c\x64\x61taset_info\x18\x04 \x01(\x0b\x32\x11.data.DatasetInfo\"_\n\x1a\x41pplyTransformationRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12-\n\x0ftransformations\x18\x02 \x03(\x0b\x32\x14.data.Transformation\"\x9c\x01\n\x0eTransformation\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0f\n\x07\x63olumns\x18\x02 \x03(\t\x12\x38\n\nparameters\x18\x03 \x03(\x0b\x32$.data.Transformation.ParametersEntry\x1a\x31\n\x0fParametersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x8b\x01\n\x14TransformationResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x1e\n\x16transformed_dataset_id\x18\x02 \x01(\t\x12\x15\n\rerror_message\x18\x03 \x01(\t\x12+\n\x10transformed_info\x18\x04 \x01(\x0b\x32\x11.data.DatasetInfo\";\n\x11GetDatasetRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x12\n\nchunk_size\x18\x02 \x01(\x05\">\n\x14StreamDatasetRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x12\n\nchunk_size\x18\x02 \x01(\x05\"A\n\tDataChunk\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\x14\n\x0c\x63hunk_number\x18\x02 \x01(\x05\x12\x10\n\x08is_final\x18\x03 \x01(\x08\"+\n\x15GetDatasetInfoRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\"\x14\n\x12HealthCheckRequest\"7\n\x13HealthCheckResponse\x12\x0f\n\x07healthy\x18\x01 \x01(\x08\x12\x0f\n\x07version\x18\x02 \x01(\t\"J\n\rFilterRequest\x12\x12\n\ndataset_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63v_step\x18\x02 \x01(\x01\x12\x14\n\x0cmin_features\x18\x03 \x01(\x05\"~\n\x0e\x46ilterResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x1b\n\x13\x66iltered_dataset_id\x18\x02 \x01(\t\x12\'\n\x0c\x64\x61taset_info\x18\x03 \x01(\x0b\x32\x11.data.DatasetInfo\x12\x15\n\rerror_message\x18\x04 \x01(\t2\xa7\x05\n\x0b\x44\x61taService\x12\x42\n\x0bHealthCheck\x12\x18.data.HealthCheckRequest\x1a\x19.data.HealthCheckResponse\x12\x42\n\x0fValidateDataset\x12\x17.data.ValidationRequest\x1a\x16.data.ValidationResult\x12@\n\x0f\x44ownloadDataset\x12\x15.data.DownloadRequest\x1a\x16.data.ValidationResult\x12<\n\rUploadDataset\x12\x13.data.UploadRequest\x1a\x16.data.ValidationResult\x12S\n\x13\x41pplyTransformation\x12 .data.ApplyTransformationRequest\x1a\x1a.data.TransformationResult\x12\x43\n\x10TransformDataset\x12\x16.data.TransformRequest\x1a\x17.data.TransformResponse\x12\x38\n\nGetDataset\x12\x17.data.GetDatasetRequest\x1a\x0f.data.DataChunk0\x01\x12>\n\rStreamDataset\x12\x1a.data.StreamDatasetRequest\x1a\x0f.data.DataChunk0\x01\x12@\n\x0eGetDatasetInfo\x12\x1b.data.GetDatasetInfoRequest\x1a\x11.data.DatasetInfo\x12:\n\rFilterDataset\x12\x13.data.FilterRequest\x1a\x14.data.FilterResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'data_service_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_TRANSFORMATION_PARAMSENTRY']._loaded_options = None
-  _globals['_TRANSFORMATION_PARAMSENTRY']._serialized_options = b'8\001'
-  _globals['_UPLOADREQUEST']._serialized_start=35
-  _globals['_UPLOADREQUEST']._serialized_end=150
-  _globals['_DOWNLOADREQUEST']._serialized_start=153
-  _globals['_DOWNLOADREQUEST']._serialized_end=332
-  _globals['_VALIDATEREQUEST']._serialized_start=334
-  _globals['_VALIDATEREQUEST']._serialized_end=454
-  _globals['_VALIDATIONRESULT']._serialized_start=457
-  _globals['_VALIDATIONRESULT']._serialized_end=595
-  _globals['_DATASETINFO']._serialized_start=598
-  _globals['_DATASETINFO']._serialized_end=732
-  _globals['_COLUMNINFO']._serialized_start=734
-  _globals['_COLUMNINFO']._serialized_end=818
+  _globals['_TRANSFORMATION_PARAMETERSENTRY']._loaded_options = None
+  _globals['_TRANSFORMATION_PARAMETERSENTRY']._serialized_options = b'8\001'
+  _globals['_COLUMNINFO']._serialized_start=28
+  _globals['_COLUMNINFO']._serialized_end=112
+  _globals['_DATASETINFO']._serialized_start=115
+  _globals['_DATASETINFO']._serialized_end=286
+  _globals['_VALIDATIONREQUEST']._serialized_start=288
+  _globals['_VALIDATIONREQUEST']._serialized_end=385
+  _globals['_DOWNLOADREQUEST']._serialized_start=388
+  _globals['_DOWNLOADREQUEST']._serialized_end=567
+  _globals['_UPLOADREQUEST']._serialized_start=569
+  _globals['_UPLOADREQUEST']._serialized_end=684
+  _globals['_VALIDATIONRESULT']._serialized_start=687
+  _globals['_VALIDATIONRESULT']._serialized_end=818
   _globals['_TRANSFORMREQUEST']._serialized_start=820
-  _globals['_TRANSFORMREQUEST']._serialized_end=912
-  _globals['_TRANSFORMATION']._serialized_start=915
-  _globals['_TRANSFORMATION']._serialized_end=1066
-  _globals['_TRANSFORMATION_PARAMSENTRY']._serialized_start=1021
-  _globals['_TRANSFORMATION_PARAMSENTRY']._serialized_end=1066
-  _globals['_TRANSFORMATIONRESULT']._serialized_start=1069
-  _globals['_TRANSFORMATIONRESULT']._serialized_end=1215
-  _globals['_STREAMREQUEST']._serialized_start=1217
-  _globals['_STREAMREQUEST']._serialized_end=1272
-  _globals['_DATACHUNK']._serialized_start=1274
-  _globals['_DATACHUNK']._serialized_end=1339
-  _globals['_DATASETINFOREQUEST']._serialized_start=1341
-  _globals['_DATASETINFOREQUEST']._serialized_end=1381
-  _globals['_DATASERVICE']._serialized_start=1384
-  _globals['_DATASERVICE']._serialized_end=1870
+  _globals['_TRANSFORMREQUEST']._serialized_end=922
+  _globals['_TRANSFORMRESPONSE']._serialized_start=925
+  _globals['_TRANSFORMRESPONSE']._serialized_end=1057
+  _globals['_APPLYTRANSFORMATIONREQUEST']._serialized_start=1059
+  _globals['_APPLYTRANSFORMATIONREQUEST']._serialized_end=1154
+  _globals['_TRANSFORMATION']._serialized_start=1157
+  _globals['_TRANSFORMATION']._serialized_end=1313
+  _globals['_TRANSFORMATION_PARAMETERSENTRY']._serialized_start=1264
+  _globals['_TRANSFORMATION_PARAMETERSENTRY']._serialized_end=1313
+  _globals['_TRANSFORMATIONRESULT']._serialized_start=1316
+  _globals['_TRANSFORMATIONRESULT']._serialized_end=1455
+  _globals['_GETDATASETREQUEST']._serialized_start=1457
+  _globals['_GETDATASETREQUEST']._serialized_end=1516
+  _globals['_STREAMDATASETREQUEST']._serialized_start=1518
+  _globals['_STREAMDATASETREQUEST']._serialized_end=1580
+  _globals['_DATACHUNK']._serialized_start=1582
+  _globals['_DATACHUNK']._serialized_end=1647
+  _globals['_GETDATASETINFOREQUEST']._serialized_start=1649
+  _globals['_GETDATASETINFOREQUEST']._serialized_end=1692
+  _globals['_HEALTHCHECKREQUEST']._serialized_start=1694
+  _globals['_HEALTHCHECKREQUEST']._serialized_end=1714
+  _globals['_HEALTHCHECKRESPONSE']._serialized_start=1716
+  _globals['_HEALTHCHECKRESPONSE']._serialized_end=1771
+  _globals['_FILTERREQUEST']._serialized_start=1773
+  _globals['_FILTERREQUEST']._serialized_end=1847
+  _globals['_FILTERRESPONSE']._serialized_start=1849
+  _globals['_FILTERRESPONSE']._serialized_end=1975
+  _globals['_DATASERVICE']._serialized_start=1978
+  _globals['_DATASERVICE']._serialized_end=2657
 # @@protoc_insertion_point(module_scope)

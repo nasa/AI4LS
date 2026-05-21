@@ -1,18 +1,13 @@
-# bioinformatics_service/Dockerfile
 FROM rocker/r-ver:4.3
 
-WORKDIR /app
-
-# Install Python
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3.10 \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
     python3-pip \
-    python3.10-dev \
+    python3-dev \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
-    libgit2-dev \
     libfontconfig1-dev \
     libharfbuzz-dev \
     libfribidi-dev \
@@ -22,25 +17,21 @@ RUN apt-get update && \
     libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Make python3.10 the default
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
-
-# Set R library path for rpy2
+# Set R environment variables
 ENV R_HOME=/usr/local/lib/R
-ENV LD_LIBRARY_PATH=/usr/local/lib/R/lib:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=/usr/local/lib/R/lib:$LD_LIBRARY_PATH
 
 # Install R packages
-RUN R -e "install.packages('BiocManager', repos='http://cran.rstudio.com/')" && \
-    R -e "BiocManager::install(c('DESeq2', 'clusterProfiler', 'enrichplot', 'DOSE', 'org.Mm.eg.db', 'org.Hs.eg.db', 'AnnotationDbi'), ask=FALSE)" && \
-    R -e "install.packages('ggplot2', repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')"
+RUN R -e "BiocManager::install(c('DESeq2', 'clusterProfiler', 'enrichplot', 'DOSE', 'org.Mm.eg.db', 'org.Hs.eg.db', 'AnnotationDbi'), update=FALSE, ask=FALSE)"
+RUN R -e "install.packages('ggplot2', repos='https://cloud.r-project.org')"
 
-# Verify R packages
-RUN R -e "library(DESeq2); library(clusterProfiler); library(enrichplot)"
+# Set working directory
+WORKDIR /app
 
-# Install Python packages
+# Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy proto files
 COPY proto/ ./proto/
@@ -48,24 +39,26 @@ COPY proto/ ./proto/
 # Generate gRPC code
 RUN mkdir -p generated && \
     touch generated/__init__.py && \
-    python -m grpc_tools.protoc \
+    python3 -m grpc_tools.protoc \
         -I./proto \
         --python_out=./generated \
         --grpc_python_out=./generated \
         ./proto/bioinformatics_service.proto && \
-    sed -i 's/^import bioinformatics_service_pb2/from . import bioinformatics_service_pb2/' generated/bioinformatics_service_pb2_grpc.py && \
-    python -m grpc_tools.protoc \
-        -I./proto \
-        --python_out=./generated \
-        --grpc_python_out=./generated \
-        ./proto/data_service.proto && \
-    sed -i 's/^import data_service_pb2/from . import data_service_pb2/' generated/data_service_pb2_grpc.py
+    sed -i 's/^import bioinformatics_service_pb2/from . import bioinformatics_service_pb2/' generated/bioinformatics_service_pb2_grpc.py
 
+# Set PYTHONPATH
 ENV PYTHONPATH=/app
 
-COPY r_scripts/ ./r_scripts/
+# Copy source code
 COPY src/ ./src/
+COPY r_scripts/ ./r_scripts/
 
+# Expose gRPC port
 EXPOSE 50054
 
-CMD ["python", "-m", "src.server"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python3 -c "import grpc; channel = grpc.insecure_channel('localhost:50054'); channel.close()" || exit 1
+
+# Run server
+CMD ["python3", "-m", "src.server"]

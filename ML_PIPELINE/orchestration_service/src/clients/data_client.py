@@ -1,8 +1,17 @@
 # orchestration-service/src/clients/data_client.py
 import grpc
 from typing import List, Dict, Optional
-from generated import data_service_pb2, data_service_pb2_grpc
 import logging
+import sys
+from pathlib import Path
+
+#from generated import data_service_pb2, data_service_pb2_grpc
+# Add parent directory (orchestration_service) to path
+_orchestration_path = Path(__file__).resolve().parent.parent.parent
+if str(_orchestration_path) not in sys.path:
+    sys.path.insert(0, str(_orchestration_path))
+
+from generated import data_service_pb2, data_service_pb2_grpc
 
 logger = logging.getLogger(__name__)
 
@@ -66,14 +75,14 @@ class DataServiceClient:
         """Upload and validate a dataset"""
         try:
             request = data_service_pb2.UploadRequest(
-                file_content=dataset_content,  # Note: file_content, not dataset_content
+                file_content=dataset_content,
                 format=format,
-                dataset_id="",  # Empty = auto-generate
+                dataset_id="",
                 exclude_columns=exclude_columns,
                 cv_step=cv_step
             )
 
-            response = self.stub.UploadDataset(request)  # Note: UploadDataset, not ValidateDataset
+            response = self.stub.UploadDataset(request)
             return self._validation_result_to_dict(response)
             
         
@@ -87,7 +96,7 @@ class DataServiceClient:
     def validate_dataset(self, dataset_content: bytes, format: str = "csv", exclude_columns: List[str] = []) -> Dict:
         """Validate a dataset (does not store — use upload_dataset to store)"""
         try:
-            request = data_service_pb2.ValidateRequest(
+            request = data_service_pb2.ValidationRequest(
                 dataset_content=dataset_content,
                 format=format,
                 exclude_columns=exclude_columns
@@ -118,23 +127,55 @@ class DataServiceClient:
             logger.error(f"gRPC error in download_dataset: {e.code()} - {e.details()}")
             raise
 
+    def filter_dataset(self, dataset_id: str, cv_step: float = 0.25, min_features: int = 1000) -> Dict:
+        """Filter dataset with CV filtering (no transformations)"""
+        try:
+            request = data_service_pb2.FilterRequest(
+                dataset_id=dataset_id,
+                cv_step=cv_step,
+                min_features=min_features
+            )
+        
+            response = self.stub.FilterDataset(request)
+        
+            return {
+                "success": response.success,
+                "filtered_dataset_id": response.filtered_dataset_id if response.success else None,
+                "error_message": response.error_message if not response.success else None,
+                "dataset_info": {
+                    "dataset_id": response.dataset_info.dataset_id,
+                    "num_rows": response.dataset_info.num_rows,
+                    "num_columns": response.dataset_info.num_columns,
+                    "size_bytes": response.dataset_info.size_bytes
+                } if response.success else None
+            }
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error in filter_dataset: {e.code()} - {e.details()}")
+            raise
+
     def apply_transformations(self, dataset_id: str,
                                transformations: List[Dict]) -> Dict:
         """Apply transformations to a dataset"""
         try:
+            # FIX 1: Use ApplyTransformationRequest, not TransformRequest
             transform_messages = [
                 data_service_pb2.Transformation(
                     type=t["type"],
-                    columns=t["columns"],
-                    params=t.get("params", {})
+                    columns=t.get("columns", []),
+                    parameters=t.get("parameters", {})  # FIX 2: Use params (proto field name)
                 )
                 for t in transformations
             ]
-            request = data_service_pb2.TransformRequest(
+            
+            # FIX 3: Use ApplyTransformationRequest
+            request = data_service_pb2.ApplyTransformationRequest(
                 dataset_id=dataset_id,
                 transformations=transform_messages
             )
+            
+            # FIX 4: Call ApplyTransformation RPC
             response = self.stub.ApplyTransformation(request)
+            
             return {
                 "success": response.success,
                 "transformed_dataset_id": response.transformed_dataset_id if response.success else None,
@@ -162,7 +203,8 @@ class DataServiceClient:
     def get_dataset_info(self, dataset_id: str) -> Dict:
         """Get information about a dataset"""
         try:
-            request = data_service_pb2.DatasetInfoRequest(dataset_id=dataset_id)
+            # FIX 5: Use GetDatasetInfoRequest (correct name)
+            request = data_service_pb2.GetDatasetInfoRequest(dataset_id=dataset_id)
             response = self.stub.GetDatasetInfo(request)
             return {
                 "dataset_id": response.dataset_id,
@@ -186,17 +228,10 @@ class DataServiceClient:
     def health_check(self) -> bool:
         """Check if Data Service is healthy"""
         try:
-            import pandas as pd
-            from io import BytesIO
-            test_df = pd.DataFrame({'test': [1, 2, 3]})
-            csv_buffer = BytesIO()
-            test_df.to_csv(csv_buffer, index=False)
-            request = data_service_pb2.UploadRequest(
-                file_content=csv_buffer.getvalue(),
-                format="csv"
-            )
-            response = self.stub.UploadDataset(request, timeout=300000000)
-            return response.is_valid
+            # FIX 6: Use HealthCheck RPC instead of uploading test data
+            request = data_service_pb2.HealthCheckRequest()
+            response = self.stub.HealthCheck(request, timeout=5)
+            return response.healthy
         except grpc.RpcError as e:
             logger.error(f"Health check failed: {e.code()} - {e.details()}")
             return False
