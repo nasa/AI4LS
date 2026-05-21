@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 import pandas as pd
 import os
+import random
 
 # Add paths
 bio_service_path = Path(__file__).parent / "bioinformatics_service"
@@ -395,9 +396,11 @@ def compute_feature_importance(model_id, dataset_id, methods=['built_in']):
     # Set default parameters for each method
     params = {}
     
+    
     if 'permutation' in methods:
         params['n_repeats'] = '10'
-        params['random_state'] = '42'
+        #params['random_state'] = '42'
+        params['random_state'] = random.randint(0,100) 
 
     if 'recursive' in methods:
         # Get number of features to calculate better defaults
@@ -567,7 +570,8 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
             "hyperparameters": {},
             "metrics": ["accuracy", "f1_score"],
             "test_size": test_size,
-            "random_state": 42,
+            #"random_state": 42,
+            "random_state": random.randint(0, 100), 
             "factor_name": factor_name,
             "factor_values": factor_values,
             "min_features": min_features,
