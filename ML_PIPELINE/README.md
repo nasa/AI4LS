@@ -103,7 +103,7 @@ cd AI4LS/ML_PIPELINE
 3. Run the `run_docker_pipeline.py` script against the data in OSD-48 to do classification using the random_forest algorithm.
 
 ```console
-python run_docker_pipeline.py --operation=download --osd_id=48 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=random_forest --test_size=0.2 --trans_list=n,s,l,t --fi_methods=built_in,rfe -pv 0.9 -qv 0.9 
+python run_docker_pipeline.py --operation=download --osd_id=48 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=random_forest --test_size=0.2 --trans_list=t,s --fi_methods=built_in,rfe -pv 0.05 -qv 0.05 -fc 1 --dgea=True
 ```
 4. Check the results directory for the CSV and PNG files 
  
@@ -111,10 +111,10 @@ python run_docker_pipeline.py --operation=download --osd_id=48 --target_column='
 ls -R results/
 ```
 
-5. Run the `run_docker_pipeline.py` script against the data in OSD-137 to do classification using the random_forest algorithm.
+5. Run the `run_docker_pipeline.py` script against the data in OSD-137 to do classification using the logistic_regression algorithm.
 
 ```console
-python run_docker_pipeline.py --operation=download --osd_id=137 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=random_forest --test_size=0.2 --trans_list=l,t --fi_methods=built_in,pfi,rfe --patterns=unnormalized -pv 0.9 -qv 0.9
+python run_docker_pipeline.py --operation=download --osd_id=137 --target_column='Factor Value[Spaceflight]'  --task_type=classification --algorithm=logistic_regression --test_size=0.2 --trans_list=l,t --fi_methods=pfi,rfe --patterns=unnormalized -pv 0.05 -qv 0.05 --dgea=True
 
 6. Check the results directory for the CSV and PNG files 
  
@@ -133,10 +133,10 @@ ls -R results/
 cd AI4LS/ML_PIPELINE
 ```
 
-3. Run the `run_docker_pipeline.py` script to upload a CSV file and do classification using the random_forest algorithm.
+3. Run the `run_docker_pipeline.py` script to upload a CSV file and do classification using the neural_network algorithm.
 
 ```console
-python run_docker_pipeline.py   -op upload   -tt classification   -al random_forest -if DATA/X_hne_class_nosample_100.csv -tc "Factor Value[Spaceflight]" -ec sample -sc sample -pv 0.9 -qv 0.9 -fi built_in 
+python run_docker_pipeline.py   -op upload   -tt classification   -al neural_network -if DATA/X_hne_class_nosample_100.csv -tc "Factor Value[Spaceflight]" -ec sample -sc sample -pv 0.05 -qv 0.05 -fi rfe --dgea=True 
 ```
 
 4. Check the results directory for the CSV and PNG files 
