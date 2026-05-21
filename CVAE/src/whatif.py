@@ -259,7 +259,11 @@ def decode_modified(model, dataset, mu_tensor, batches,
             flight = batch["flight"].clone()
 
             # apply the change
-            new_t = torch.full_like(strain, new_val)
+            # create a batch-sized tensor filled with new_val
+            # (dtype=long, same device as other tensors)
+            new_t = torch.full(
+                (z.shape[0],), new_val, dtype=torch.long, device=device
+            )
             if change_condition == "flight":
                 flight = new_t
             elif change_condition == "tissue":
@@ -521,6 +525,247 @@ def run_population(args, model, dataset, out_dir, device):
                     "mean_counterfactual", "delta"]].head(10).to_string(index=False))
 
 
+
+# ---------------------------------------------------------------------------
+# Interaction analysis: strain x flight (or any covariate x flight)
+# ---------------------------------------------------------------------------
+
+def run_interaction(args, model, dataset, out_dir, device):
+    """
+    Compute the interaction effect between flight and a second covariate.
+
+    For each pair of values of covariate_b, computes:
+        delta_A = flight_effect(tissue, strain_A, sex, euth)
+        delta_B = flight_effect(tissue, strain_B, sex, euth)
+        interaction = delta_A - delta_B
+
+    Genes with large interaction are those where the spaceflight response
+    differs between the two covariate values.
+
+    Example:
+        Does spaceflight affect C57BL/6J liver differently than BALB/c liver?
+
+    Usage:
+        python whatif.py \
+            --mode interaction \
+            --tissue Liver \
+            --interact_condition strain \
+            --interact_value_a C57BL/6J \
+            --interact_value_b BALB/c
+    """
+    print("\n=== Interaction Analysis ===")
+    print("Tissue: " + str(args.tissue))
+    print("Interact condition: " + args.interact_condition)
+    print("Value A: " + args.interact_value_a)
+    print("Value B: " + args.interact_value_b)
+
+    def get_flight_delta(condition_val):
+        """
+        For a given value of interact_condition, compute the population-level
+        flight effect: mean(z | condition) decoded under flight=1 minus flight=0.
+        """
+        # build filter kwargs — set interact_condition to condition_val
+        filter_kwargs = {
+            "tissue": args.tissue,
+            "strain": args.strain,
+            "sex":    args.sex,
+            "euth":   args.euth,
+            "flight": None,   # include both conditions for averaging
+        }
+        # override the interact condition with specific value
+        filter_kwargs[args.interact_condition] = condition_val
+
+        indices, meta_df = select_samples(dataset, **filter_kwargs)
+        print("  " + condition_val + ": " + str(len(indices)) + " samples")
+
+        mu, batches = encode_samples(model, dataset, indices, device)
+        mu_mean = mu.mean(dim=0, keepdim=True)
+        ref_single = {k: v[:1] for k, v in batches[0].items()}
+
+        # decode under flight=1
+        cf_flight = decode_modified(
+            model, dataset, mu_mean, [ref_single],
+            change_condition="flight", change_to=1, device=device,
+        )
+        # decode under flight=0
+        cf_ground = decode_modified(
+            model, dataset, mu_mean, [ref_single],
+            change_condition="flight", change_to=0, device=device,
+        )
+        return cf_flight[0] - cf_ground[0]   # (n_genes,) flight effect
+
+    print("\nComputing flight effect for " + args.interact_value_a + "...")
+    delta_a = get_flight_delta(args.interact_value_a)
+
+    print("Computing flight effect for " + args.interact_value_b + "...")
+    delta_b = get_flight_delta(args.interact_value_b)
+
+    # interaction = difference in flight effects
+    interaction = delta_a - delta_b
+    abs_interaction = np.abs(interaction)
+
+    df = pd.DataFrame({
+        "ensembl_id":    dataset.ensembl_ids,
+        "symbol":        dataset.gene_symbols,
+        "flight_delta_" + args.interact_value_a.replace("/", "-"): delta_a,
+        "flight_delta_" + args.interact_value_b.replace("/", "-"): delta_b,
+        "interaction":   interaction,
+        "abs_interaction": abs_interaction,
+    }).sort_values("abs_interaction", ascending=False).reset_index(drop=True)
+    df.insert(0, "rank", range(1, len(df) + 1))
+
+    # split into genes where A responds more vs B responds more
+    top_a = df[df["interaction"] > 0].head(args.n_top).reset_index(drop=True)
+    top_b = df[df["interaction"] < 0].head(args.n_top).reset_index(drop=True)
+
+    df.to_csv(out_dir / "interaction_all_genes.csv", index=False)
+    top_a.to_csv(out_dir / ("stronger_in_" + args.interact_value_a.replace("/", "-") + ".csv"), index=False)
+    top_b.to_csv(out_dir / ("stronger_in_" + args.interact_value_b.replace("/", "-") + ".csv"), index=False)
+
+    print("\nSaved: interaction_all_genes.csv")
+    print("Saved: stronger_in_" + args.interact_value_a.replace("/", "-") + ".csv")
+    print("Saved: stronger_in_" + args.interact_value_b.replace("/", "-") + ".csv")
+
+    print("\nTop 10 genes with stronger spaceflight response in " + args.interact_value_a + ":")
+    print(top_a[["rank", "symbol",
+                  "flight_delta_" + args.interact_value_a.replace("/", "-"),
+                  "flight_delta_" + args.interact_value_b.replace("/", "-"),
+                  "interaction"]].head(10).to_string(index=False))
+
+    print("\nTop 10 genes with stronger spaceflight response in " + args.interact_value_b + ":")
+    print(top_b[["rank", "symbol",
+                  "flight_delta_" + args.interact_value_a.replace("/", "-"),
+                  "flight_delta_" + args.interact_value_b.replace("/", "-"),
+                  "interaction"]].head(10).to_string(index=False))
+
+
+# ---------------------------------------------------------------------------
+# Euthanasia artifact quantification
+# ---------------------------------------------------------------------------
+
+def run_artifact(args, model, dataset, out_dir, device):
+    """
+    Quantify how much of the observed spaceflight signal is confounded
+    by euthanasia method.
+
+    For a given tissue, computes the predicted expression under spaceflight
+    for each euthanasia method, then identifies genes where the euthanasia
+    method changes the apparent spaceflight response.
+
+    This answers: "Which spaceflight DE genes are actually euthanasia artifacts?"
+
+    Usage:
+        python whatif.py \
+            --mode artifact \
+            --tissue Liver \
+            --euth_a Isoflurane \
+            --euth_b CO2
+    """
+    print("\n=== Euthanasia Artifact Analysis ===")
+    print("Tissue:    " + str(args.tissue))
+    print("Euth A:    " + args.euth_a)
+    print("Euth B:    " + args.euth_b)
+
+    def get_spaceflight_effect(euth_val):
+        """
+        For a given euthanasia method, compute population-level
+        spaceflight effect: decoded flight=1 minus decoded flight=0.
+        """
+        filter_kwargs = {
+            "tissue": args.tissue,
+            "strain": args.strain,
+            "sex":    args.sex,
+            "euth":   euth_val,
+            "flight": None,
+        }
+        indices, meta_df = select_samples(dataset, **filter_kwargs)
+        n_f = int((dataset.flight[indices] == 1).sum())
+        n_g = int((dataset.flight[indices] == 0).sum())
+        print("  " + euth_val + ": " + str(len(indices)) +
+              " samples (" + str(n_f) + "f/" + str(n_g) + "g)")
+
+        mu, batches = encode_samples(model, dataset, indices, device)
+        mu_mean  = mu.mean(dim=0, keepdim=True)
+        ref_single = {k: v[:1] for k, v in batches[0].items()}
+
+        cf_flight = decode_modified(
+            model, dataset, mu_mean, [ref_single],
+            change_condition="flight", change_to=1, device=device,
+        )
+        cf_ground = decode_modified(
+            model, dataset, mu_mean, [ref_single],
+            change_condition="flight", change_to=0, device=device,
+        )
+        return cf_flight[0] - cf_ground[0]   # (n_genes,) flight effect
+
+    print("\nComputing spaceflight effect under " + args.euth_a + "...")
+    delta_a = get_spaceflight_effect(args.euth_a)
+
+    print("Computing spaceflight effect under " + args.euth_b + "...")
+    delta_b = get_spaceflight_effect(args.euth_b)
+
+    # artifact = genes where euthanasia method changes the flight signal
+    artifact    = delta_a - delta_b
+    abs_artifact = np.abs(artifact)
+
+    # concordant = genes robust across both euthanasia methods
+    # (same sign and both large)
+    concordant = np.sign(delta_a) == np.sign(delta_b)
+    min_effect  = np.minimum(np.abs(delta_a), np.abs(delta_b))
+
+    df = pd.DataFrame({
+        "ensembl_id":             dataset.ensembl_ids,
+        "symbol":                 dataset.gene_symbols,
+        "flight_effect_" + args.euth_a: delta_a,
+        "flight_effect_" + args.euth_b: delta_b,
+        "artifact_delta":         artifact,
+        "abs_artifact":           abs_artifact,
+        "concordant":             concordant,
+        "min_effect_both_euths":  min_effect,
+    })
+
+    # Robust genes: concordant direction AND meaningful effect in both methods
+    robust = df[df["concordant"] & (df["min_effect_both_euths"] > 0.1)].copy()
+    robust = robust.sort_values("min_effect_both_euths", ascending=False).reset_index(drop=True)
+    robust.insert(0, "rank", range(1, len(robust) + 1))
+
+    # Artifact genes: large discordance between euthanasia methods
+    artifacts = df.sort_values("abs_artifact", ascending=False).head(args.n_top).reset_index(drop=True)
+    artifacts.insert(0, "rank", range(1, len(artifacts) + 1))
+
+    df.sort_values("abs_artifact", ascending=False).reset_index(drop=True).to_csv(
+        out_dir / "all_genes_artifact_analysis.csv", index=False
+    )
+    robust.to_csv(out_dir / "robust_spaceflight_genes.csv", index=False)
+    artifacts.to_csv(out_dir / "potential_artifact_genes.csv", index=False)
+
+    print("\nSaved: all_genes_artifact_analysis.csv")
+    print("Saved: robust_spaceflight_genes.csv  (" + str(len(robust)) + " genes)")
+    print("Saved: potential_artifact_genes.csv  (" + str(len(artifacts)) + " genes)")
+
+    print("\nTop 10 robust spaceflight genes (consistent across both euthanasia methods):")
+    cols = ["rank", "symbol",
+            "flight_effect_" + args.euth_a,
+            "flight_effect_" + args.euth_b,
+            "min_effect_both_euths"]
+    print(robust[cols].head(10).to_string(index=False))
+
+    print("\nTop 10 potential artifact genes (diverge by euthanasia method):")
+    art_cols = ["rank", "symbol",
+                "flight_effect_" + args.euth_a,
+                "flight_effect_" + args.euth_b,
+                "artifact_delta"]
+    print(artifacts[art_cols].head(10).to_string(index=False))
+
+    # Summary stats
+    n_robust    = len(robust)
+    n_artifact  = int((abs_artifact > 0.1).sum())
+    print("\n=== Summary ===")
+    print("Robust spaceflight genes (concordant, |effect|>0.1 in both): " + str(n_robust))
+    print("Potential artifacts (|artifact_delta|>0.1):                  " + str(n_artifact))
+    print("Artifact fraction of active genes:                           " +
+          f"{n_artifact / max(n_robust + n_artifact, 1):.1%}")
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -558,8 +803,18 @@ def run(args):
         run_counterfactual(args, model, dataset, out_dir, device)
     elif args.mode == "population":
         run_population(args, model, dataset, out_dir, device)
+    elif args.mode == "interaction":
+        if not args.interact_condition:
+            raise ValueError("--interact_condition required for interaction mode")
+        if not args.interact_value_a or not args.interact_value_b:
+            raise ValueError("--interact_value_a and --interact_value_b required for interaction mode")
+        run_interaction(args, model, dataset, out_dir, device)
+    elif args.mode == "artifact":
+        if not args.euth_a or not args.euth_b:
+            raise ValueError("--euth_a and --euth_b required for artifact mode")
+        run_artifact(args, model, dataset, out_dir, device)
     else:
-        raise ValueError("--mode must be 'counterfactual' or 'population'")
+        raise ValueError("--mode must be counterfactual, population, interaction, or artifact")
 
     print("\nDone. Results saved to: " + str(out_dir))
 
@@ -577,8 +832,8 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", type=str, required=True)
     parser.add_argument("--data",       type=str, required=True)
     parser.add_argument("--mode",       type=str, required=True,
-                        choices=["counterfactual", "population"],
-                        help="counterfactual or population")
+                        choices=["counterfactual", "population", "interaction", "artifact"],
+                        help="counterfactual, population, interaction, or artifact")
 
     # sample filters (all optional — combine to narrow selection)
     parser.add_argument("--tissue", type=str, default=None,
@@ -601,6 +856,21 @@ if __name__ == "__main__":
                         help="Original value of the condition")
     parser.add_argument("--change_to",   type=str, default=None,
                         help="New value of the condition")
+
+    # interaction mode
+    parser.add_argument("--interact_condition", type=str, default=None,
+                        choices=["strain", "tissue", "sex", "euth"],
+                        help="Covariate to compare flight effects across (interaction mode)")
+    parser.add_argument("--interact_value_a",   type=str, default=None,
+                        help="First value of interact_condition, e.g. 'C57BL/6J'")
+    parser.add_argument("--interact_value_b",   type=str, default=None,
+                        help="Second value of interact_condition, e.g. 'BALB/c'")
+
+    # artifact mode
+    parser.add_argument("--euth_a", type=str, default=None,
+                        help="First euthanasia method for artifact analysis, e.g. 'Isoflurane'")
+    parser.add_argument("--euth_b", type=str, default=None,
+                        help="Second euthanasia method for artifact analysis, e.g. 'CO2'")
 
     # output
     parser.add_argument("--output_dir", type=str, default="whatif_results")
