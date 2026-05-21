@@ -34,6 +34,11 @@ class MLServiceStub(object):
                 request_serializer=ml__service__pb2.ListModelsRequest.SerializeToString,
                 response_deserializer=ml__service__pb2.ModelList.FromString,
                 _registered_method=True)
+        self.TrainEnsemble = channel.unary_unary(
+                '/mlservice.MLService/TrainEnsemble',
+                request_serializer=ml__service__pb2.EnsembleRequest.SerializeToString,
+                response_deserializer=ml__service__pb2.EnsembleResponse.FromString,
+                _registered_method=True)
 
 
 class MLServiceServicer(object):
@@ -67,6 +72,13 @@ class MLServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def TrainEnsemble(self, request, context):
+        """Train an ensemble of models 
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MLServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -89,6 +101,11 @@ def add_MLServiceServicer_to_server(servicer, server):
                     servicer.ListModels,
                     request_deserializer=ml__service__pb2.ListModelsRequest.FromString,
                     response_serializer=ml__service__pb2.ModelList.SerializeToString,
+            ),
+            'TrainEnsemble': grpc.unary_unary_rpc_method_handler(
+                    servicer.TrainEnsemble,
+                    request_deserializer=ml__service__pb2.EnsembleRequest.FromString,
+                    response_serializer=ml__service__pb2.EnsembleResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -199,6 +216,33 @@ class MLService(object):
             '/mlservice.MLService/ListModels',
             ml__service__pb2.ListModelsRequest.SerializeToString,
             ml__service__pb2.ModelList.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def TrainEnsemble(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/mlservice.MLService/TrainEnsemble',
+            ml__service__pb2.EnsembleRequest.SerializeToString,
+            ml__service__pb2.EnsembleResponse.FromString,
             options,
             channel_credentials,
             insecure,

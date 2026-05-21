@@ -23,9 +23,141 @@ ec_service_path = Path(__file__).parent / "experiment_service"
 sys.path.insert(0, str(ec_service_path))
 from experiment_service.src.experiment_client import ExperimentClient
 
+ml_service_path = Path(__file__).parent / "ml_service"
+sys.path.insert(0, str(ml_service_path))
+from ml_service.src.consensus import compute_consensus_features
 
 
 BASE_URL = "http://localhost:8000"
+
+# In run_docker_pipeline.py
+
+def run_ensemble_pipeline(dataset_id, target_column, factor_values, 
+                          top_n=100, consensus_threshold=3):
+    """Run ensemble training and compute consensus features"""
+
+    ml_service_path = Path(__file__).parent / "ml_service"
+    sys.path.insert(0, str(ml_service_path))
+    from ml_service.generated import ml_service_pb2_grpc, ml_service_pb2 
+    
+    # 1. Train ensemble of models
+    ml_channel = grpc.insecure_channel('localhost:50052')
+    ml_stub = ml_service_pb2_grpc.MLServiceStub(ml_channel)
+    
+    ensemble_request = ml_service_pb2.EnsembleRequest(
+        dataset_id=dataset_id,
+        target_column=target_column,
+        algorithms=["random_forest", "xgboost", "svm", "logistic_regression", "neural_network"]
+    )
+    
+    ensemble_response = ml_stub.TrainEnsemble(ensemble_request)
+    
+    if not ensemble_response.success:
+        print(f"✗ Ensemble training failed: {ensemble_response.error_message}")
+        return None
+    
+    print(f"✓ Trained {ensemble_response.num_models} models")
+    
+    # 2. Compute feature importance for each model
+    fi_service_path = Path(__file__).parent / "feature_importance_service"
+    sys.path.insert(0, str(fi_service_path))
+    from feature_importance_service.generated import feature_importance_service_pb2_grpc, feature_importance_service_pb2 
+
+    fi_channel = grpc.insecure_channel('localhost:50053')
+    fi_stub = feature_importance_service_pb2_grpc.FeatureImportanceServiceStub(fi_channel)
+    
+    feature_importance_results = []
+    
+    for model_result in ensemble_response.models:
+        print(f"Computing importance for {model_result.algorithm} ({model_result.model_id})...")
+        
+        fi_request = feature_importance_service_pb2.ImportanceRequest(
+            model_id=model_result.model_id,
+            dataset_id=dataset_id,
+            methods=["permutation"]
+        )
+        
+        fi_response = fi_stub.ComputeImportance(fi_request)
+        if fi_response.success:
+            # importances is a map: {"permutation": FeatureImportances}
+            if "permutation" in fi_response.importances:
+                perm_results = fi_response.importances["permutation"]
+        
+                # Access the scores from FeatureImportances
+                features = [
+                    {
+                        'feature': score.feature_name,
+                        'importance': score.importance,
+                        'rank': score.rank
+                    }
+                    for score in perm_results.scores
+                ]
+        
+                feature_importance_results.append({
+                    'model_id': model_result.model_id,
+                    'algorithm': model_result.algorithm,
+                    'features': features
+                })
+            else:
+                print(f"Warning: No permutation results for {model_result.model_id}")
+        else:
+            print(f"Failed to compute importance for {model_result.model_id}: {fi_response.error_message}")     
+    
+    # 3. Compute consensus features
+    ml_service_path = Path(__file__).parent / "ml_service"
+    sys.path.insert(0, str(ml_service_path))
+    from ml_service.src.consensus import compute_consensus_features
+    
+    consensus_result = compute_consensus_features(
+        feature_importance_results,
+        top_n=top_n,
+        consensus_threshold=consensus_threshold
+    )
+    
+    print(f"\n✓ Consensus Analysis:")
+    print(f"  Total models: {consensus_result['total_models']}")
+    print(f"  Consensus features: {consensus_result['num_consensus']}")
+    print(f"  Perfect consensus: {consensus_result['summary']['perfect_consensus']}")
+    print(f"  High consensus: {consensus_result['summary']['high_consensus']}")
+    
+    print(f"\nTop 10 Consensus Features:")
+    for i, feature in enumerate(consensus_result['consensus_features'][:10], 1):
+        print(f"  {i}. {feature['feature']}")
+        print(f"     - Selected by {feature['num_models']}/{consensus_result['total_models']} models")
+        print(f"     - Avg rank: {feature['avg_rank']:.1f} (best: {feature['best_rank']})")
+    
+    return consensus_result
+
+def get_data_client():
+    import importlib.util
+    # REMOVE experiment_service and ml_service from sys.path temporarily
+    paths_to_remove = [p for p in sys.path if 'experiment_service' in p or 'ml_service' in p]
+    for path in paths_to_remove:
+        sys.path.remove(path)
+
+    # Add orchestration_service to the FRONT of sys.path
+    orchestration_path = "/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service"
+    sys.path.insert(0, orchestration_path)
+    print(f"sys.path after cleanup: {sys.path[:3]}")
+
+
+    # Load data_client module directly
+    data_client_path = orchestration_path + "/src/clients/data_client.py"
+    spec = importlib.util.spec_from_file_location("data_client", data_client_path)
+    data_client_module = importlib.util.module_from_spec(spec)
+
+
+    # Now execute the module
+    spec.loader.exec_module(data_client_module)
+
+    # Get the class
+    DataServiceClient = data_client_module.DataServiceClient
+
+    # CREATE the data_client object
+    #data_client = DataServiceClient(service_url="data_service:50051")
+    data_client = DataServiceClient(service_url="localhost:50051")
+
+    return data_client
 
 
 def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_group="Ground Control", treatment_group="Space Flight", padj_threshold=0.05, log2fc_threshold=0, cv_step=0.25, min_features=1000):
@@ -35,29 +167,6 @@ def run_deseq2(dataset_id, target_column="Factor Value[Spaceflight]", control_gr
     print("\n" + "=" * 60)
     print("STEP 6: Run DESEQ2")
     print("=" * 60)
-
-    # filter dataset for deseq2 (keep raw counts, just filter genes)
-    '''script_dir = os.path.dirname(os.path.abspath(__file__))
-    orchestration_path = os.path.join(script_dir, "orchestration_service")
-
-    print(f"Adding to path: {orchestration_path}")
-    print(f"Path exists: {os.path.exists(orchestration_path)}")
-
-    # Add to path
-    sys.path.insert(0, orchestration_path)
-
-    # Verify the module exists
-    data_client_path = os.path.join(orchestration_path, "src", "clients", "data_client.py")
-    print(f"data_client.py exists: {os.path.exists(data_client_path)}")
-
-    # Now try to import
-    try:
-        from src.clients.data_client import DataServiceClient
-        print("✓ Import successful")
-    except ImportError as e:
-        print(f"✗ Import failed: {e}")
-        print(f"sys.path: {sys.path[:3]}")
-        raise'''
 
     # REMOVE experiment_service and ml_service from sys.path temporarily
     paths_to_remove = [p for p in sys.path if 'experiment_service' in p or 'ml_service' in p]
@@ -787,6 +896,23 @@ def main():
 
         # Step 8a: do KEGG analysis for ML
         # Step 8b: do KEGG analysis for DESeq2
+
+        # Call the ensemble pipeline function 
+        data_client = get_data_client()
+        filter_response = data_client.filter_dataset(
+            dataset_id = dataset_id,
+            cv_step=cv_step,
+            min_features=min_features)
+
+        filtered_dataset_id = filter_response['filtered_dataset_id']
+
+        consensus_result = run_ensemble_pipeline(
+            dataset_id=filtered_dataset_id,
+            target_column=target_column,
+            factor_values=factor_values,
+            top_n=100,
+            consensus_threshold=3
+        )
 
 
 
