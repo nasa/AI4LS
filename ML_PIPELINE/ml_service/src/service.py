@@ -7,6 +7,8 @@ from typing import Dict, Optional
 import logging
 from datetime import datetime
 
+import random
+
 from generated import ml_service_pb2, ml_service_pb2_grpc
 from src.trainers import ModelTrainer
 from src.model_store import ModelStore
@@ -91,7 +93,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 request.target_column,
                 list(request.feature_columns) if request.feature_columns else [],
                 request.test_size or 0.2,
-                request.random_state or 42
+                request.random_state or random.randint(0, 100)
             )
             
             yield ml_service_pb2.TrainingProgress(
@@ -277,10 +279,10 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
             # Prepare data
             X = df.drop(columns=[target_column])
             y = df[target_column]
-        
+       
             from sklearn.model_selection import train_test_split
             X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=0.2, random_state=42, stratify=y
+                X, y, test_size=0.2, random_state=random.randint(0, 100), stratify=y
             )
         
             logger.info(f"Train: {len(X_train)} samples, Test: {len(X_test)} samples")

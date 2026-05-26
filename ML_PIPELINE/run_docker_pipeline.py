@@ -399,8 +399,8 @@ def compute_feature_importance(model_id, dataset_id, methods=['built_in']):
     
     if 'permutation' in methods:
         params['n_repeats'] = '10'
-        #params['random_state'] = '42'
-        params['random_state'] = random.randint(0,100) 
+        params['random_state'] = '42'
+        #params['random_state'] = random.randint(0,100) 
 
     if 'recursive' in methods:
         # Get number of features to calculate better defaults
@@ -742,7 +742,7 @@ def main():
     min_features = args.min_features
     do_kegg_analysis = bool(args.kegg_analysis)
     dgea = bool(args.dgea)
-    organism_name = bool(args.organism_name)
+    organism_name = args.organism_name
 
     random_state = int(args.random_state)
     pvalue_threshold = float(args.pvalue_threshold) 
