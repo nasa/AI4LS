@@ -48,7 +48,9 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
     ensemble_request = ml_service_pb2.EnsembleRequest(
         dataset_id=dataset_id,
         target_column=target_column,
-        algorithms=["random_forest", "xgboost", "svm", "logistic_regression", "neural_network"]
+        algorithms=["random_forest", "svm", "logistic_regression", "neural_network"]
+        #algorithms=["random_forest", "xgboost", "svm", "logistic_regression", "neural_network"]
+
     )
     
     ensemble_response = ml_stub.TrainEnsemble(ensemble_request)
