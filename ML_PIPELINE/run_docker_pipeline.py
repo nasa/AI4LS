@@ -11,6 +11,7 @@ import pandas as pd
 import os
 import random
 
+
 # Add paths
 bio_service_path = Path(__file__).parent / "bioinformatics_service"
 sys.path.insert(0, str(bio_service_path))
@@ -49,6 +50,7 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
         dataset_id=dataset_id,
         target_column=target_column,
         algorithms=["random_forest", "svm", "logistic_regression", "neural_network"]
+        #algorithms=["random_forest"]
         #algorithms=["random_forest", "xgboost", "svm", "logistic_regression", "neural_network"]
 
     )
@@ -77,7 +79,7 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
         fi_request = feature_importance_service_pb2.ImportanceRequest(
             model_id=model_result.model_id,
             dataset_id=dataset_id,
-            methods=["permutation"]
+            methods=["permutation", "recursive"]
         )
         
         fi_response = fi_stub.ComputeImportance(fi_request)

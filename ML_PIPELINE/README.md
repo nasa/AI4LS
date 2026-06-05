@@ -158,3 +158,31 @@ python view_experiments.py
 ```console
 python view_experiments.py  <experiment_id>
 ``` 
+
+## Manage artifacts
+
+# List all artifacts
+
+```console
+python utils/cleanup.py list experiments
+python utils/cleanup.py list models
+python utils/cleanup.py list datasets
+```
+
+# Preview deletions (dry-run)
+
+```console
+python utils/cleanup.py delete-experiment exp_abc123 --dry-run
+python utils/cleanup.py delete-model model_f4d97fe38159 --dry-run
+python utils/cleanup.py delete-dataset 65a3ddc6-b4e8 --dry-run
+```
+
+# Actually delete
+
+```console
+python utils/cleanup.py delete-experiment exp_abc123
+python utils/cleanup.py delete-model model_f4d97fe38159
+python utils/cleanup.py delete-dataset 65a3ddc6-b4e8
+python utils/cleanup.py delete-importance model_f4d97fe38159
+python utils/cleanup.py delete-kegg --analysis-id model_61abe71dee68
+```
