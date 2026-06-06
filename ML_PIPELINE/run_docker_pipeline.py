@@ -697,6 +697,7 @@ def main():
     parser.add_argument('-fc', '--l2fc_threshold', help='log2 fold change', type=float, default=0.0, required=False)
     parser.add_argument('-ka', '--kegg_analysis', help='do kegg analysis', type=bool, default=False, required=False)
     parser.add_argument('-on', '--organism_name', help='name of org (e.g. mmu)', default='mmu', required=False)
+    parser.add_argument('-mc', '--model_consensus', help='boolean run consensus', type=bool, default=False, required=False)
 
 
     args = parser.parse_args()
@@ -747,6 +748,7 @@ def main():
     do_kegg_analysis = bool(args.kegg_analysis)
     dgea = bool(args.dgea)
     organism_name = args.organism_name
+    model_consensus = bool(args.model_consensus)
 
     random_state = int(args.random_state)
     pvalue_threshold = float(args.pvalue_threshold) 
@@ -906,21 +908,22 @@ def main():
         # Step 8b: do KEGG analysis for DESeq2
 
         # Call the ensemble pipeline function 
-        data_client = get_data_client()
-        filter_response = data_client.filter_dataset(
-            dataset_id = dataset_id,
-            cv_step=cv_step,
-            min_features=min_features)
+        if model_consensus:
+            data_client = get_data_client()
+            filter_response = data_client.filter_dataset(
+                dataset_id = dataset_id,
+                cv_step=cv_step,
+                min_features=min_features)
 
-        filtered_dataset_id = filter_response['filtered_dataset_id']
+            filtered_dataset_id = filter_response['filtered_dataset_id']
 
-        consensus_result = run_ensemble_pipeline(
-            dataset_id=filtered_dataset_id,
-            target_column=target_column,
-            factor_values=factor_values,
-            top_n=100,
-            consensus_threshold=3
-        )
+            consensus_result = run_ensemble_pipeline(
+                dataset_id=filtered_dataset_id,
+                target_column=target_column,
+                factor_values=factor_values,
+                top_n=100,
+                consensus_threshold=3
+            )
 
 
 

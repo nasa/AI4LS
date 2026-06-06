@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Cleanup utility to delete experiments, datasets, models, feature importances, and KEGG analyses
+Works on host machine with proper path detection
 """
 
 import sys
@@ -20,51 +21,71 @@ logger = logging.getLogger(__name__)
 class PipelineCleanup:
     """Manage deletion of pipeline artifacts"""
     
-    def __init__(self):
-        # Base paths
-        self.ml_service_path = Path("/app/models")  # Inside Docker
-        self.data_service_path = Path("/app/datasets")  # Inside Docker
-        self.experiment_service_path = Path("/app/experiments")  # Inside Docker
-        self.bioinformatics_results_path = Path("/app/results")  # Inside Docker
+    def __init__(self, ml_models_path="./models", datasets_path="./datasets", 
+                 experiments_path="./experiments", results_path="./bioinformatics_service/results"):
+        # Set paths
+        self.ml_service_path = Path(ml_models_path)
+        self.data_service_path = Path(datasets_path)
+        self.experiment_service_path = Path(experiments_path)
+        self.bioinformatics_results_path = Path(results_path)
+        
+        logger.info(f"Models path: {self.ml_service_path}")
+        logger.info(f"Datasets path: {self.data_service_path}")
+        logger.info(f"Experiments path: {self.experiment_service_path}")
+        logger.info(f"Results path: {self.bioinformatics_results_path}")
     
     def delete_experiment(self, experiment_id: str, dry_run: bool = False) -> bool:
-        """Delete an experiment and all associated data"""
+        """Delete an experiment from experiments.json and all associated data"""
         try:
             logger.info(f"Deleting experiment: {experiment_id}")
             
-            # Load experiment to find associated resources
-            exp_file = self.experiment_service_path / f"{experiment_id}.json"
+            # Load experiments from experiments.json
+            exp_file = self.experiment_service_path / "experiments.json"
             
             if not exp_file.exists():
-                logger.error(f"Experiment not found: {experiment_id}")
+                logger.error(f"Experiments file not found: {exp_file}")
                 return False
             
             with open(exp_file, 'r') as f:
-                exp_data = json.load(f)
+                experiments = json.load(f)
+            
+            # Find the experiment
+            if experiment_id not in experiments:
+                logger.error(f"Experiment not found: {experiment_id}")
+                logger.info(f"Available experiments: {list(experiments.keys())}")
+                return False
+            
+            exp_data = experiments[experiment_id]
+            
+            logger.info(f"Found experiment: {exp_data.get('description', 'N/A')}")
             
             # Delete associated datasets
             if 'datasets' in exp_data:
                 for dataset_type, dataset_id in exp_data['datasets'].items():
                     if dataset_id:
+                        logger.info(f"Deleting associated dataset: {dataset_id}")
                         self.delete_dataset(dataset_id, dry_run=dry_run)
             
             # Delete associated models
             if 'models' in exp_data:
                 for model_info in exp_data['models']:
                     if 'model_id' in model_info:
+                        logger.info(f"Deleting associated model: {model_info['model_id']}")
                         self.delete_model(model_info['model_id'], dry_run=dry_run)
             
-            # Delete experiment file
+            # Remove experiment from experiments.json
             if not dry_run:
-                exp_file.unlink()
-                logger.info(f"✓ Deleted experiment file: {exp_file}")
+                del experiments[experiment_id]
+                with open(exp_file, 'w') as f:
+                    json.dump(experiments, f, indent=2)
+                logger.info(f"✓ Deleted experiment {experiment_id} from {exp_file}")
             else:
-                logger.info(f"[DRY RUN] Would delete experiment file: {exp_file}")
+                logger.info(f"[DRY RUN] Would delete experiment {experiment_id} from {exp_file}")
             
             return True
             
         except Exception as e:
-            logger.error(f"Failed to delete experiment {experiment_id}: {e}")
+            logger.error(f"Failed to delete experiment {experiment_id}: {e}", exc_info=True)
             return False
     
     def delete_dataset(self, dataset_id: str, dry_run: bool = False) -> bool:
@@ -198,22 +219,24 @@ class PipelineCleanup:
     def list_experiments(self) -> list:
         """List all experiments"""
         try:
-            exp_files = list(self.experiment_service_path.glob("exp_*.json"))
-            experiments = []
+            exp_file = self.experiment_service_path / "experiments.json"
             
-            for exp_file in exp_files:
-                try:
-                    with open(exp_file, 'r') as f:
-                        exp_data = json.load(f)
-                    experiments.append({
-                        'experiment_id': exp_data.get('experiment_id'),
-                        'status': exp_data.get('status'),
-                        'created_at': exp_data.get('created_at'),
-                        'num_models': len(exp_data.get('models', [])),
-                        'file': str(exp_file)
-                    })
-                except Exception as e:
-                    logger.warning(f"Could not parse {exp_file}: {e}")
+            if not exp_file.exists():
+                logger.warning("No experiments file found")
+                return []
+            
+            with open(exp_file, 'r') as f:
+                exp_data = json.load(f)
+            
+            experiments = []
+            for exp_id, exp_info in exp_data.items():
+                experiments.append({
+                    'experiment_id': exp_id,
+                    'status': exp_info.get('status'),
+                    'created_at': exp_info.get('created_at'),
+                    'description': exp_info.get('description', ''),
+                    'num_models': len(exp_info.get('models', []))
+                })
             
             return experiments
             
@@ -271,7 +294,7 @@ class PipelineCleanup:
                     'files': files,
                     'num_files': len(files)
                 }
-                for dataset_id, files in datasets.items()
+                for dataset_id, files in sorted(datasets.items())
             ]
             
         except Exception as e:
@@ -283,6 +306,12 @@ def main():
     parser = argparse.ArgumentParser(
         description='Clean up ML pipeline artifacts (experiments, datasets, models, analyses)'
     )
+    
+    # Path arguments (defaults to your local structure)
+    parser.add_argument('--ml-models-path', default='./models', help='Path to ML service models directory (default: ./models)')
+    parser.add_argument('--datasets-path', default='./datasets', help='Path to data service datasets directory (default: ./datasets)')
+    parser.add_argument('--experiments-path', default='./experiments', help='Path to experiment service directory (default: ./experiments)')
+    parser.add_argument('--results-path', default='./bioinformatics_service/results', help='Path to bioinformatics results directory')
     
     subparsers = parser.add_subparsers(dest='command', help='Command to execute')
     
@@ -319,7 +348,16 @@ def main():
     
     args = parser.parse_args()
     
-    cleanup = PipelineCleanup()
+    cleanup = PipelineCleanup(
+        ml_models_path=args.ml_models_path,
+        datasets_path=args.datasets_path,
+        experiments_path=args.experiments_path,
+        results_path=args.results_path
+    )
+    
+    if not args.command:
+        parser.print_help()
+        return
     
     if args.command == 'delete-experiment':
         if cleanup.delete_experiment(args.experiment_id, dry_run=args.dry_run):
@@ -360,13 +398,14 @@ def main():
         if args.type == 'experiments':
             experiments = cleanup.list_experiments()
             if experiments:
-                print("\n" + "=" * 80)
+                print("\n" + "=" * 100)
                 print("EXPERIMENTS")
-                print("=" * 80)
-                print(f"{'ID':<30} {'Status':<12} {'Models':<8} {'Created'}")
-                print("-" * 80)
+                print("=" * 100)
+                print(f"{'ID':<36} {'Status':<12} {'Description':<35} {'Models':<8}")
+                print("-" * 100)
                 for exp in experiments:
-                    print(f"{exp['experiment_id']:<30} {exp['status']:<12} {exp['num_models']:<8} {exp['created_at']}")
+                    desc = exp['description'][:32] if exp['description'] else ''
+                    print(f"{exp['experiment_id']:<36} {exp['status']:<12} {desc:<35} {exp['num_models']:<8}")
             else:
                 print("No experiments found")
         
@@ -376,10 +415,10 @@ def main():
                 print("\n" + "=" * 80)
                 print("MODELS")
                 print("=" * 80)
-                print(f"{'ID':<30} {'Algorithm':<20} {'Task':<15} {'Created'}")
+                print(f"{'ID':<36} {'Algorithm':<20} {'Task':<15}")
                 print("-" * 80)
                 for model in models:
-                    print(f"{model['model_id']:<30} {model['algorithm']:<20} {model['task_type']:<15} {model['created_at']}")
+                    print(f"{model['model_id']:<36} {model['algorithm']:<20} {model['task_type']:<15}")
             else:
                 print("No models found")
         
@@ -389,15 +428,12 @@ def main():
                 print("\n" + "=" * 80)
                 print("DATASETS")
                 print("=" * 80)
-                print(f"{'Dataset ID':<40} {'Files':<8} {'Variants'}")
+                print(f"{'Dataset ID':<40} {'Files':<8}")
                 print("-" * 80)
                 for dataset in datasets:
-                    print(f"{dataset['dataset_id']:<40} {dataset['num_files']:<8} {', '.join(dataset['files'])}")
+                    print(f"{dataset['dataset_id']:<40} {dataset['num_files']:<8}")
             else:
                 print("No datasets found")
-    
-    else:
-        parser.print_help()
 
 
 if __name__ == '__main__':
