@@ -1,8 +1,7 @@
-
-models/
-experiments/
-datasets/
-results/
+models/*
+experiments/*
+datasets/*
+results/*
 bioinformatics_service/src/__pycache__/deseq2_analysis.cpython-310.pyc
 bioinformatics_service/src/__pycache__/service.cpython-310.pyc
 data_service/generated/__pycache__/__init__.cpython-310.pyc

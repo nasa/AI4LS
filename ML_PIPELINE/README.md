@@ -145,16 +145,72 @@ python run_docker_pipeline.py   -op upload   -tt classification   -al neural_net
 ls -R results/
 ```
 
-## Check experiments that you've run
+# Manage artifacts
 
-1. Get list of experiments
+## List all artifacts
 
 ```console
-python view_experiments.py 
+python utils/cleanup.py list experiments
+python utils/cleanup.py list models
+python utils/cleanup.py list datasets
 ```
 
-2. Check specific experiment
+## Preview deletions (dry-run)
 
 ```console
-python view_experiments.py  <experiment_id>
-``` 
+python utils/cleanup.py delete-experiment exp_abc123 --dry-run
+python utils/cleanup.py delete-model model_f4d97fe38159 --dry-run
+python utils/cleanup.py delete-dataset 65a3ddc6-b4e8 --dry-run
+```
+
+## Actually delete
+
+```console
+python utils/cleanup.py delete-experiment exp_abc123
+python utils/cleanup.py delete-model model_f4d97fe38159
+python utils/cleanup.py delete-dataset 65a3ddc6-b4e8
+python utils/cleanup.py delete-importance model_f4d97fe38159
+python utils/cleanup.py delete-kegg --analysis-id model_61abe71dee68
+```
+
+# multi-dataset experiments
+## Combine all muscle tissue datasets
+```console
+python multi_dataset_pipeline.py --tissue muscle
+```
+
+## Other available tissues: bone, liver, kidney, heart, brain, blood, skin, intestine, lung
+```console
+python multi_dataset_pipeline.py --tissue brain
+```
+
+## Combine specific datasets
+```console
+python multi_dataset_pipeline.py --osd-ids "OSD-48,OSD-51,OSD-71"
+```
+
+## Single dataset still works
+```console
+python multi_dataset_pipeline.py --osd-ids "OSD-48"
+```
+
+## Customize the pipeline
+```console
+python multi_dataset_pipeline.py \
+  --tissue muscle \
+  --task_type classification \
+  --algorithm random_forest \
+  --test_size 0.2 \
+  --cv_step 0.25 \
+  --min_features 1000 \
+  --fi_methods "built_in,permutation"
+```
+
+## Custom factor values
+```console
+python multi_dataset_pipeline.py \
+  --osd-ids "OSD-48,OSD-51" \
+  --factor_name "Factor Value[Spaceflight]" \
+  --factor_values "Ground Control,Space Flight" \
+  --algorithm logistic_regression
+```
