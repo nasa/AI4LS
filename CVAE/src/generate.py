@@ -74,9 +74,44 @@ from model import SpaceflightCVAE
 # Model loading
 # ---------------------------------------------------------------------------
 
+
+def _arch_from_state_dict(ckpt):
+    """
+    Read true model architecture from state dict weights.
+    More reliable than ckpt["args"] which may be stale or incorrect.
+    """
+    sd   = ckpt["model_state"]
+
+    # which condition embeddings actually exist in the weights
+    conditions = [
+        c for c in ["tissue", "strain", "sex", "study", "euth"]
+        if f"embedder.embeddings.{c}.weight" in sd
+    ]
+    if not conditions:
+        conditions = ckpt.get("args", {}).get(
+            "conditions", ["tissue","strain","sex","study","euth"])
+
+    # latent dim from μ head output size
+    latent_dim = sd["encoder.mu.weight"].shape[0]
+
+    # embedding dims from weight shapes
+    def emb_dim(name, default):
+        key = f"embedder.embeddings.{name}.weight"
+        return int(sd[key].shape[1]) if key in sd else default
+
+    return dict(
+        conditions=conditions,
+        latent_dim=latent_dim,
+        tissue_emb_dim=emb_dim("tissue", 32),
+        strain_emb_dim=emb_dim("strain", 16),
+        sex_emb_dim=emb_dim("sex",     4),
+        study_emb_dim=emb_dim("study",  16),
+        euth_emb_dim=emb_dim("euth",    8),
+    )
+
 def load_model(checkpoint_path, dataset, device="cpu"):
-    ckpt  = torch.load(checkpoint_path, map_location=device)
-    args  = ckpt["args"]
+    ckpt  = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    arch  = _arch_from_state_dict(ckpt)
     model = SpaceflightCVAE(
         n_genes=dataset.n_genes,
         n_strains=dataset.n_strains,
@@ -84,17 +119,17 @@ def load_model(checkpoint_path, dataset, device="cpu"):
         n_studies=dataset.n_studies,
         n_tissues=dataset.n_tissues,
         n_euths=dataset.n_euths,
-        latent_dim=args["latent_dim"],
+        **arch,
         hidden_dims=[256, 128],
         dropout=0.0,
         grl_alpha=0.0,
     )
     model.load_state_dict(ckpt["model_state"])
     model.to(device).eval()
-    print("Loaded model from " + checkpoint_path +
-          " (epoch " + str(ckpt["epoch"]) +
-          ", val_loss=" + f"{ckpt['val_loss']:.4f})")
-    return model, args["latent_dim"]
+    print(f"Loaded {checkpoint_path} | epoch={ckpt['epoch']} "
+          f"val_loss={ckpt['val_loss']:.4f} | "
+          f"conditions={arch['conditions']} latent_dim={arch['latent_dim']}")
+    return model, arch["latent_dim"]
 
 
 # ---------------------------------------------------------------------------

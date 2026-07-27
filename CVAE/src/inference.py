@@ -42,9 +42,44 @@ from model import SpaceflightCVAE
 # Model loading
 # ---------------------------------------------------------------------------
 
+
+def _arch_from_state_dict(ckpt):
+    """
+    Read true model architecture from state dict weights.
+    More reliable than ckpt["args"] which may be stale or incorrect.
+    """
+    sd   = ckpt["model_state"]
+
+    # which condition embeddings actually exist in the weights
+    conditions = [
+        c for c in ["tissue", "strain", "sex", "study", "euth"]
+        if f"embedder.embeddings.{c}.weight" in sd
+    ]
+    if not conditions:
+        conditions = ckpt.get("args", {}).get(
+            "conditions", ["tissue","strain","sex","study","euth"])
+
+    # latent dim from μ head output size
+    latent_dim = sd["encoder.mu.weight"].shape[0]
+
+    # embedding dims from weight shapes
+    def emb_dim(name, default):
+        key = f"embedder.embeddings.{name}.weight"
+        return int(sd[key].shape[1]) if key in sd else default
+
+    return dict(
+        conditions=conditions,
+        latent_dim=latent_dim,
+        tissue_emb_dim=emb_dim("tissue", 32),
+        strain_emb_dim=emb_dim("strain", 16),
+        sex_emb_dim=emb_dim("sex",     4),
+        study_emb_dim=emb_dim("study",  16),
+        euth_emb_dim=emb_dim("euth",    8),
+    )
+
 def load_model(checkpoint_path, dataset, device="cpu"):
-    ckpt = torch.load(checkpoint_path, map_location=device)
-    args = ckpt["args"]
+    ckpt  = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    arch  = _arch_from_state_dict(ckpt)
     model = SpaceflightCVAE(
         n_genes=dataset.n_genes,
         n_strains=dataset.n_strains,
@@ -52,16 +87,16 @@ def load_model(checkpoint_path, dataset, device="cpu"):
         n_studies=dataset.n_studies,
         n_tissues=dataset.n_tissues,
         n_euths=dataset.n_euths,
-        latent_dim=args["latent_dim"],
-        hidden_dims=[256, 128],
+        **arch,
+        hidden_dims=args.hidden_dims,
         dropout=0.0,
         grl_alpha=0.0,
     )
     model.load_state_dict(ckpt["model_state"])
     model.to(device).eval()
-    print("Loaded model from " + str(checkpoint_path) +
-          " (epoch " + str(ckpt["epoch"]) +
-          ", val_loss=" + f"{ckpt['val_loss']:.4f})")
+    print(f"Loaded {checkpoint_path} | epoch={ckpt['epoch']} "
+          f"val_loss={ckpt['val_loss']:.4f} | "
+          f"conditions={arch['conditions']} latent_dim={arch['latent_dim']}")
     return model
 
 
@@ -339,6 +374,124 @@ def tissue_stratified_attribution(model, dataset, device="cpu",
     return pd.concat(all_dfs, ignore_index=True)
 
 
+
+
+def _compute_integrated_gradients(model, dataloader, device, n_steps=50):
+    """
+    Integrated gradients attribution.
+
+    For each sample, averages gradients along a linear interpolation
+    from a zero-expression baseline to the actual input, then multiplies
+    by (input - baseline).
+
+    This satisfies the completeness axiom:
+        sum(attribution) = model_output(x) - model_output(baseline)
+
+    More tissue-specific than vanilla gradients because it measures the
+    contribution of each gene's actual expression level rather than the
+    local gradient direction at a single point.
+
+    Args:
+        model:      SpaceflightCVAE (eval mode)
+        dataloader: DataLoader over samples to attribute
+        device:     torch device
+        n_steps:    number of interpolation steps (more = more accurate, slower)
+
+    Returns:
+        mean_attr: (n_genes,) mean absolute integrated gradient per gene
+    """
+    model.eval()
+    all_attrs = []
+
+    for batch in dataloader:
+        x_real = batch["x"].to(device)       # (B, n_genes)
+        strain = batch["strain"].to(device)
+        sex    = batch["sex"].to(device)
+        study  = batch["study"].to(device)
+        tissue = batch["tissue"].to(device)
+        euth   = batch["euth"].to(device)
+        flight = batch["flight"].to(device)
+
+        baseline = torch.zeros_like(x_real)   # zero expression as reference
+
+        # accumulate gradients across interpolation steps
+        accumulated_grads = torch.zeros_like(x_real)
+
+        for step in range(n_steps):
+            alpha   = step / (n_steps - 1)
+            x_interp = (baseline + alpha * (x_real - baseline)).detach()
+            x_interp.requires_grad_(True)
+
+            outputs = model(x_interp, strain, sex, study, tissue, euth, flight)
+            outputs["flight_logit"].sum().backward()
+
+            accumulated_grads = accumulated_grads + x_interp.grad.detach()
+            model.zero_grad()
+
+        # average gradients, scale by (input - baseline)
+        avg_grads   = accumulated_grads / n_steps
+        attribution = (avg_grads * (x_real - baseline))   # (B, n_genes)
+
+        # absolute value and average across samples in batch
+        all_attrs.append(attribution.abs().mean(dim=0).cpu().numpy())
+
+    return np.stack(all_attrs).mean(axis=0)   # (n_genes,)
+
+
+def gene_attribution_ig(model, dataloader, gene_symbols, ensembl_ids,
+                        device="cpu", n_steps=50, n_top=200,
+                        tissue_label=None):
+    """
+    Gene attribution using integrated gradients.
+    Returns top n_top genes ranked by mean absolute integrated gradient.
+    """
+    mean_attr = _compute_integrated_gradients(
+        model, dataloader, device, n_steps=n_steps
+    )
+    top_idx = np.argsort(mean_attr)[::-1][:n_top]
+    df = pd.DataFrame({
+        "rank":              range(1, n_top + 1),
+        "ensembl_id":        ensembl_ids[top_idx],
+        "symbol":            gene_symbols[top_idx],
+        "attribution_score": mean_attr[top_idx],
+    })
+    if tissue_label is not None:
+        df.insert(0, "tissue", tissue_label)
+    return df
+
+
+def tissue_stratified_attribution_ig(model, dataset, device="cpu",
+                                     n_steps=50, n_top=100,
+                                     min_flight_samples=5):
+    """
+    Integrated gradients attribution computed separately per tissue.
+    More tissue-specific than vanilla gradient attribution.
+    """
+    all_dfs = []
+    for tissue_idx, tissue_name in enumerate(dataset.tissue_enc.classes_):
+        mask     = dataset.tissue_ids == tissue_idx
+        n_flight = int((dataset.flight[mask] == 1).sum())
+        n_ground = int((dataset.flight[mask] == 0).sum())
+        if n_flight < min_flight_samples or n_ground < min_flight_samples:
+            print("  Skipping " + tissue_name +
+                  " (" + str(n_flight) + "f/" + str(n_ground) + "g)")
+            continue
+        indices = np.where(mask)[0]
+        loader  = DataLoader(Subset(dataset, indices),
+                             batch_size=32, shuffle=False, num_workers=2)
+        print("  " + tissue_name + ": " + str(n_flight) +
+              "f/" + str(n_ground) + "g  (n_steps=" + str(n_steps) + ")")
+        df = gene_attribution_ig(
+            model, loader,
+            gene_symbols=dataset.gene_symbols,
+            ensembl_ids=dataset.ensembl_ids,
+            device=device,
+            n_steps=n_steps,
+            n_top=n_top,
+            tissue_label=tissue_name,
+        )
+        all_dfs.append(df)
+    return pd.concat(all_dfs, ignore_index=True)
 
 # ---------------------------------------------------------------------------
 # Tissue-stratified differential expression
@@ -641,32 +794,56 @@ def run_analysis(args):
         )
 
 
-    # --- Global gene attribution ---
-    print("\nComputing global gene attribution...")
-    attr_df = gene_attribution(
-        model, full_loader,
-        gene_symbols=dataset.gene_symbols,
-        ensembl_ids=dataset.ensembl_ids,
-        device=device, n_top=200,
-    )
-    attr_df.to_csv(out_dir / "gene_attribution.csv", index=False)
+    # --- Gene attribution (vanilla or integrated gradients) ---
+    use_ig = args.attribution_method == "integrated_gradients"
+    method_label = "integrated gradients" if use_ig else "vanilla gradients"
 
-    attr_clean = clean_attribution(attr_df)
-    attr_clean.to_csv(out_dir / "gene_attribution_clean.csv", index=False)
-    print("  Saved: " + str(out_dir / "gene_attribution_clean.csv"))
-    print("\nTop 20 spaceflight-associated genes (characterized only):")
+    print("\nComputing global gene attribution (" + method_label + ")...")
+    if use_ig:
+        attr_df = gene_attribution_ig(
+            model, full_loader,
+            gene_symbols=dataset.gene_symbols,
+            ensembl_ids=dataset.ensembl_ids,
+            device=device, n_steps=args.ig_steps, n_top=200,
+        )
+        attr_df.to_csv(out_dir / "gene_attribution_ig.csv", index=False)
+        attr_clean = clean_attribution(attr_df)
+        attr_clean.to_csv(out_dir / "gene_attribution_ig_clean.csv", index=False)
+        print("  Saved: " + str(out_dir / "gene_attribution_ig_clean.csv"))
+    else:
+        attr_df = gene_attribution(
+            model, full_loader,
+            gene_symbols=dataset.gene_symbols,
+            ensembl_ids=dataset.ensembl_ids,
+            device=device, n_top=200,
+        )
+        attr_df.to_csv(out_dir / "gene_attribution.csv", index=False)
+        attr_clean = clean_attribution(attr_df)
+        attr_clean.to_csv(out_dir / "gene_attribution_clean.csv", index=False)
+        print("  Saved: " + str(out_dir / "gene_attribution_clean.csv"))
+
+    print("\nTop 20 spaceflight-associated genes (" + method_label + ", characterized only):")
     print(attr_clean.head(20).to_string(index=False))
 
     # --- Tissue-stratified attribution ---
-    print("\nComputing tissue-stratified gene attribution...")
-    tissue_attr_df = tissue_stratified_attribution(
-        model, dataset, device=device, n_top=100, min_flight_samples=5
-    )
-    tissue_attr_df.to_csv(out_dir / "gene_attribution_by_tissue.csv",
-                          index=False)
-    print("  Saved: " + str(out_dir / "gene_attribution_by_tissue.csv"))
+    print("\nComputing tissue-stratified gene attribution (" + method_label + ")...")
+    if use_ig:
+        tissue_attr_df = tissue_stratified_attribution_ig(
+            model, dataset, device=device,
+            n_steps=args.ig_steps, n_top=100, min_flight_samples=5
+        )
+        tissue_attr_df.to_csv(out_dir / "gene_attribution_ig_by_tissue.csv",
+                              index=False)
+        print("  Saved: " + str(out_dir / "gene_attribution_ig_by_tissue.csv"))
+    else:
+        tissue_attr_df = tissue_stratified_attribution(
+            model, dataset, device=device, n_top=100, min_flight_samples=5
+        )
+        tissue_attr_df.to_csv(out_dir / "gene_attribution_by_tissue.csv",
+                              index=False)
+        print("  Saved: " + str(out_dir / "gene_attribution_by_tissue.csv"))
 
-    tissue_out_dir = out_dir / "by_tissue"
+    tissue_out_dir = out_dir / ("by_tissue_ig" if use_ig else "by_tissue")
     tissue_out_dir.mkdir(exist_ok=True)
     for tissue_name, grp in tissue_attr_df.groupby("tissue"):
         clean = clean_attribution(grp.drop(columns="tissue"))
@@ -692,7 +869,8 @@ def run_analysis(args):
             fname = de_dir / (tissue_name.lower().replace(" ", "_") + "_de.csv")
             if fname.exists():
                 df = pd.read_csv(fname)
-                #df.insert(0, "tissue", tissue_name)
+                if "tissue" not in df.columns:
+                    df.insert(0, "tissue", tissue_name)
                 de_rows.append(df)
         if de_rows:
             de_combined = pd.concat(de_rows, ignore_index=True)
@@ -725,6 +903,11 @@ if __name__ == "__main__":
                         help="Skip Enrichr (use when offline)")
     parser.add_argument("--n_de_genes",        type=int,   default=200,
                         help="Top DE genes per tissue to save")
+    parser.add_argument("--attribution_method", type=str,   default="vanilla",
+                        choices=["vanilla", "integrated_gradients"],
+                        help="Gene attribution method (default: vanilla)")
+    parser.add_argument("--ig_steps",           type=int,   default=50,
+                        help="Interpolation steps for integrated gradients (default: 50)")
     parser.add_argument("--enrichment_genes",  type=int,   default=100,
                         help="Top genes per tissue for enrichment")
     parser.add_argument("--enrichment_cutoff", type=float, default=0.05,
@@ -733,5 +916,8 @@ if __name__ == "__main__":
                         help="t-SNE perplexity (default 30)")
     parser.add_argument("--tsne_n_iter",       type=int,   default=1000,
                         help="t-SNE iterations (default 1000)")
+    parser.add_argument("--hidden_dims",  type=int, nargs="+",
+                    default=[512, 256], help="dimensions of encoder layers")
+
     args = parser.parse_args()
     run_analysis(args)
