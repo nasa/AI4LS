@@ -164,6 +164,11 @@ def combine_and_run_pipeline(
     if fi_methods is None:
         fi_methods = ["built_in"]
     
+    # Filter out RFE for neural network algorithms (they don't have feature_importances_)
+    if algorithm in ["neural_network", "mlp", "nn"]:
+        fi_methods = [m for m in fi_methods if m != "rfe"]
+        logger.info(f"Removed RFE from feature importance methods for {algorithm} algorithm")
+    
     # Step 1: Get OSD IDs
     print("\n" + "=" * 80)
     print("STEP 1: RESOLVE DATASET IDS")
@@ -324,11 +329,17 @@ def combine_and_run_pipeline(
         print("=" * 80)
         
         try:
-            feature_importance_response = compute_feature_importance(
-                model_id=model_id,
-                dataset_id=dataset_id,
-                methods=fi_methods
-            )
+            try:
+                feature_importance_response = compute_feature_importance(
+                    model_id=model_id,
+                    dataset_id=dataset_id,
+                    methods=fi_methods
+                )
+            except Exception as e:
+                # If feature importance fails, log but continue
+                logger.warning(f"Feature importance computation failed: {e}")
+                logger.warning("Continuing without feature importance...")
+                feature_importance_response = None
             
             if feature_importance_response:
                 print("✓ Feature importance computed successfully")
