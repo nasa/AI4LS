@@ -169,8 +169,71 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         df = df.dropna(axis=1, thresh=col_threshold)
         
         return df
+
+
+    def _filter_cvs(self, df, start=None, step=None, min_features=1000):
+        """
+        NEW METHOD: Keep exactly top min_features most varied genes
     
-    def _filter_cvs(self, df, start, step=0.25, min_features=1000):
+        Args:
+            df: DataFrame with samples x genes
+            min_features: exact number of genes to keep (default: 1000)
+            start, step: ignored (kept for backward compatibility)
+    
+        Returns:
+            DataFrame with top min_features genes by coefficient of variation
+        """
+        logger.info("=" * 80)
+        logger.info("FILTERING BY COEFFICIENT OF VARIATION")
+        logger.info("=" * 80)
+    
+        # If we already have fewer genes than min_features, return as-is
+        if df.shape[1] <= min_features:
+            logger.info(f"Dataset has {df.shape[1]} genes, which is ≤ {min_features}. No filtering needed.")
+            return df
+    
+        logger.info(f"Starting genes: {df.shape[1]}")
+        logger.info(f"Target genes: {min_features}")
+    
+        # Step 1: Remove low-count genes (optional, but good for quality)
+        logger.info(f"\nRemoving low-count genes...")
+        min_count = df.shape[0] * 50
+        numeric_sums = df.sum(numeric_only=True)
+        cols_to_keep = numeric_sums[numeric_sums >= min_count].index
+        df_filtered = df[cols_to_keep].copy()
+        logger.info(f"After removing low-count: {df_filtered.shape[1]} genes")
+    
+        # Step 2: Calculate coefficient of variation for all genes
+        logger.info(f"\nCalculating coefficient of variation...")
+        cv_scores = {}
+    
+        for col in df_filtered.columns:
+            mean_val = np.mean(df_filtered[col])
+            std_val = np.std(df_filtered[col])
+        
+            # Avoid division by zero
+            if mean_val != 0:
+                cv = std_val / mean_val
+                cv_scores[col] = cv
+            else:
+                cv_scores[col] = 0
+    
+        # Step 3: Sort by CV and select top min_features
+        logger.info(f"Selecting top {min_features} genes by CV...")
+        sorted_genes = sorted(cv_scores.items(), key=lambda x: x[1], reverse=True)
+        top_genes = [gene for gene, cv in sorted_genes[:min_features]]
+    
+        logger.info(f"CV range: {sorted_genes[-1][1]:.6f} - {sorted_genes[0][1]:.6f}")
+        logger.info(f"Top gene CV: {sorted_genes[0][0]} = {sorted_genes[0][1]:.6f}")
+        logger.info(f"Bottom gene CV (rank {min_features}): {sorted_genes[min_features-1][0]} = {sorted_genes[min_features-1][1]:.6f}")
+    
+        # Step 4: Return DataFrame with top genes
+        df_result = df_filtered[top_genes]
+        logger.info(f"\nFiltered dataset: {df_result.shape[0]} samples × {df_result.shape[1]} genes")
+    
+        return df_result
+    
+    '''def _filter_cvs(self, df, start, step=0.25, min_features=1000):
         # calculate coefficient of variation
         # assumes samples x genes
         if df.shape[1] <= min_features:
@@ -202,7 +265,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                 start += step
                 logger.info(f"stepping up start: {start}")
 
-        return df[keep_columns_use]
+        return df[keep_columns_use]'''
     
     def transpose_df(self, df):
         # if num cols > num rows, assume cols = genes and rows = samples 
