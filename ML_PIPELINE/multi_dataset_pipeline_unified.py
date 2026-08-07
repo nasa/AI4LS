@@ -27,6 +27,68 @@ from feature_importance_service.generated import feature_importance_service_pb2,
 
 from ml_service.generated import ml_service_pb2_grpc, ml_service_pb2 
 
+def _filter_cvs(df, start=None, step=None, min_features=1000):
+    """
+    NEW METHOD: Keep exactly top min_features most varied genes
+    
+    Args:
+        df: DataFrame with samples x genes
+        min_features: exact number of genes to keep (default: 1000)
+        start, step: ignored (kept for backward compatibility)
+    
+    Returns:
+        DataFrame with top min_features genes by coefficient of variation
+    """
+    logger.info("=" * 80)
+    logger.info("FILTERING BY COEFFICIENT OF VARIATION")
+    logger.info("=" * 80)
+    
+    # If we already have fewer genes than min_features, return as-is
+    if df.shape[1] <= min_features:
+        logger.info(f"Dataset has {df.shape[1]} genes, which is ≤ {min_features}. No filtering needed.")
+        return df
+    
+    logger.info(f"Starting genes: {df.shape[1]}")
+    logger.info(f"Target genes: {min_features}")
+    
+    # Step 1: Remove low-count genes (optional, but good for quality)
+    logger.info(f"\nRemoving low-count genes...")
+    min_count = df.shape[0] * 50
+    numeric_sums = df.sum(numeric_only=True)
+    cols_to_keep = numeric_sums[numeric_sums >= min_count].index
+    df_filtered = df[cols_to_keep].copy()
+    logger.info(f"After removing low-count: {df_filtered.shape[1]} genes")
+
+    # Step 2: Calculate coefficient of variation for all genes
+    logger.info(f"\nCalculating coefficient of variation...")
+    cv_scores = {}
+
+    for col in df_filtered.columns:
+        mean_val = np.mean(df_filtered[col])
+        std_val = np.std(df_filtered[col])
+        
+        # Avoid division by zero
+        if mean_val != 0:
+            cv = std_val / mean_val
+            cv_scores[col] = cv
+        else:
+            cv_scores[col] = 0
+
+    # Step 3: Sort by CV and select top min_features
+    logger.info(f"Selecting top {min_features} genes by CV...")
+    sorted_genes = sorted(cv_scores.items(), key=lambda x: x[1], reverse=True)
+    top_genes = [gene for gene, cv in sorted_genes[:min_features]]
+    
+    logger.info(f"CV range: {sorted_genes[-1][1]:.6f} - {sorted_genes[0][1]:.6f}")
+    logger.info(f"Top gene CV: {sorted_genes[0][0]} = {sorted_genes[0][1]:.6f}")
+    logger.info(f"Bottom gene CV (rank {min_features}): {sorted_genes[min_features-1][0]} = {sorted_genes[min_features-1][1]:.6f}")
+    
+    # Step 4: Return DataFrame with top genes
+    df_result = df_filtered[top_genes]
+    logger.info(f"\nFiltered dataset: {df_result.shape[0]} samples × {df_result.shape[1]} genes")
+    
+    return df_result, top_genes
+
 def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000, trans_list=None):
     """
     Filter by coefficient of variation and apply transformations
@@ -39,37 +101,20 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
     logger.info("=" * 80)
     
     # Separate target from features
-    condition_cols = [col for col in df.columns if 'Factor' in col or 'Condition' in col]
-    feature_cols = [col for col in df.columns if col not in condition_cols and col != 'source_dataset']
+    feature_cols = [col for col in df.columns if col != target_column and col != 'source_dataset' ]
     
     X = df[feature_cols]
-    y = df[target_column] if target_column in df.columns else None
+    y = df[target_column]
+
     
     logger.info(f"Original features: {len(feature_cols)}")
     
     # Step 1: CV Filtering - Keep exactly top min_features by CV
     logger.info(f"\nApplying CV filtering...")
-    
-    # Calculate coefficient of variation for each gene
-    means = X.mean()
-    stds = X.std()
-    cv = stds / means  # Coefficient of variation
-    cv = cv.replace([np.inf, -np.inf], np.nan)
-    
-    # Sort by CV and select top min_features genes
-    cv_sorted = cv.sort_values(ascending=False)
-    top_n = min(min_features, len(feature_cols))  # Can't select more than available
-    
-    selected_features = cv_sorted.head(top_n).index.tolist()
-    logger.info(f"After CV filtering: {len(selected_features)} features (top {top_n} by CV)")
-    
-    # Show CV range
-    if top_n < len(cv_sorted):
-        top_cv = cv_sorted.iloc[0]
-        bottom_cv = cv_sorted.iloc[top_n-1]
-        logger.info(f"  CV range: {bottom_cv:.6f} - {top_cv:.6f}")
-    
-    X_filtered = X[selected_features].copy()
+
+    X_filtered, selected_features = _filter_cvs(X, start=0.25, step=0.25, min_features=1000)
+
+    print('before trans: ', X_filtered.head())
     
     # Step 2: Apply transformations
     if trans_list:
@@ -77,17 +122,15 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
         
         X_transformed = X_filtered.copy()
         
-        if 't' in trans_list or 'log' in trans_list:
+        if 't' in trans_list or 'tpm' in trans_list:
+            logger.info("  Applying tpm transformation...")
+        
+        if 'l' in trans_list or 'log' in trans_list:
             logger.info("  Applying log transformation...")
             # Add pseudocount to avoid log(0)
             X_transformed = np.log2(X_transformed + 1)
         
-        if 'l' in trans_list or 'standardize' in trans_list:
-            logger.info("  Applying standardization (z-score)...")
-            # Standardize each feature (column)
-            X_transformed = (X_transformed - X_transformed.mean()) / (X_transformed.std() + 1e-8)
-        
-        if 's' in trans_list:
+        if 's' in trans_list or 'std' in trans_list:
             logger.info("  Applying scaling...")
             # Min-max scaling
             X_transformed = (X_transformed - X_transformed.min()) / (X_transformed.max() - X_transformed.min() + 1e-8)
@@ -95,10 +138,12 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
         logger.info("No transformations specified")
         X_transformed = X_filtered.copy()
     
+
+    print('after trans: ', X_transformed.head())
+
     # Combine back with target
     df_filtered_transformed = X_transformed.copy()
-    if target_column in df.columns:
-        df_filtered_transformed[target_column] = df[target_column]
+    df_filtered_transformed[target_column] = df[target_column]
     
     # Add back source_dataset if present
     if 'source_dataset' in df.columns:
@@ -106,7 +151,8 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
     
     logger.info(f"\nFiltered & Transformed dataset:")
     logger.info(f"  Samples: {len(df_filtered_transformed)}")
-    logger.info(f"  Features: {len(selected_features)}")
+
+    print('after adding back source_dataset: ', df_filtered_transformed.head())
     
     return df_filtered_transformed, selected_features
 
@@ -158,8 +204,8 @@ def combine_and_run_pipeline(
     if patterns is None:
         patterns = ["unnormalized", "RSEM"]
     
-    if trans_list is None:
-        trans_list = ['t', 'l']  # log + standardize
+    '''if trans_list is None:
+        trans_list = ['t', 's']  # tpm + standardize '''
     
     if fi_methods is None:
         fi_methods = ["built_in"]
@@ -219,13 +265,6 @@ def combine_and_run_pipeline(
     print("STEP 4: PREPARE DATA")
     print("=" * 80)
     
-    if target_column is None:
-        condition_cols = [col for col in combined_df.columns if 'Factor' in col or 'Condition' in col]
-        if condition_cols:
-            target_column = condition_cols[0]
-        else:
-            raise ValueError("Could not determine target column")
-    
     print(f"Target column: {target_column}")
     
     # Ensure target has string values
@@ -242,7 +281,7 @@ def combine_and_run_pipeline(
     print("\n" + "=" * 80)
     print("STEP 5: FILTER AND TRANSFORM DATA")
     print("=" * 80)
-    
+
     try:
         df_filtered_transformed, selected_genes = filter_and_transform_data(
             df_clean,
@@ -272,6 +311,8 @@ def combine_and_run_pipeline(
         df_for_upload = df_filtered_transformed.copy()
         if 'source_dataset' in df_for_upload.columns:
             df_for_upload = df_for_upload.drop(columns=['source_dataset'])
+
+        #df_for_upload.to_csv('/Users/jcasalet/Desktop/df.csv', sep=',', index=None)
         
         df_for_upload.to_parquet(dataset_path)
         print(f"✓ Filtered & transformed dataset saved: {dataset_id}")
@@ -284,6 +325,9 @@ def combine_and_run_pipeline(
         import traceback
         traceback.print_exc()
         return None
+
+    # TODO fix combine+transform
+    df_for_upload
     
     # Step 7: Train single model
     print("\n" + "=" * 80)
@@ -325,7 +369,7 @@ def combine_and_run_pipeline(
     # Step 8: Feature Importance (single model)
     if do_feature_importance:
         print("\n" + "=" * 80)
-        print("STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)")
+        print("STEP 9: COMPUTE FEATURE IMPORTANCE (Single Model)")
         print("=" * 80)
         
         try:
@@ -365,7 +409,7 @@ def combine_and_run_pipeline(
     # Step 9: Ensemble Training with Consensus Features
     if do_ensemble:
         print("\n" + "=" * 80)
-        print("STEP 9: ENSEMBLE TRAINING & CONSENSUS FEATURES")
+        print("STEP 11: ENSEMBLE TRAINING & CONSENSUS FEATURES")
         print("=" * 80)
         
         try:
@@ -410,10 +454,10 @@ def combine_and_run_pipeline(
             import traceback
             traceback.print_exc()
     
-    # Step 10: KEGG Pathway Enrichment Analysis
+    # Step 11: KEGG Pathway Enrichment Analysis
     if do_kegg_analysis and feature_importance_response:
         print("\n" + "=" * 80)
-        print("STEP 10: KEGG PATHWAY ENRICHMENT")
+        print("STEP 12: KEGG PATHWAY ENRICHMENT")
         print("=" * 80)
         
         try:
@@ -493,7 +537,7 @@ def get_data_client():
 def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list, factor_name, factor_values, min_features, fi_methods, exclude_columns, cv_step):
     """Run full ML pipeline"""
     print("\n" + "=" * 60)
-    print("STEP 3: Run ML Pipeline")
+    print("STEP 8: Run ML Pipeline")
     print("=" * 60)
 
     # remove sample and target from features
@@ -592,7 +636,7 @@ def compute_feature_importance(model_id, dataset_id, methods=['built_in']):
     stub = feature_importance_service_pb2_grpc.FeatureImportanceServiceStub(channel)
     
     print("\n" + "=" * 60)
-    print("STEP 5: COMPUTE FEATURE IMPORTANCE")
+    print("STEP 10: COMPUTE FEATURE IMPORTANCE")
     print("=" * 60)
     
     print(f"Computing feature importance for model: {model_id}")
@@ -787,10 +831,6 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
     # Lazy import to avoid path conflicts
     _ml_path = str(Path(__file__).parent / "ml_service")
     sys.path.insert(0, _ml_path)
-    '''try:
-        from generated import ml_service_pb2_grpc, ml_service_pb2
-    finally:
-        sys.path.remove(_ml_path) '''
     
     # 1. Train ensemble of models
     ml_channel = grpc.insecure_channel('localhost:50052')
@@ -800,8 +840,6 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
         dataset_id=dataset_id,
         target_column=target_column,
         algorithms=["random_forest", "svm", "logistic_regression", "neural_network"]
-        #algorithms=["random_forest"]
-        #algorithms=["random_forest", "xgboost", "svm", "logistic_regression", "neural_network"]
 
     )
     
@@ -816,11 +854,6 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
     # 2. Compute feature importance for each model
     # Lazy import to avoid path conflicts
     _fi_path = str(Path(__file__).parent / "feature_importance_service")
-    sys.path.insert(0, _fi_path)
-    '''try:
-        from generated import feature_importance_service_pb2_grpc, feature_importance_service_pb2
-    finally:
-        sys.path.remove(_fi_path) '''
 
     fi_channel = grpc.insecure_channel('localhost:50053')
     fi_stub = feature_importance_service_pb2_grpc.FeatureImportanceServiceStub(fi_channel)
@@ -909,11 +942,11 @@ def main():
     parser.add_argument('-tt', '--task_type', default='classification', help='classification|regression')
     parser.add_argument('-al', '--algorithm', default='random_forest', help='ML algorithm')
     parser.add_argument('-ts', '--test_size', type=float, default=0.2, help='test set fraction')
-    parser.add_argument('-tc', '--target_column', default=None, help='target column name')
+    parser.add_argument('-tc', '--target_column', default=None, help='target column name', required=True)
     parser.add_argument('-fl', '--factor_name', default='Factor Value[Spaceflight]', help='factor name')
     parser.add_argument('-fv', '--factor_values', default='Ground Control,Space Flight', help='factor values')
     parser.add_argument('-pa', '--patterns', default='unnormalized,RSEM', help='data patterns')
-    parser.add_argument('-tl', '--trans_list', default='t,l', help='transformations (t=log, l=standardize, s=scale)')
+    parser.add_argument('-tl', '--trans_list', default='', help='transformations (t=tpm, l=log, s=stdize)')
     parser.add_argument('-cs', '--cv_step', type=float, default=0.25, help='CV filtering step')
     parser.add_argument('-mf', '--min_features', type=int, default=1000, help='minimum features after filtering')
     parser.add_argument('-fi', '--fi_methods', default='built_in', help='feature importance methods')
