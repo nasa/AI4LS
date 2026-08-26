@@ -214,3 +214,24 @@ python multi_dataset_pipeline.py \
   --factor_values "Ground Control,Space Flight" \
   --algorithm logistic_regression
 ```
+
+# Full pipeline with all steps
+python multi_dataset_pipeline_full.py --tissue liver
+
+# With custom transformations
+python multi_dataset_pipeline_full.py \
+  --tissue liver \
+  --trans_list "t,l,s" \
+  --cv_step 0.25 \
+  --min_features 1000
+
+# Skip transformations (raw filtered data)
+python multi_dataset_pipeline_full.py \
+  --tissue liver \
+  --trans_list ""
+
+# Skip specific steps
+python multi_dataset_pipeline_full.py \
+  --tissue liver \
+  --no-ensemble \
+  --no-kegg
