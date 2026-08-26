@@ -3,11 +3,12 @@
 SRC_DIR=/home/jcasalet/nobackup/AI4LS/CVAE/src/
 DATA_BASEDIR=/home/jcasalet/nobackup/AI4LS/CVAE/DATA/
 #ARCHS4_DATA=archs4_pretrain.h5
-ARCHS4_DATA=archs4_top1024cv.h5
-#ARCHS4_DATA=archs4_top8192cv.h5
+#ARCHS4_DATA=archs4_top1024cv.h5
+ARCHS4_DATA=mouse_human_orthologs_top8192.h5
 #OSDR_DATA=osdr_mouse.h5
-OSDR_DATA=osdr_mouse_top1024.h5
+#OSDR_DATA=osdr_mouse_top1024.h5
 #OSDR_DATA=osdr_mouse_top8192.h5
+OSDR_DATA=osdr_mouse_top8192.h5
 PRETRAIN_DATA=${DATA_BASEDIR}/$ARCHS4_DATA
 FINETUNE_DATA=${DATA_BASEDIR}/$OSDR_DATA
 OUTPUT_BASEDIR=/home/jcasalet/nobackup/AI4LS/CVAE/
@@ -43,7 +44,7 @@ do
 		for detach in "" 
 		do
 			echo $detach
-			for reinit_latent_heads in --reinit_latent_heads ""
+			for reinit_latent_heads in ""
 			do
 				hidden="${hidden_dims// /-}"
 				experiment=${ARCHS4_DATA}_${OSDR_DATA}_hidden_${hidden}_latent_${LATENT_DIM}_tissue_emb_dim_${TISSUE_EMB_DIM}_study_emb_dim_${STUDY_EMB_DIM}_grl_alpha_${GRL_ALPHA}_lambda_cls_${LAMBDA_CLS}_reinit_latent_heads_${reinit_latent_heads}_detach_${detach}_train_${train}
