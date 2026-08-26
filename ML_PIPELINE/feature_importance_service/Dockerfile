@@ -26,13 +26,7 @@ RUN mkdir -p generated && \
         ./proto/feature_importance_service.proto && \
     sed -i 's/^import feature_importance_service_pb2/from . import feature_importance_service_pb2/' generated/feature_importance_service_pb2_grpc.py
 
-# Generate gRPC code for data service (needed by data_client)
-RUN python -m grpc_tools.protoc \
-        -I./proto \
-        --python_out=./generated \
-        --grpc_python_out=./generated \
-        ./proto/data_service.proto && \
-    sed -i 's/^import data_service_pb2/from . import data_service_pb2/' generated/data_service_pb2_grpc.py
+COPY generated/ ./generated/
 
 # Set PYTHONPATH
 ENV PYTHONPATH=/app

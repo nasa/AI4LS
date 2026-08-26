@@ -156,3 +156,109 @@ service DataService {
     rpc GetDatasetInfo(GetDatasetInfoRequest) returns (DatasetInfo);
     rpc FilterDataset(FilterRequest) returns (FilterResponse);
 }
+
+// ============================================================================
+// MULTI-DATASET COMBINING SERVICE
+// ============================================================================
+
+// Request to get OSD IDs for a tissue
+message GetOSDIDsRequest {
+    string tissue_name = 1;
+}
+
+// Response with OSD IDs for a tissue
+message GetOSDIDsResponse {
+    bool success = 1;
+    repeated string osd_ids = 2;
+    string error_message = 3;
+}
+
+// Request to download multiple datasets
+message DownloadMultipleDatasetsRequest {
+    repeated string osd_ids = 1;
+    repeated string patterns = 2;
+    string factor_name = 3;
+    repeated string factor_values = 4;
+    repeated string exclude_columns = 5;
+    int32 min_features = 6;
+    float cv_step = 7;
+}
+
+// Response with dataset IDs for each OSD
+message DownloadMultipleDatasetsResponse {
+    bool success = 1;
+    map<string, string> dataset_ids = 2;  // OSD ID -> dataset_id
+    map<string, string> sample_counts = 3; // OSD ID -> sample count
+    string error_message = 4;
+}
+
+// Request to find common genes
+message FindCommonGenesRequest {
+    repeated string dataset_ids = 1;
+}
+
+// Response with common genes
+message FindCommonGenesResponse {
+    bool success = 1;
+    repeated string common_genes = 2;
+    int32 count = 3;
+    string error_message = 4;
+}
+
+// Request to combine datasets
+message CombineDatasetsRequest {
+    repeated string dataset_ids = 1;
+    repeated string common_genes = 2;  // Optional: if empty, will compute
+    string output_name = 3;  // Optional name for combined dataset
+}
+
+// Response with combined dataset
+message CombineDatasetsResponse {
+    bool success = 1;
+    string combined_dataset_id = 2;
+    int32 total_samples = 3;
+    int32 total_genes = 4;
+    map<string, int32> samples_per_source = 5;  // OSD ID -> sample count in combined
+    string condition_column = 6;
+    string error_message = 7;
+}
+
+// Convenience request: combine by tissue name
+message CombineByTissueRequest {
+    string tissue_name = 1;
+    repeated string patterns = 2;
+    string factor_name = 3;
+    repeated string factor_values = 4;
+    int32 min_features = 5;
+    float cv_step = 6;
+    string output_name = 7;
+}
+
+// Response: same as CombineDatasetsResponse
+message CombineByTissueResponse {
+    bool success = 1;
+    string combined_dataset_id = 2;
+    int32 total_samples = 3;
+    int32 total_genes = 4;
+    map<string, int32> samples_per_source = 5;
+    string condition_column = 6;
+    string error_message = 7;
+}
+
+// Service definition
+service MultiDatasetService {
+    // Get OSD IDs for a tissue
+    rpc GetOSDIDsForTissue(GetOSDIDsRequest) returns (GetOSDIDsResponse);
+    
+    // Download multiple datasets
+    rpc DownloadMultipleDatasets(DownloadMultipleDatasetsRequest) returns (DownloadMultipleDatasetsResponse);
+    
+    // Find common genes across datasets
+    rpc FindCommonGenes(FindCommonGenesRequest) returns (FindCommonGenesResponse);
+    
+    // Combine datasets
+    rpc CombineDatasets(CombineDatasetsRequest) returns (CombineDatasetsResponse);
+    
+    // Convenience: combine by tissue name in one call
+    rpc CombineByTissue(CombineByTissueRequest) returns (CombineByTissueResponse);
+}

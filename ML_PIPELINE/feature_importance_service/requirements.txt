@@ -1,9 +1,18 @@
 # feature_importance_service/requirements.txt
-grpcio==1.62.0
-grpcio-tools==1.62.0
-protobuf==4.25.1
-scikit-learn==1.3.2
-pandas==2.1.4
-numpy==1.26.2
-joblib==1.3.2
+#grpcio==1.62.0
+grpcio
+#grpcio-tools==1.62.0
+grpcio-tools
+#protobuf>=6.0.0
+protobuf
+#scikit-learn==1.3.2
+scikit-learn
+#pandas==2.1.4
+pandas
+#numpy==1.26.2
+numpy
+#joblib==1.3.2
+joblib
 xgboost
+pyarrow
+fastparquet

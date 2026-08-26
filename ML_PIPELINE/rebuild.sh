@@ -15,6 +15,7 @@ else
 fi
 
 docker system prune -f
+docker system prune -a
 docker-compose build $svc 
 docker-compose up -d $svc
 

@@ -1,246 +1,288 @@
-# orchestration-service/src/clients/data_client.py
+#!/usr/bin/env python3
+"""
+DataServiceClient - Updated for Merged Multi-Dataset Service
+
+The multi_dataset_service definitions are merged into data_service.proto,
+so we import from data_service_pb2, not a separate multi_dataset_service_pb2
+"""
+
 import grpc
-from typing import List, Dict, Optional
 import logging
-import sys
-from pathlib import Path
+from typing import List, Dict, Tuple
 
-#from generated import data_service_pb2, data_service_pb2_grpc
-# Add parent directory (orchestration_service) to path
-_orchestration_path = Path(__file__).resolve().parent.parent.parent
-if str(_orchestration_path) not in sys.path:
-    sys.path.insert(0, str(_orchestration_path))
-
-from generated import data_service_pb2, data_service_pb2_grpc
-
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class DataServiceClient:
-    """Client for Data Service gRPC communication"""
-
-    def __init__(self, service_url: str):
-        self.service_url = service_url
-        self.channel: Optional[grpc.Channel] = None
-        self.stub: Optional[data_service_pb2_grpc.DataServiceStub] = None
-        self._connect()
-
-    def _connect(self):
-        """Establish connection to Data Service"""
+    """Client for data service with multi-dataset support"""
+    
+    def __init__(self, host='localhost', port=50051, service_url=None):
+        """
+        Initialize data service client
+        
+        Args:
+            host: Service host (default localhost)
+            port: Service port (default 50051)
+            service_url: Full service URL (e.g., "localhost:50051")
+        """
+        if service_url:
+            self.service_url = service_url
+        else:
+            if ':' in host:
+                self.service_url = host
+            else:
+                self.service_url = f"{host}:{port}"
+        
+        # Import here to avoid issues if protobuf files not yet generated
         try:
-            self.channel = grpc.insecure_channel(
-                self.service_url,
-                options=[
-                    ('grpc.max_send_message_length',    50 * 1024 * 1024),
-                    ('grpc.max_receive_message_length', 50 * 1024 * 1024),
-                ]
-            )
-            self.stub = data_service_pb2_grpc.DataServiceStub(self.channel)
-            logger.info(f"Connected to Data Service at {self.service_url}")
-        except Exception as e:
-            logger.error(f"Failed to connect to Data Service: {e}")
+            from data_service.generated import data_service_pb2, data_service_pb2_grpc
+            self.data_service_pb2 = data_service_pb2
+            self.data_service_pb2_grpc = data_service_pb2_grpc
+        except ImportError as e:
+            logger.error(f"Failed to import protobuf modules: {e}")
+            logger.error("Make sure to regenerate data_service.proto:")
+            logger.error("  python regenerate_data_service_proto.py")
             raise
-
-    def _validation_result_to_dict(self, response) -> Dict:
-        """Convert a ValidationResult gRPC response to a dict."""
-        return {
-            "is_valid": response.is_valid,
-            "errors": list(response.errors),
-            "warnings": list(response.warnings),
-            "dataset_info": {
-                "dataset_id": response.dataset_id,
-                "num_rows": response.dataset_info.num_rows,
-                "num_columns": response.dataset_info.num_columns,
-                "size_bytes": response.dataset_info.size_bytes,
-                "columns": [
-                    {
-                        "name": col.name,
-                        "dtype": col.dtype,
-                        "null_count": col.null_count,
-                        "sample_values": list(col.sample_values)
-                    }
-                    for col in response.dataset_info.columns
-                ]
-            } if response.is_valid else None
-        }
-
-    def upload_dataset(
-        self, 
-        dataset_content: bytes, 
-        format: str = "csv",
-        dataset_id: str = "",
-        exclude_columns: List[str] = [],
-        cv_step=0.25
-
-    ) -> Dict:
-        """Upload and validate a dataset"""
+        
+        self.channel = grpc.insecure_channel(self.service_url)
+        self.multi_stub = self.data_service_pb2_grpc.MultiDatasetServiceStub(self.channel)
+    
+    # ============================================================================
+    # MULTI-DATASET SERVICE METHODS
+    # ============================================================================
+    
+    def get_osd_ids_for_tissue(self, tissue_name: str) -> List[str]:
+        """
+        Get OSD IDs for a tissue type
+        
+        Args:
+            tissue_name: Name of tissue (e.g., "liver", "muscle")
+        
+        Returns:
+            List of OSD IDs for that tissue
+        """
         try:
-            request = data_service_pb2.UploadRequest(
-                file_content=dataset_content,
-                format=format,
-                dataset_id="",
+            request = self.data_service_pb2.GetOSDIDsRequest(tissue_name=tissue_name)
+            response = self.multi_stub.GetOSDIDsForTissue(request)
+            
+            if not response.success:
+                raise Exception(response.error_message)
+            
+            logger.info(f"Found {len(response.osd_ids)} OSD IDs for {tissue_name}")
+            return list(response.osd_ids)
+        except Exception as e:
+            logger.error(f"Error getting OSD IDs for tissue {tissue_name}: {e}")
+            raise
+    
+    def download_multiple_datasets(
+        self,
+        osd_ids: List[str],
+        patterns: List[str] = None,
+        factor_name: str = None,
+        factor_values: List[str] = None,
+        exclude_columns: List[str] = None,
+        min_features: int = 1000,
+        cv_step: float = 0.25
+    ) -> Dict[str, str]:
+        """
+        Download multiple datasets
+        
+        Args:
+            osd_ids: List of OSD IDs to download
+            patterns: Optional list of patterns to filter samples
+            factor_name: Name of factor for filtering
+            factor_values: List of factor values to include
+            exclude_columns: List of columns to exclude
+            min_features: Minimum features after CV filtering
+            cv_step: CV filtering threshold
+        
+        Returns:
+            Dict mapping OSD ID -> dataset_id
+        """
+        try:
+            if patterns is None:
+                patterns = []
+            if factor_values is None:
+                factor_values = []
+            if exclude_columns is None:
+                exclude_columns = []
+            
+            request = self.data_service_pb2.DownloadMultipleDatasetsRequest(
+                osd_ids=osd_ids,
+                patterns=patterns,
+                factor_name=factor_name or "",
+                factor_values=factor_values,
                 exclude_columns=exclude_columns,
+                min_features=min_features,
                 cv_step=cv_step
             )
-
-            response = self.stub.UploadDataset(request)
-            return self._validation_result_to_dict(response)
+            response = self.multi_stub.DownloadMultipleDatasets(request)
             
-        
-        except grpc.RpcError as e:
-            logger.error(f"gRPC error in upload_dataset: {e.code()} - {e.details()}")
-            raise
+            if not response.success:
+                raise Exception(response.error_message)
+            
+            logger.info(f"Downloaded {len(response.dataset_ids)} datasets")
+            return dict(response.dataset_ids)
         except Exception as e:
-            logger.error(f"Error in upload_dataset: {e}", exc_info=True)
+            logger.error(f"Error downloading multiple datasets: {e}")
             raise
-
-    def validate_dataset(self, dataset_content: bytes, format: str = "csv", exclude_columns: List[str] = []) -> Dict:
-        """Validate a dataset (does not store — use upload_dataset to store)"""
+    
+    def find_common_genes(self, dataset_ids: List[str]) -> List[str]:
+        """
+        Find genes common to all datasets
+        
+        Args:
+            dataset_ids: List of dataset IDs to analyze
+        
+        Returns:
+            List of common gene names
+        """
         try:
-            request = data_service_pb2.ValidationRequest(
-                dataset_content=dataset_content,
-                format=format,
-                exclude_columns=exclude_columns
+            request = self.data_service_pb2.FindCommonGenesRequest(
+                dataset_ids=dataset_ids
             )
-            response = self.stub.ValidateDataset(request)
-            return self._validation_result_to_dict(response)
-        except grpc.RpcError as e:
-            logger.error(f"gRPC error in validate_dataset: {e.code()} - {e.details()}")
+            response = self.multi_stub.FindCommonGenes(request)
+            
+            if not response.success:
+                raise Exception(response.error_message)
+            
+            logger.info(f"Found {response.count} common genes")
+            return list(response.common_genes)
+        except Exception as e:
+            logger.error(f"Error finding common genes: {e}")
             raise
-
-    def download_dataset(self, osd_id: str, patterns: List[str],
-                         dataset_id: str, factor_name: str, factor_values: List[str], min_features: int, exclude_columns: List[str], cv_step: float) -> Dict:
-        """Download a dataset from NASA OSDR"""
+    
+    def combine_datasets(
+        self,
+        dataset_ids: List[str],
+        common_genes: List[str] = None,
+        output_name: str = None
+    ) -> Tuple[str, Dict[str, int], str]:
+        """
+        Combine multiple datasets into one
+        
+        Args:
+            dataset_ids: List of dataset IDs to combine
+            common_genes: Optional list of genes to keep (if None, will compute)
+            output_name: Optional name for combined dataset
+        
+        Returns:
+            Tuple of (combined_dataset_id, samples_per_source, condition_column)
+        """
         try:
-            request = data_service_pb2.DownloadRequest(
-                osd_id=osd_id,
+            if common_genes is None:
+                common_genes = []
+            
+            logger.info(f"here is the number of common genes {len(common_genes)}") 
+            logger.info(f"here is the list of dataset ids {dataset_ids}") 
+            logger.info(f"here is the output name {output_name}") 
+            request = self.data_service_pb2.CombineDatasetsRequest(
+                dataset_ids=dataset_ids,
+                common_genes=common_genes,
+                output_name=output_name or ""
+            )
+            logger.info(f"here is the request for self.data_service_pb2.CombineDatasetsRequest {request}") 
+            # JC this is the call that is failing
+            response = self.multi_stub.CombineDatasets(request)
+            logger.info(f"here is the response from self.multi_stub.CombineDatasets {response}") 
+            if not response.success:
+                raise Exception(response.error_message)
+            
+            logger.info(f"Combined dataset created: {response.combined_dataset_id}")
+            logger.info(f"  Total samples: {response.total_samples}")
+            logger.info(f"  Total genes: {response.total_genes}")
+            
+            return response.combined_dataset_id, dict(response.samples_per_source), response.condition_column
+        except Exception as e:
+            logger.error(f"Error combining datasets: {e}")
+            raise
+    
+    def combine_by_tissue(
+        self,
+        tissue_name: str,
+        patterns: List[str] = None,
+        factor_name: str = None,
+        factor_values: List[str] = None,
+        min_features: int = 1000,
+        cv_step: float = 0.25,
+        output_name: str = None
+    ) -> Tuple[str, Dict[str, int], str]:
+        """
+        Combine all datasets for a tissue in one call (convenience method)
+        
+        Args:
+            tissue_name: Name of tissue to combine
+            patterns: Optional patterns to filter samples
+            factor_name: Name of factor for filtering
+            factor_values: List of factor values to include
+            min_features: Minimum features after CV filtering
+            cv_step: CV filtering threshold
+            output_name: Optional name for combined dataset
+        
+        Returns:
+            Tuple of (combined_dataset_id, samples_per_source, condition_column)
+        """
+        try:
+            if patterns is None:
+                patterns = []
+            if factor_values is None:
+                factor_values = []
+            
+            request = self.data_service_pb2.CombineByTissueRequest(
+                tissue_name=tissue_name,
                 patterns=patterns,
-                dataset_id=dataset_id,
-                factor_name=factor_name,
+                factor_name=factor_name or "",
                 factor_values=factor_values,
                 min_features=min_features,
-                exclude_columns=exclude_columns,
-                cv_step=cv_step
-            )
-            response = self.stub.DownloadDataset(request)
-            return self._validation_result_to_dict(response)
-        except grpc.RpcError as e:
-            logger.error(f"gRPC error in download_dataset: {e.code()} - {e.details()}")
-            raise
-
-    def filter_dataset(self, dataset_id: str, cv_step: float = 0.25, min_features: int = 1000) -> Dict:
-        """Filter dataset with CV filtering (no transformations)"""
-        try:
-            request = data_service_pb2.FilterRequest(
-                dataset_id=dataset_id,
                 cv_step=cv_step,
-                min_features=min_features
+                output_name=output_name or ""
             )
-        
-            response = self.stub.FilterDataset(request)
-        
-            return {
-                "success": response.success,
-                "filtered_dataset_id": response.filtered_dataset_id if response.success else None,
-                "error_message": response.error_message if not response.success else None,
-                "dataset_info": {
-                    "dataset_id": response.dataset_info.dataset_id,
-                    "num_rows": response.dataset_info.num_rows,
-                    "num_columns": response.dataset_info.num_columns,
-                    "size_bytes": response.dataset_info.size_bytes
-                } if response.success else None
-            }
-        except grpc.RpcError as e:
-            logger.error(f"gRPC error in filter_dataset: {e.code()} - {e.details()}")
-            raise
-
-    def apply_transformations(self, dataset_id: str,
-                               transformations: List[Dict]) -> Dict:
-        """Apply transformations to a dataset"""
-        try:
-            # FIX 1: Use ApplyTransformationRequest, not TransformRequest
-            transform_messages = [
-                data_service_pb2.Transformation(
-                    type=t["type"],
-                    columns=t.get("columns", []),
-                    parameters=t.get("parameters", {})  # FIX 2: Use params (proto field name)
-                )
-                for t in transformations
-            ]
+            response = self.multi_stub.CombineByTissue(request)
             
-            # FIX 3: Use ApplyTransformationRequest
-            request = data_service_pb2.ApplyTransformationRequest(
-                dataset_id=dataset_id,
-                transformations=transform_messages
-            )
+            if not response.success:
+                raise Exception(response.error_message)
             
-            # FIX 4: Call ApplyTransformation RPC
-            response = self.stub.ApplyTransformation(request)
+            logger.info(f"Combined {tissue_name} datasets: {response.combined_dataset_id}")
+            logger.info(f"  Total samples: {response.total_samples}")
+            logger.info(f"  Total genes: {response.total_genes}")
             
-            return {
-                "success": response.success,
-                "transformed_dataset_id": response.transformed_dataset_id if response.success else None,
-                "error_message": response.error_message if not response.success else None,
-                "transformed_info": {
-                    "dataset_id": response.transformed_info.dataset_id,
-                    "num_rows": response.transformed_info.num_rows,
-                    "num_columns": response.transformed_info.num_columns,
-                    "size_bytes": response.transformed_info.size_bytes,
-                    "columns": [
-                        {
-                            "name": col.name,
-                            "dtype": col.dtype,
-                            "null_count": col.null_count,
-                            "sample_values": list(col.sample_values)
-                        }
-                        for col in response.transformed_info.columns
-                    ]
-                } if response.success else None
-            }
-        except grpc.RpcError as e:
-            logger.error(f"gRPC error in apply_transformations: {e.code()} - {e.details()}")
-            raise
-
-    def get_dataset_info(self, dataset_id: str) -> Dict:
-        """Get information about a dataset"""
-        try:
-            # FIX 5: Use GetDatasetInfoRequest (correct name)
-            request = data_service_pb2.GetDatasetInfoRequest(dataset_id=dataset_id)
-            response = self.stub.GetDatasetInfo(request)
-            return {
-                "dataset_id": response.dataset_id,
-                "num_rows": response.num_rows,
-                "num_columns": response.num_columns,
-                "size_bytes": response.size_bytes,
-                "columns": [
-                    {
-                        "name": col.name,
-                        "dtype": col.dtype,
-                        "null_count": col.null_count,
-                        "sample_values": list(col.sample_values)
-                    }
-                    for col in response.columns
-                ]
-            }
-        except grpc.RpcError as e:
-            logger.error(f"gRPC error in get_dataset_info: {e.code()} - {e.details()}")
-            raise
-
-    def health_check(self) -> bool:
-        """Check if Data Service is healthy"""
-        try:
-            # FIX 6: Use HealthCheck RPC instead of uploading test data
-            request = data_service_pb2.HealthCheckRequest()
-            response = self.stub.HealthCheck(request, timeout=5)
-            return response.healthy
-        except grpc.RpcError as e:
-            logger.error(f"Health check failed: {e.code()} - {e.details()}")
-            return False
+            return response.combined_dataset_id, dict(response.samples_per_source), response.condition_column
         except Exception as e:
-            logger.error(f"Health check exception: {e}")
-            return False
-
+            logger.error(f"Error combining by tissue: {e}")
+            raise
+    
     def close(self):
-        """Close the gRPC channel"""
-        if self.channel:
-            self.channel.close()
-            logger.info("Data Service connection closed")
+        """Close the channel"""
+        self.channel.close()
+
+
+# ============================================================================
+# USAGE EXAMPLES
+# ============================================================================
+
+if __name__ == "__main__":
+    # Initialize client
+    client = DataServiceClient('localhost', 50051)
+    
+    # Example 1: Get OSD IDs for liver tissue
+    try:
+        liver_osds = client.get_osd_ids_for_tissue("liver")
+        print(f"Liver datasets: {liver_osds}")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    # Example 2: Combine liver datasets in one call
+    try:
+        combined_id, samples_per_source, condition_col = client.combine_by_tissue(
+            tissue_name="liver",
+            factor_name="Factor Value[Spaceflight]",
+            factor_values=["Ground Control", "Space Flight"],
+            min_features=500
+        )
+        print(f"Combined dataset: {combined_id}")
+        print(f"Samples per source: {samples_per_source}")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    client.close()

@@ -72,6 +72,7 @@ services:
       - "50052:50052"
     volumes:
       - ./models:/app/models 
+      - ./datasets:/app/datasets
     networks:
       - ml-pipeline-network
     depends_on:

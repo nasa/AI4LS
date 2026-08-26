@@ -15,6 +15,7 @@ import requests
 
 from generated import data_service_pb2, data_service_pb2_grpc
 
+
 from src.transformations import DataTransformer
 
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +43,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         
         logger.info(f"DataService initialized with dataset path: {self.dataset_path}")
         logger.info(f"Loaded {len(self.download_cache)} cached downloads")
+
     
     def _load_download_cache(self):
         """Load download cache from disk"""
@@ -92,6 +94,23 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
     def _find_file(self, files, osd_key, patterns):
         """Find files matching patterns"""
         matches = []
+
+        # DEBUG: Print the actual structure
+        if "studies" in files:
+            print(f"DEBUG: studies keys: {files['studies'].keys()}")
+        if osd_key in files["studies"]:
+            print(f"DEBUG: study data for {osd_key}: {files['studies'][osd_key].keys()}")
+    
+        # Handle different response structures
+        if isinstance(files, dict):
+            # New API structure: {"studies": {osd_key: {"study_files": [...]}}}
+            if "studies" in files and osd_key in files["studies"]:
+                study_data = files["studies"][osd_key]
+                if "study_files" in study_data:
+                    file_list = study_data["study_files"]
+                else:
+                    logger.error(f"No 'study_files' in study data. Keys: {study_data.keys()}")
+                    return []
         
         # Handle different response structures
         if isinstance(files, dict):
@@ -233,39 +252,6 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
     
         return df_result
     
-    '''def _filter_cvs(self, df, start, step=0.25, min_features=1000):
-        # calculate coefficient of variation
-        # assumes samples x genes
-        if df.shape[1] <= min_features:
-            logger.info(f"len(df) is less than min_features {min_features}") 
-            return df 
-
-        # first remove low-count genes
-        logger.info(f"shape before removing low-count: {df.shape}")
-        min_count = df.shape[0] * 50 
-        numeric_sums = df.sum(numeric_only=True)
-        cols_to_drop = numeric_sums[numeric_sums < min_count].index
-        df.drop(columns=cols_to_drop, inplace=True)
-        logger.info(f"shape after removing low-count: {df.shape}")
-        
-        keep_columns_use = list(df.columns)
-        while True: 
-            keep_columns = list() 
-            for col in list(df.columns):
-                m = np.mean(df[col])
-                sd = np.std(df[col])
-                if m != 0 and sd/m > start:
-                    keep_columns.append(col)
-            if len(keep_columns) < min_features:
-                logger.info(f"keep cols less than min cols: {len(keep_columns)} ")
-                logger.info(f"length of keep_cols_use: {len(keep_columns_use)}")
-                break
-            else:
-                keep_columns_use = keep_columns 
-                start += step
-                logger.info(f"stepping up start: {start}")
-
-        return df[keep_columns_use]'''
     
     def transpose_df(self, df):
         # if num cols > num rows, assume cols = genes and rows = samples 
@@ -358,6 +344,68 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             errors=errors,
             warnings=warnings
         )
+
+    def download_dataset(
+        self,
+        osd_id,
+        dataset_id=None,
+        patterns=None,
+        factor_name="",
+        factor_values=None,
+        exclude_columns=None,
+        min_features=1000,
+        cv_step=0.25,
+    ):
+        """
+        Internal Python API for downloading a dataset.
+
+        This wraps the gRPC DownloadDataset() implementation and converts
+        its protobuf response into the dictionary format expected by
+        MultiDatasetCombiner.
+        """
+
+        if patterns is None:
+            patterns = []
+
+        if factor_values is None:
+            factor_values = []
+
+        if exclude_columns is None:
+            exclude_columns = []
+
+        request = data_service_pb2.DownloadRequest(
+            osd_id=str(osd_id),
+            dataset_id=str(dataset_id) if dataset_id else "",
+            patterns=patterns,
+            factor_name=factor_name or "",
+            factor_values=factor_values,
+            exclude_columns=exclude_columns,
+            min_features=min_features,
+            cv_step=cv_step,
+        )
+
+        # Your DownloadDataset implementation does not currently use
+        # the gRPC context, so None is sufficient here.
+        response = self.DownloadDataset(request, None)
+
+        # Convert protobuf response to the dictionary expected by
+        # MultiDatasetCombiner.
+        result = {
+            "is_valid": response.is_valid,
+            "dataset_id": response.dataset_id,
+            "errors": list(response.errors),
+            "warnings": list(response.warnings),
+            "dataset_info": {},
+        }
+
+        if response.HasField("dataset_info"):
+            result["dataset_info"] = {
+                "dataset_id": response.dataset_info.dataset_id,
+                "num_rows": response.dataset_info.num_rows,
+                "num_columns": response.dataset_info.num_columns,
+            }
+
+        return result
    
     def DownloadDataset(self, request, context):
         """
@@ -973,3 +1021,231 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
     def StreamDataset(self, request, context):
         """Stream dataset (alias for GetDataset)"""
         return self.GetDataset(request, context)
+
+# ============================================================================
+# ADD THIS TO THE END OF service.py
+# ============================================================================
+
+
+from src.multi_dataset_combiner import MultiDatasetCombiner, TISSUE_REGISTRY
+
+
+class MultiDatasetServiceImpl(data_service_pb2_grpc.MultiDatasetServiceServicer):
+    """Implementation of MultiDatasetService gRPC methods"""
+    
+    def __init__(self, data_service_impl):
+        """
+        Initialize with reference to DataServiceImpl so we can access its data_client
+        
+        Args:
+            data_service_impl: The DataServiceImpl instance from server.py
+        """
+        self.data_service = data_service_impl
+        self.combiner = MultiDatasetCombiner(data_service_impl)  # Pass data_service as the "client"
+        logger.info("MultiDatasetService initialized")
+    
+    def GetOSDIDsForTissue(self, request, context):
+        """Get OSD IDs for a tissue type"""
+        try:
+            osd_ids = self.combiner.get_osd_ids_for_tissue(request.tissue_name)
+            return data_service_pb2.GetOSDIDsResponse(
+                success=True,
+                osd_ids=osd_ids
+            )
+        except Exception as e:
+            logger.error(f"Error getting OSD IDs for tissue {request.tissue_name}: {e}")
+            #return multi_dataset_service_pb2.GetOSDIDsResponse(
+            return data_service_pb2.GetOSDIDsResponse(
+                success=False,
+                error_message=str(e)
+            )
+    
+    def DownloadMultipleDatasets(self, request, context):
+        """Download multiple datasets"""
+        try:
+            osd_ids = list(request.osd_ids)
+            patterns = list(request.patterns) if request.patterns else []
+            exclude_columns = list(request.exclude_columns) if request.exclude_columns else []
+            
+            datasets = self.combiner.download_multiple_datasets(
+                osd_ids=osd_ids,
+                patterns=patterns,
+                factor_name=request.factor_name,
+                factor_values=list(request.factor_values),
+                exclude_columns=exclude_columns,
+                min_features=request.min_features if request.min_features > 0 else 1000,
+                cv_step=request.cv_step if request.cv_step > 0 else 0.25
+            )
+            
+            # Build response mapping
+            dataset_ids = {}
+            sample_counts = {}
+            for osd_id, df in datasets.items():
+                #dataset_id = osd_id
+                #dataset_ids[osd_id] = dataset_id
+                #sample_counts[osd_id] = str(len(df))
+                dataset_ids[osd_id] = osd_id  # ✓ Return OSD ID, file is saved as OSD ID
+                sample_counts[osd_id] = str(len(df))
+            
+            #return multi_dataset_service_pb2.DownloadMultipleDatasetsResponse(
+            return data_service_pb2.DownloadMultipleDatasetsResponse(
+                success=True,
+                dataset_ids=dataset_ids,
+                sample_counts=sample_counts
+            )
+        except Exception as e:
+            logger.error(f"Error downloading multiple datasets: {e}")
+            #return multi_dataset_service_pb2.DownloadMultipleDatasetsResponse(
+            return data_service_pb2.DownloadMultipleDatasetsResponse(
+                success=False,
+                error_message=str(e)
+            )
+    
+    def FindCommonGenes(self, request, context):
+        """Find common genes across datasets"""
+        try:
+            # Load datasets from disk based on dataset_ids
+            datasets = {}
+            for dataset_id in request.dataset_ids:
+                dataset_path = Path("./datasets") / f"{dataset_id}.parquet"
+                if dataset_path.exists():
+                    datasets[dataset_id] = pd.read_parquet(dataset_path)
+            
+            if not datasets:
+                raise ValueError("No datasets found on disk")
+            
+            common_genes = self.combiner.find_common_genes(datasets)
+            
+            #return multi_dataset_service_pb2.FindCommonGenesResponse(
+            return data_service_pb2.FindCommonGenesResponse(
+                success=True,
+                common_genes=list(common_genes),
+                count=len(common_genes)
+            )
+        except Exception as e:
+            logger.error(f"Error finding common genes: {e}")
+            #return multi_dataset_service_pb2.FindCommonGenesResponse(
+            return data_service_pb2.FindCommonGenesResponse(
+                success=False,
+                error_message=str(e)
+            )
+    
+    def CombineDatasets(self, request, context):
+        """Combine multiple datasets into one"""
+        try:
+            # Load datasets from disk
+            datasets = {}
+            for dataset_id in request.dataset_ids:
+                dataset_path = Path("./datasets") / f"{dataset_id}.parquet"
+                if dataset_path.exists():
+                    datasets[dataset_id] = pd.read_parquet(dataset_path)
+            
+            if not datasets:
+                raise ValueError("No datasets found on disk")
+            
+            # Parse common genes if provided
+            # JC bug fix from chatgpt
+            common_genes = None
+            if request.common_genes:
+                common_genes = list(request.common_genes)
+
+            
+            # Combine datasets
+            logger.info(f"datasets list in CombineDatasets {datasets}")
+            combined_df, dataset_map = self.combiner.combine_datasets(
+                datasets=datasets,
+                common_genes=common_genes
+            )
+            
+            # Save combined dataset with UUID
+            combined_id = str(uuid.uuid4())
+            output_path = Path("./datasets") / f"{combined_id}.parquet"
+            combined_df.to_parquet(output_path)
+            
+            # Count samples per source
+            samples_per_source = {}
+            for source, count in combined_df['source_dataset'].value_counts().items():
+                samples_per_source[source] = int(count)
+            
+            # Find condition column
+            condition_column = None
+            for col in combined_df.columns:
+                if 'Factor' in col or 'Condition' in col:
+                    condition_column = col
+                    break
+            
+            #return multi_dataset_service_pb2.CombineDatasetsResponse(
+            return data_service_pb2.CombineDatasetsResponse(
+                success=True,
+                combined_dataset_id=combined_id,
+                total_samples=len(combined_df),
+                total_genes=len([c for c in combined_df.columns if c not in ['source_dataset', condition_column or '']]),
+                samples_per_source=samples_per_source,
+                condition_column=condition_column or ""
+            )
+        except Exception as e:
+            logger.error(f"Error combining datasets: {e}")
+            return data_service_pb2.CombineDatasetsResponse(
+                success=False,
+                error_message=str(e)
+            )
+    
+    def CombineByTissue(self, request, context):
+        """Combine datasets by tissue name (convenience method)"""
+        try:
+            # Step 1: Get OSD IDs for tissue
+            osd_ids = self.combiner.get_osd_ids_for_tissue(request.tissue_name)
+            
+            # Step 2: Download datasets
+            patterns = list(request.patterns) if request.patterns else []
+            datasets = self.combiner.download_multiple_datasets(
+                osd_ids=osd_ids,
+                patterns=patterns,
+                factor_name=request.factor_name,
+                factor_values=list(request.factor_values),
+                min_features=request.min_features if request.min_features > 0 else 1000,
+                cv_step=request.cv_step if request.cv_step > 0 else 0.25
+            )
+            
+            # Step 3: Find common genes
+            common_genes = self.combiner.find_common_genes(datasets)
+            
+            # Step 4: Combine datasets
+            combined_df, dataset_map = self.combiner.combine_datasets(
+                datasets=datasets,
+                common_genes=common_genes
+            )
+            
+            # Save combined dataset
+            combined_id = str(uuid.uuid4())
+            output_path = Path("./datasets") / f"{combined_id}.parquet"
+            combined_df.to_parquet(output_path)
+            
+            # Count samples per source
+            samples_per_source = {}
+            for source, count in combined_df['source_dataset'].value_counts().items():
+                samples_per_source[source] = int(count)
+            
+            # Find condition column
+            condition_column = None
+            for col in combined_df.columns:
+                if 'Factor' in col or 'Condition' in col:
+                    condition_column = col
+                    break
+            
+            #return multi_dataset_service_pb2.CombineByTissueResponse(
+            return data_service_pb2.CombineByTissueResponse(
+                success=True,
+                combined_dataset_id=combined_id,
+                total_samples=len(combined_df),
+                total_genes=len([c for c in combined_df.columns if c not in ['source_dataset', condition_column or '']]),
+                samples_per_source=samples_per_source,
+                condition_column=condition_column or ""
+            )
+        except Exception as e:
+            logger.error(f"Error combining by tissue: {e}")
+            #return multi_dataset_service_pb2.CombineByTissueResponse(
+            return data_service_pb2.CombineByTissueResponse(
+                success=False,
+                error_message=str(e)
+            )
