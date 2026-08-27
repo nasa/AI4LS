@@ -20,7 +20,7 @@ build/
 .vscode/
 *.swp
 *.swo
-generated/
+#generated/
 models/
 *.joblib
 metadata.json

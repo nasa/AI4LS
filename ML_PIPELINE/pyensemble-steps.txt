@@ -1,0 +1,34 @@
+# download file from ensembl
+
+curl -o /Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/DATA/mus_musculus/Mus_musculus.GRCm39.115.gtf.gz -O https://ftp.ensembl.org/pub//current/gtf/mus_musculus/Mus_musculus.GRCm39.115.gtf.gz
+
+pip install pyensembl
+
+export PYENSEMBL_CACHE_DIR=/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/DATA
+
+pyensembl install --species mus_musculus --release 115
+
+
+import os
+os.environ['PYENSEMBL_CACHE_DIR'] = '/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/DATA' 
+from pyensembl import EnsemblRelease
+data = EnsemblRelease(release=115, species='mus_musculus')
+gene = data.gene_by_id(gene_id='ENSMUSG00000000001')
+gene
+gene.biotype
+gene.gene_name
+
+
+
+
+from pyensembl import Genome
+data = Genome(reference_name='GRCm39', annotation_name='my_genome_features', gtf_path_or_url='/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/DATA/Mus_musculus.GRCm39.115.gtf.gz', cache_directory_path='/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/DATA') 
+)
+# parse GTF and construct database of genomic features
+data.index()
+
+# now use the db to your heart's content!
+gene_id='ENSMUSG00000000001'
+gene=data.gene_by_id(gene_id)
+gene.biotype
+gene.gene_name

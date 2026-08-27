@@ -1,0 +1,1083 @@
+2026-08-26 13:03:48,650 - INFO - Email provider: gmail
+2026-08-26 13:03:48,650 - INFO - Note: Gmail: Requires app password (https://myaccount.google.com/apppasswords)
+2026-08-26 13:03:48,650 - INFO - ============================================================
+2026-08-26 13:03:48,650 - INFO - PIPELINE STARTED
+2026-08-26 13:03:48,650 - INFO - ============================================================
+2026-08-26 13:03:48,650 - INFO - Arguments: {'--target_column': 'Factor Value[Spaceflight]', '--test_size': 0.2, '--algorithm': 'random_forest', '--min_features': 1000, '--osd_ids': '47,137'}
+2026-08-26 13:03:48,650 - INFO - Running: /Users/jcasalet/miniconda3/envs/mlpipe/bin/python new_multi_pipeline.py --target_column Factor Value[Spaceflight] --test_size 0.2 --algorithm random_forest --min_features 1000 --osd_ids 47,137
+2026-08-26 13:04:52,349 - INFO - Pipeline execution completed
+2026-08-26 13:04:52,349 - INFO - Return code: 0
+2026-08-26 13:04:52,349 - INFO - STDOUT:
+================================================================================
+MULTI-DATASET PIPELINE (Filtered & Transformed)
+================================================================================
+
+================================================================================
+STEP 1-3: RESOLVE, DOWNLOAD, AND COMBINE DATASETS
+================================================================================
+Using specified OSD IDs: ['47', '137']
+
+✓ Combined dataset loaded: e2d22abc-f6b7-419d-9332-998cb06da104
+  Samples: 6
+  Genes: 56832
+  Samples per source: {'47': 6}
+  Condition column: Factor Value[Spaceflight]
+
+================================================================================
+STEP 4: PREPARE DATA
+================================================================================
+Target column: Factor Value[Spaceflight]
+Converting Factor Value[Spaceflight] from 0/1 to string values
+
+================================================================================
+STEP 5: FILTER AND TRANSFORM DATA
+================================================================================
+before trans:                               ENSMUSG00000083411  ...  ENSMUSG00000042745
+sample                                           ...                    
+Mmus_C57-6T_LVR_GC_Rep1_G2                 0.00  ...               221.0
+Mmus_C57-6T_LVR_GC_Rep2_G3               824.83  ...               434.0
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...               237.0
+Mmus_C57-6T_LVR_FLT_Rep1_F1                0.04  ...               223.0
+Mmus_C57-6T_LVR_FLT_Rep2_F2                0.00  ...               179.0
+
+[5 rows x 1000 columns]
+after trans:                               ENSMUSG00000083411  ...  ENSMUSG00000042745
+sample                                           ...                    
+Mmus_C57-6T_LVR_GC_Rep1_G2                 0.00  ...               221.0
+Mmus_C57-6T_LVR_GC_Rep2_G3               824.83  ...               434.0
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...               237.0
+Mmus_C57-6T_LVR_FLT_Rep1_F1                0.04  ...               223.0
+Mmus_C57-6T_LVR_FLT_Rep2_F2                0.00  ...               179.0
+
+[5 rows x 1000 columns]
+after adding back source_dataset:                               ENSMUSG00000083411  ...  source_dataset
+sample                                           ...                
+Mmus_C57-6T_LVR_GC_Rep1_G2                 0.00  ...              47
+Mmus_C57-6T_LVR_GC_Rep2_G3               824.83  ...              47
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...              47
+Mmus_C57-6T_LVR_FLT_Rep1_F1                0.04  ...              47
+Mmus_C57-6T_LVR_FLT_Rep2_F2                0.00  ...              47
+
+[5 rows x 1002 columns]
+
+================================================================================
+STEP 6: SAVE FILTERED & TRANSFORMED DATASET
+================================================================================
+✓ Filtered & transformed dataset saved: c8f1ff2f-6113-4692-8f40-49ad3a766490
+  Samples: 6
+  Features: 1000
+
+================================================================================
+STEP 7: TRAIN SINGLE MODEL
+================================================================================
+
+============================================================
+STEP 7: Run ML Pipeline
+============================================================
+
+Configuration:
+  Algorithm: random_forest
+  Target: Factor Value[Spaceflight]
+  Features: All except target
+  Test size: 0.2
+
+Streaming progress:
+------------------------------------------------------------
+[████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░]  30% | starting     | Initializing training...
+[█████████████████░░░░░░░░░░░░░░░░░░░░░░░]  44% | training     | Preparing data...
+[███████████████████████░░░░░░░░░░░░░░░░░]  58% | training     | Training random_forest model...
+[██████████████████████████████████░░░░░░]  86% | evaluating   | Evaluating model...
+[████████████████████████████████████████] 100% | completed    | Training completed successfully
+[████████████████████████████████████████] 100% | completed    | Pipeline completed successfully
+------------------------------------------------------------
+
+✓ Model trained: model_8fd034fd12fb
+✓ Metrics: {'precision': 0.0, 'f1_score': 0.0, 'recall': 0.0, 'accuracy': 0.0}
+
+================================================================================
+STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)
+================================================================================
+✗ Feature importance computation failed
+
+================================================================================
+STEP 9: ENSEMBLE TRAINING & CONSENSUS FEATURES
+================================================================================
+✓ Trained 4 models
+Computing importance for random_forest (model_77500c7ee416)...
+Computing importance for svm (model_f16e32450f7e)...
+Computing importance for logistic_regression (model_b46064b6a32b)...
+Computing importance for neural_network (model_b5bd8cd4ab9d)...
+
+✓ Consensus Analysis:
+  Total models: 4
+  Consensus features: 98
+  Perfect consensus: 0
+  High consensus: 0
+
+Top 10 Consensus Features:
+  1. ENSMUSG00000037071
+     - Selected by 3/4 models
+     - Avg rank: 1.3 (best: 1)
+  2. ENSMUSG00000083411
+     - Selected by 3/4 models
+     - Avg rank: 2.7 (best: 2)
+  3. ENSMUSG00000076543
+     - Selected by 3/4 models
+     - Avg rank: 3.7 (best: 3)
+  4. ENSMUSG00000075604
+     - Selected by 3/4 models
+     - Avg rank: 4.7 (best: 4)
+  5. ENSMUSG00000027871
+     - Selected by 3/4 models
+     - Avg rank: 5.7 (best: 5)
+  6. ENSMUSG00000032323
+     - Selected by 3/4 models
+     - Avg rank: 6.7 (best: 6)
+  7. ENSMUSG00000024365
+     - Selected by 3/4 models
+     - Avg rank: 7.7 (best: 7)
+  8. ENSMUSG00000078889
+     - Selected by 3/4 models
+     - Avg rank: 8.7 (best: 8)
+  9. ENSMUSG00000031574
+     - Selected by 3/4 models
+     - Avg rank: 9.7 (best: 9)
+  10. ENSMUSG00000052131
+     - Selected by 3/4 models
+     - Avg rank: 10.7 (best: 10)
+✓ Ensemble training completed successfully
+
+Consensus Features (3+ models):
+  Total consensus features: 98
+
+  Top 10 Consensus Features:
+    1. ENSMUSG00000037071
+       - Selected by 3/5 models
+       - Average rank: 1.3
+       - Average importance: 0.2333
+    2. ENSMUSG00000083411
+       - Selected by 3/5 models
+       - Average rank: 2.7
+       - Average importance: 0.0000
+    3. ENSMUSG00000076543
+       - Selected by 3/5 models
+       - Average rank: 3.7
+       - Average importance: 0.0000
+    4. ENSMUSG00000075604
+       - Selected by 3/5 models
+       - Average rank: 4.7
+       - Average importance: 0.0000
+    5. ENSMUSG00000027871
+       - Selected by 3/5 models
+       - Average rank: 5.7
+       - Average importance: 0.0000
+    6. ENSMUSG00000032323
+       - Selected by 3/5 models
+       - Average rank: 6.7
+       - Average importance: 0.0000
+    7. ENSMUSG00000024365
+       - Selected by 3/5 models
+       - Average rank: 7.7
+       - Average importance: 0.0000
+    8. ENSMUSG00000078889
+       - Selected by 3/5 models
+       - Average rank: 8.7
+       - Average importance: 0.0000
+    9. ENSMUSG00000031574
+       - Selected by 3/5 models
+       - Average rank: 9.7
+       - Average importance: 0.0000
+    10. ENSMUSG00000052131
+       - Selected by 3/5 models
+       - Average rank: 10.7
+       - Average importance: 0.0000
+
+  Individual Model Performance:
+
+================================================================================
+✓ MULTI-DATASET PIPELINE COMPLETED SUCCESSFULLY
+================================================================================
+
+Results Summary:
+  Combined dataset ID: e2d22abc-f6b7-419d-9332-998cb06da104
+  Total samples: 6
+  Raw common genes: 56832
+  Filtered & transformed genes: 1000
+  Single model ID: model_8fd034fd12fb
+  Single model metrics: {'precision': 0.0, 'f1_score': 0.0, 'recall': 0.0, 'accuracy': 0.0}
+  Feature importance: ✗
+  Ensemble analysis: ✓
+  KEGG enrichment: ✓
+
+2026-08-26 13:04:52,350 - ERROR - STDERR:
+INFO:__main__:sys.path (first 3): ['/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service', '/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE', '/Users/jcasalet/miniconda3/envs/mlpipe/lib/python310.zip']
+INFO:data_client:Downloaded 1 datasets
+INFO:data_client:Found 56832 common genes
+INFO:data_client:here is the number of common genes 56832
+INFO:data_client:here is the list of dataset ids ['47']
+INFO:data_client:here is the output name None
+INFO:data_client:here is the response from self.multi_stub.CombineDatasets success: true
+combined_dataset_id: "e2d22abc-f6b7-419d-9332-998cb06da104"
+total_samples: 6
+total_genes: 56832
+samples_per_source {
+  key: "47"
+  value: 6
+}
+condition_column: "Factor Value[Spaceflight]"
+
+INFO:data_client:Combined dataset created: e2d22abc-f6b7-419d-9332-998cb06da104
+INFO:data_client:  Total samples: 6
+INFO:data_client:  Total genes: 56832
+INFO:__main__:================================================================================
+INFO:__main__:FILTERING AND TRANSFORMING DATA
+INFO:__main__:================================================================================
+INFO:__main__:Original features: 56832
+INFO:__main__:
+Applying CV filtering...
+INFO:__main__:================================================================================
+INFO:__main__:FILTERING BY COEFFICIENT OF VARIATION
+INFO:__main__:================================================================================
+INFO:__main__:Starting genes: 56832
+INFO:__main__:Target genes: 1000
+INFO:__main__:
+Removing low-count genes...
+INFO:__main__:After removing low-count: 12203 genes
+INFO:__main__:
+Calculating coefficient of variation...
+INFO:__main__:Selecting top 1000 genes by CV...
+INFO:__main__:CV range: 0.014546 - 2.235938
+INFO:__main__:Top gene CV: ENSMUSG00000083411 = 2.235938
+INFO:__main__:Bottom gene CV (rank 1000): ENSMUSG00000042745 = 0.352684
+INFO:__main__:
+Filtered dataset: 6 samples × 1000 genes
+INFO:__main__:
+Applying transformations: ['']...
+INFO:__main__:
+Filtered & Transformed dataset:
+INFO:__main__:  Samples: 6
+WARNING:__main__:Feature importance computation failed: cannot import name 'feature_importance_service_pb2' from 'generated' (/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service/generated/__init__.py)
+WARNING:__main__:Continuing without feature importance...
+
+2026-08-26 13:04:52,351 - INFO - Sending email to jcasalet@ucsc.edu...
+2026-08-26 13:04:52,351 - INFO - Using SMTP: smtp.gmail.com:587
+2026-08-26 13:04:55,068 - INFO - ✓ Email sent to jcasalet@ucsc.edu
+2026-08-26 13:04:55,069 - INFO - ✓ Pipeline completed in 66.4 seconds
+2026-08-26 13:30:19,628 - INFO - Email provider: gmail
+2026-08-26 13:30:19,629 - INFO - Note: Gmail: Requires app password (https://myaccount.google.com/apppasswords)
+2026-08-26 13:30:19,629 - INFO - ============================================================
+2026-08-26 13:30:19,629 - INFO - PIPELINE STARTED
+2026-08-26 13:30:19,629 - INFO - ============================================================
+2026-08-26 13:30:19,629 - INFO - Arguments: {'--target_column': 'Factor Value[Spaceflight]', '--test_size': 0.2, '--algorithm': 'random_forest', '--min_features': 1000, '--osd_ids': '47,48,137,168'}
+2026-08-26 13:30:19,629 - INFO - Running: /Users/jcasalet/miniconda3/envs/mlpipe/bin/python new_multi_pipeline.py --target_column Factor Value[Spaceflight] --test_size 0.2 --algorithm random_forest --min_features 1000 --osd_ids 47,48,137,168
+2026-08-26 13:32:23,048 - INFO - Pipeline execution completed
+2026-08-26 13:32:23,049 - INFO - Return code: 0
+2026-08-26 13:32:23,049 - INFO - STDOUT:
+================================================================================
+MULTI-DATASET PIPELINE (Filtered & Transformed)
+================================================================================
+
+================================================================================
+STEP 1-3: RESOLVE, DOWNLOAD, AND COMBINE DATASETS
+================================================================================
+Using specified OSD IDs: ['47', '48', '137', '168']
+
+✓ Combined dataset loaded: 0ae2b3e4-1b92-42fc-8be2-ed56573faa2d
+  Samples: 34
+  Genes: 56832
+  Samples per source: {'47': 6, '168': 28}
+  Condition column: Factor Value[Spaceflight]
+
+================================================================================
+STEP 4: PREPARE DATA
+================================================================================
+Target column: Factor Value[Spaceflight]
+Converting Factor Value[Spaceflight] from 0/1 to string values
+
+================================================================================
+STEP 5: FILTER AND TRANSFORM DATA
+================================================================================
+before trans:                               ENSMUSG00000057003  ...  ENSMUSG00000091021
+sample                                           ...                    
+Mmus_C57-6T_LVR_GC_Rep1_G2                 2.22  ...                 0.0
+Mmus_C57-6T_LVR_GC_Rep2_G3                 1.12  ...                 0.0
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...                 0.0
+Mmus_C57-6T_LVR_FLT_Rep1_F1                3.00  ...                 0.0
+Mmus_C57-6T_LVR_FLT_Rep2_F2                1.44  ...                 0.0
+
+[5 rows x 1000 columns]
+after trans:                               ENSMUSG00000057003  ...  ENSMUSG00000091021
+sample                                           ...                    
+Mmus_C57-6T_LVR_GC_Rep1_G2                 2.22  ...                 0.0
+Mmus_C57-6T_LVR_GC_Rep2_G3                 1.12  ...                 0.0
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...                 0.0
+Mmus_C57-6T_LVR_FLT_Rep1_F1                3.00  ...                 0.0
+Mmus_C57-6T_LVR_FLT_Rep2_F2                1.44  ...                 0.0
+
+[5 rows x 1000 columns]
+after adding back source_dataset:                               ENSMUSG00000057003  ...  source_dataset
+sample                                           ...                
+Mmus_C57-6T_LVR_GC_Rep1_G2                 2.22  ...              47
+Mmus_C57-6T_LVR_GC_Rep2_G3                 1.12  ...              47
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...              47
+Mmus_C57-6T_LVR_FLT_Rep1_F1                3.00  ...              47
+Mmus_C57-6T_LVR_FLT_Rep2_F2                1.44  ...              47
+
+[5 rows x 1002 columns]
+
+================================================================================
+STEP 6: SAVE FILTERED & TRANSFORMED DATASET
+================================================================================
+✓ Filtered & transformed dataset saved: f3275f1f-f0da-47a3-8e15-40b6cb3d504b
+  Samples: 34
+  Features: 1000
+
+================================================================================
+STEP 7: TRAIN SINGLE MODEL
+================================================================================
+
+============================================================
+STEP 7: Run ML Pipeline
+============================================================
+
+Configuration:
+  Algorithm: random_forest
+  Target: Factor Value[Spaceflight]
+  Features: All except target
+  Test size: 0.2
+
+Streaming progress:
+------------------------------------------------------------
+[████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░]  30% | starting     | Initializing training...
+[█████████████████░░░░░░░░░░░░░░░░░░░░░░░]  44% | training     | Preparing data...
+[███████████████████████░░░░░░░░░░░░░░░░░]  58% | training     | Training random_forest model...
+[██████████████████████████████████░░░░░░]  86% | evaluating   | Evaluating model...
+[████████████████████████████████████████] 100% | completed    | Training completed successfully
+[████████████████████████████████████████] 100% | completed    | Pipeline completed successfully
+------------------------------------------------------------
+
+✓ Model trained: model_1adede8876af
+✓ Metrics: {'precision': 0.8285714285714285, 'f1_score': 0.7023809523809523, 'recall': 0.7142857142857143, 'roc_auc': 1.0, 'accuracy': 0.7142857142857143}
+
+================================================================================
+STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)
+================================================================================
+✗ Feature importance computation failed
+
+================================================================================
+STEP 9: ENSEMBLE TRAINING & CONSENSUS FEATURES
+================================================================================
+✓ Trained 4 models
+Computing importance for random_forest (model_018a976c3453)...
+Computing importance for svm (model_37377d7cad72)...
+Computing importance for logistic_regression (model_d461b43ffdce)...
+Computing importance for neural_network (model_6d76fe35c010)...
+
+✓ Consensus Analysis:
+  Total models: 4
+  Consensus features: 59
+  Perfect consensus: 0
+  High consensus: 0
+
+Top 10 Consensus Features:
+  1. ENSMUSG00000066154
+     - Selected by 3/4 models
+     - Avg rank: 1.7 (best: 1)
+  2. ENSMUSG00000064339
+     - Selected by 3/4 models
+     - Avg rank: 2.7 (best: 1)
+  3. ENSMUSG00000025153
+     - Selected by 3/4 models
+     - Avg rank: 3.0 (best: 2)
+  4. ENSMUSG00000064358
+     - Selected by 3/4 models
+     - Avg rank: 4.7 (best: 1)
+  5. ENSMUSG00000100862
+     - Selected by 3/4 models
+     - Avg rank: 7.3 (best: 4)
+  6. ENSMUSG00000064363
+     - Selected by 3/4 models
+     - Avg rank: 8.3 (best: 5)
+  7. ENSMUSG00000051747
+     - Selected by 3/4 models
+     - Avg rank: 26.0 (best: 13)
+  8. ENSMUSG00000057003
+     - Selected by 3/4 models
+     - Avg rank: 26.7 (best: 7)
+  9. ENSMUSG00000076612
+     - Selected by 3/4 models
+     - Avg rank: 27.7 (best: 8)
+  10. ENSMUSG00000031972
+     - Selected by 3/4 models
+     - Avg rank: 28.7 (best: 9)
+✓ Ensemble training completed successfully
+
+Consensus Features (3+ models):
+  Total consensus features: 59
+
+  Top 10 Consensus Features:
+    1. ENSMUSG00000066154
+       - Selected by 3/5 models
+       - Average rank: 1.7
+       - Average importance: 0.1627
+    2. ENSMUSG00000064339
+       - Selected by 3/5 models
+       - Average rank: 2.7
+       - Average importance: 0.1490
+    3. ENSMUSG00000025153
+       - Selected by 3/5 models
+       - Average rank: 3.0
+       - Average importance: 0.1098
+    4. ENSMUSG00000064358
+       - Selected by 3/5 models
+       - Average rank: 4.7
+       - Average importance: 0.1157
+    5. ENSMUSG00000100862
+       - Selected by 3/5 models
+       - Average rank: 7.3
+       - Average importance: 0.0569
+    6. ENSMUSG00000064363
+       - Selected by 3/5 models
+       - Average rank: 8.3
+       - Average importance: 0.0667
+    7. ENSMUSG00000051747
+       - Selected by 3/5 models
+       - Average rank: 26.0
+       - Average importance: 0.0020
+    8. ENSMUSG00000057003
+       - Selected by 3/5 models
+       - Average rank: 26.7
+       - Average importance: 0.0000
+    9. ENSMUSG00000076612
+       - Selected by 3/5 models
+       - Average rank: 27.7
+       - Average importance: 0.0000
+    10. ENSMUSG00000031972
+       - Selected by 3/5 models
+       - Average rank: 28.7
+       - Average importance: 0.0000
+
+  Individual Model Performance:
+
+================================================================================
+✓ MULTI-DATASET PIPELINE COMPLETED SUCCESSFULLY
+================================================================================
+
+Results Summary:
+  Combined dataset ID: 0ae2b3e4-1b92-42fc-8be2-ed56573faa2d
+  Total samples: 34
+  Raw common genes: 56832
+  Filtered & transformed genes: 1000
+  Single model ID: model_1adede8876af
+  Single model metrics: {'precision': 0.8285714285714285, 'f1_score': 0.7023809523809523, 'recall': 0.7142857142857143, 'roc_auc': 1.0, 'accuracy': 0.7142857142857143}
+  Feature importance: ✗
+  Ensemble analysis: ✓
+  KEGG enrichment: ✓
+
+2026-08-26 13:32:23,050 - ERROR - STDERR:
+INFO:__main__:sys.path (first 3): ['/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service', '/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE', '/Users/jcasalet/miniconda3/envs/mlpipe/lib/python310.zip']
+INFO:data_client:Downloaded 2 datasets
+INFO:data_client:Found 56832 common genes
+INFO:data_client:here is the number of common genes 56832
+INFO:data_client:here is the list of dataset ids ['47', '168']
+INFO:data_client:here is the output name None
+INFO:data_client:here is the response from self.multi_stub.CombineDatasets success: true
+combined_dataset_id: "0ae2b3e4-1b92-42fc-8be2-ed56573faa2d"
+total_samples: 34
+total_genes: 56832
+samples_per_source {
+  key: "47"
+  value: 6
+}
+samples_per_source {
+  key: "168"
+  value: 28
+}
+condition_column: "Factor Value[Spaceflight]"
+
+INFO:data_client:Combined dataset created: 0ae2b3e4-1b92-42fc-8be2-ed56573faa2d
+INFO:data_client:  Total samples: 34
+INFO:data_client:  Total genes: 56832
+INFO:__main__:================================================================================
+INFO:__main__:FILTERING AND TRANSFORMING DATA
+INFO:__main__:================================================================================
+INFO:__main__:Original features: 56832
+INFO:__main__:
+Applying CV filtering...
+INFO:__main__:================================================================================
+INFO:__main__:FILTERING BY COEFFICIENT OF VARIATION
+INFO:__main__:================================================================================
+INFO:__main__:Starting genes: 56832
+INFO:__main__:Target genes: 1000
+INFO:__main__:
+Removing low-count genes...
+INFO:__main__:After removing low-count: 13403 genes
+INFO:__main__:
+Calculating coefficient of variation...
+INFO:__main__:Selecting top 1000 genes by CV...
+INFO:__main__:CV range: 0.140382 - 5.055519
+INFO:__main__:Top gene CV: ENSMUSG00000057003 = 5.055519
+INFO:__main__:Bottom gene CV (rank 1000): ENSMUSG00000091021 = 0.751794
+INFO:__main__:
+Filtered dataset: 34 samples × 1000 genes
+INFO:__main__:
+Applying transformations: ['']...
+INFO:__main__:
+Filtered & Transformed dataset:
+INFO:__main__:  Samples: 34
+WARNING:__main__:Feature importance computation failed: cannot import name 'feature_importance_service_pb2' from 'generated' (/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service/generated/__init__.py)
+WARNING:__main__:Continuing without feature importance...
+
+2026-08-26 13:32:23,050 - INFO - Sending email to jcasalet@ucsc.edu...
+2026-08-26 13:32:23,050 - INFO - Using SMTP: smtp.gmail.com:587
+2026-08-26 13:32:26,278 - INFO - ✓ Email sent to jcasalet@ucsc.edu
+2026-08-26 13:32:26,278 - INFO - ✓ Pipeline completed in 126.6 seconds
+2026-08-26 13:54:12,550 - INFO - Email provider: gmail
+2026-08-26 13:54:12,551 - INFO - Note: Gmail: Requires app password (https://myaccount.google.com/apppasswords)
+2026-08-26 13:54:12,551 - INFO - ============================================================
+2026-08-26 13:54:12,551 - INFO - PIPELINE STARTED
+2026-08-26 13:54:12,551 - INFO - ============================================================
+2026-08-26 13:54:12,551 - INFO - Arguments: {'--target_column': 'Factor Value[Spaceflight]', '--test_size': 0.2, '--algorithm': 'random_forest', '--min_features': 1000, '--osd_ids': '47,48,137,168'}
+2026-08-26 13:54:12,551 - INFO - Running: /Users/jcasalet/miniconda3/envs/mlpipe/bin/python new_multi_pipeline.py --target_column Factor Value[Spaceflight] --test_size 0.2 --algorithm random_forest --min_features 1000 --osd_ids 47,48,137,168
+2026-08-26 13:55:37,709 - INFO - Pipeline execution completed
+2026-08-26 13:55:37,710 - INFO - Return code: 0
+2026-08-26 13:55:37,710 - INFO - STDOUT:
+================================================================================
+MULTI-DATASET PIPELINE (Filtered & Transformed)
+================================================================================
+
+================================================================================
+STEP 1-3: RESOLVE, DOWNLOAD, AND COMBINE DATASETS
+================================================================================
+Using specified OSD IDs: ['47', '48', '137', '168']
+
+✓ Combined dataset loaded: b4db9404-ea12-43e4-badb-512c3821f2bc
+  Samples: 34
+  Genes: 56832
+  Samples per source: {'47': 6, '168': 28}
+  Condition column: Factor Value[Spaceflight]
+
+================================================================================
+STEP 4: PREPARE DATA
+================================================================================
+Target column: Factor Value[Spaceflight]
+Converting Factor Value[Spaceflight] from 0/1 to string values
+
+================================================================================
+STEP 5: FILTER AND TRANSFORM DATA
+================================================================================
+before trans:                               ENSMUSG00000057003  ...  ENSMUSG00000091021
+sample                                           ...                    
+Mmus_C57-6T_LVR_GC_Rep1_G2                 2.22  ...                 0.0
+Mmus_C57-6T_LVR_GC_Rep2_G3                 1.12  ...                 0.0
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...                 0.0
+Mmus_C57-6T_LVR_FLT_Rep1_F1                3.00  ...                 0.0
+Mmus_C57-6T_LVR_FLT_Rep2_F2                1.44  ...                 0.0
+
+[5 rows x 1000 columns]
+after trans:                               ENSMUSG00000057003  ...  ENSMUSG00000091021
+sample                                           ...                    
+Mmus_C57-6T_LVR_GC_Rep1_G2                 2.22  ...                 0.0
+Mmus_C57-6T_LVR_GC_Rep2_G3                 1.12  ...                 0.0
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...                 0.0
+Mmus_C57-6T_LVR_FLT_Rep1_F1                3.00  ...                 0.0
+Mmus_C57-6T_LVR_FLT_Rep2_F2                1.44  ...                 0.0
+
+[5 rows x 1000 columns]
+after adding back source_dataset:                               ENSMUSG00000057003  ...  source_dataset
+sample                                           ...                
+Mmus_C57-6T_LVR_GC_Rep1_G2                 2.22  ...              47
+Mmus_C57-6T_LVR_GC_Rep2_G3                 1.12  ...              47
+Mmus_C57-6T_LVR_GC_Rep3_G5                 0.00  ...              47
+Mmus_C57-6T_LVR_FLT_Rep1_F1                3.00  ...              47
+Mmus_C57-6T_LVR_FLT_Rep2_F2                1.44  ...              47
+
+[5 rows x 1002 columns]
+
+================================================================================
+STEP 6: SAVE FILTERED & TRANSFORMED DATASET
+================================================================================
+✓ Filtered & transformed dataset saved: 6c4f40e1-d727-4119-8a47-e0b869726bf9
+  Samples: 34
+  Features: 1000
+
+================================================================================
+STEP 7: TRAIN SINGLE MODEL
+================================================================================
+
+============================================================
+STEP 7: Run ML Pipeline
+============================================================
+
+Configuration:
+  Algorithm: random_forest
+  Target: Factor Value[Spaceflight]
+  Features: All except target
+  Test size: 0.2
+
+Streaming progress:
+------------------------------------------------------------
+[████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░]  30% | starting     | Initializing training...
+[█████████████████░░░░░░░░░░░░░░░░░░░░░░░]  44% | training     | Preparing data...
+[███████████████████████░░░░░░░░░░░░░░░░░]  58% | training     | Training random_forest model...
+[██████████████████████████████████░░░░░░]  86% | evaluating   | Evaluating model...
+[████████████████████████████████████████] 100% | completed    | Training completed successfully
+[████████████████████████████████████████] 100% | completed    | Pipeline completed successfully
+------------------------------------------------------------
+
+✓ Model trained: model_aab2f68654fb
+✓ Metrics: {'accuracy': 0.7142857142857143, 'precision': 0.8285714285714285, 'recall': 0.7142857142857143, 'roc_auc': 1.0, 'f1_score': 0.7023809523809523}
+
+================================================================================
+STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)
+================================================================================
+✗ Feature importance computation failed
+
+================================================================================
+STEP 9: ENSEMBLE TRAINING & CONSENSUS FEATURES
+================================================================================
+✓ Trained 4 models
+Computing importance for random_forest (model_0837b4af125c)...
+Computing importance for svm (model_62b3a5cc3f89)...
+Computing importance for logistic_regression (model_3e1691470d7a)...
+Computing importance for neural_network (model_a08f6b757ede)...
+
+✓ Consensus Analysis:
+  Total models: 4
+  Consensus features: 78
+  Perfect consensus: 0
+  High consensus: 0
+
+Top 10 Consensus Features:
+  1. ENSMUSG00000064339
+     - Selected by 3/4 models
+     - Avg rank: 2.3 (best: 1)
+  2. ENSMUSG00000076612
+     - Selected by 3/4 models
+     - Avg rank: 9.7 (best: 3)
+  3. ENSMUSG00000031972
+     - Selected by 3/4 models
+     - Avg rank: 10.7 (best: 4)
+  4. ENSMUSG00000061723
+     - Selected by 3/4 models
+     - Avg rank: 13.0 (best: 7)
+  5. ENSMUSG00000051747
+     - Selected by 3/4 models
+     - Avg rank: 14.0 (best: 8)
+  6. ENSMUSG00000030672
+     - Selected by 3/4 models
+     - Avg rank: 15.0 (best: 9)
+  7. ENSMUSG00000076609
+     - Selected by 3/4 models
+     - Avg rank: 15.3 (best: 7)
+  8. ENSMUSG00000076613
+     - Selected by 3/4 models
+     - Avg rank: 16.0 (best: 10)
+  9. ENSMUSG00000024365
+     - Selected by 3/4 models
+     - Avg rank: 17.0 (best: 11)
+  10. ENSMUSG00000056328
+     - Selected by 3/4 models
+     - Avg rank: 18.0 (best: 12)
+✓ Ensemble training completed successfully
+
+Consensus Features (3+ models):
+  Total consensus features: 78
+
+  Top 10 Consensus Features:
+    1. ENSMUSG00000064339
+       - Selected by 3/5 models
+       - Average rank: 2.3
+       - Average importance: 0.1098
+    2. ENSMUSG00000076612
+       - Selected by 3/5 models
+       - Average rank: 9.7
+       - Average importance: 0.0000
+    3. ENSMUSG00000031972
+       - Selected by 3/5 models
+       - Average rank: 10.7
+       - Average importance: 0.0000
+    4. ENSMUSG00000061723
+       - Selected by 3/5 models
+       - Average rank: 13.0
+       - Average importance: 0.0000
+    5. ENSMUSG00000051747
+       - Selected by 3/5 models
+       - Average rank: 14.0
+       - Average importance: 0.0000
+    6. ENSMUSG00000030672
+       - Selected by 3/5 models
+       - Average rank: 15.0
+       - Average importance: 0.0000
+    7. ENSMUSG00000076609
+       - Selected by 3/5 models
+       - Average rank: 15.3
+       - Average importance: 0.0020
+    8. ENSMUSG00000076613
+       - Selected by 3/5 models
+       - Average rank: 16.0
+       - Average importance: 0.0000
+    9. ENSMUSG00000024365
+       - Selected by 3/5 models
+       - Average rank: 17.0
+       - Average importance: 0.0000
+    10. ENSMUSG00000056328
+       - Selected by 3/5 models
+       - Average rank: 18.0
+       - Average importance: 0.0000
+
+  Individual Model Performance:
+
+================================================================================
+✓ MULTI-DATASET PIPELINE COMPLETED SUCCESSFULLY
+================================================================================
+
+Results Summary:
+  Combined dataset ID: b4db9404-ea12-43e4-badb-512c3821f2bc
+  Total samples: 34
+  Raw common genes: 56832
+  Filtered & transformed genes: 1000
+  Single model ID: model_aab2f68654fb
+  Single model metrics: {'accuracy': 0.7142857142857143, 'precision': 0.8285714285714285, 'recall': 0.7142857142857143, 'roc_auc': 1.0, 'f1_score': 0.7023809523809523}
+  Feature importance: ✗
+  Ensemble analysis: ✓
+  KEGG enrichment: ✓
+
+2026-08-26 13:55:37,711 - ERROR - STDERR:
+INFO:__main__:sys.path (first 3): ['/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service', '/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE', '/Users/jcasalet/miniconda3/envs/mlpipe/lib/python310.zip']
+INFO:data_client:Downloaded 2 datasets
+INFO:data_client:Found 56832 common genes
+INFO:data_client:here is the number of common genes 56832
+INFO:data_client:here is the list of dataset ids ['47', '168']
+INFO:data_client:here is the output name None
+INFO:data_client:here is the response from self.multi_stub.CombineDatasets success: true
+combined_dataset_id: "b4db9404-ea12-43e4-badb-512c3821f2bc"
+total_samples: 34
+total_genes: 56832
+samples_per_source {
+  key: "47"
+  value: 6
+}
+samples_per_source {
+  key: "168"
+  value: 28
+}
+condition_column: "Factor Value[Spaceflight]"
+
+INFO:data_client:Combined dataset created: b4db9404-ea12-43e4-badb-512c3821f2bc
+INFO:data_client:  Total samples: 34
+INFO:data_client:  Total genes: 56832
+INFO:__main__:================================================================================
+INFO:__main__:FILTERING AND TRANSFORMING DATA
+INFO:__main__:================================================================================
+INFO:__main__:Original features: 56832
+INFO:__main__:
+Applying CV filtering...
+INFO:__main__:================================================================================
+INFO:__main__:FILTERING BY COEFFICIENT OF VARIATION
+INFO:__main__:================================================================================
+INFO:__main__:Starting genes: 56832
+INFO:__main__:Target genes: 1000
+INFO:__main__:
+Removing low-count genes...
+INFO:__main__:After removing low-count: 13403 genes
+INFO:__main__:
+Calculating coefficient of variation...
+INFO:__main__:Selecting top 1000 genes by CV...
+INFO:__main__:CV range: 0.140382 - 5.055519
+INFO:__main__:Top gene CV: ENSMUSG00000057003 = 5.055519
+INFO:__main__:Bottom gene CV (rank 1000): ENSMUSG00000091021 = 0.751794
+INFO:__main__:
+Filtered dataset: 34 samples × 1000 genes
+INFO:__main__:
+Applying transformations: ['']...
+INFO:__main__:
+Filtered & Transformed dataset:
+INFO:__main__:  Samples: 34
+WARNING:__main__:Feature importance computation failed: cannot import name 'feature_importance_service_pb2' from 'generated' (/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service/generated/__init__.py)
+WARNING:__main__:Continuing without feature importance...
+
+2026-08-26 13:55:37,711 - INFO - Sending email to jcasalet@ucsc.edu...
+2026-08-26 13:55:37,711 - INFO - Using SMTP: smtp.gmail.com:587
+2026-08-26 13:55:41,023 - INFO - ✓ Email sent to jcasalet@ucsc.edu
+2026-08-26 13:55:41,024 - INFO - ✓ Pipeline completed in 88.5 seconds
+2026-08-27 10:33:50,418 - INFO - Email provider: gmail
+2026-08-27 10:33:50,418 - INFO - Note: Gmail: Requires app password (https://myaccount.google.com/apppasswords)
+2026-08-27 10:33:50,418 - INFO - ============================================================
+2026-08-27 10:33:50,418 - INFO - PIPELINE STARTED
+2026-08-27 10:33:50,418 - INFO - ============================================================
+2026-08-27 10:33:50,418 - INFO - Arguments: {'--target_column': 'Factor Value[Spaceflight]', '--test_size': 0.2, '--algorithm': 'random_forest', '--min_features': 1000, '--osd_ids': '47,48,137,168'}
+2026-08-27 10:33:50,418 - INFO - Running: /Users/jcasalet/miniconda3/envs/mlpipe/bin/python new_multi_pipeline.py --target_column Factor Value[Spaceflight] --test_size 0.2 --algorithm random_forest --min_features 1000 --osd_ids 47,48,137,168
+2026-08-27 10:34:57,704 - INFO - Email provider: gmail
+2026-08-27 10:34:57,704 - INFO - Note: Gmail: Requires app password (https://myaccount.google.com/apppasswords)
+2026-08-27 10:34:57,704 - INFO - ============================================================
+2026-08-27 10:34:57,704 - INFO - PIPELINE STARTED
+2026-08-27 10:34:57,704 - INFO - ============================================================
+2026-08-27 10:34:57,704 - INFO - Arguments: {'--target_column': 'Factor Value[Spaceflight]', '--test_size': 0.2, '--algorithm': 'random_forest', '--min_features': 1000, '--osd_ids': '47,48,137,168'}
+2026-08-27 10:34:57,704 - INFO - Running: /Users/jcasalet/miniconda3/envs/mlpipe/bin/python new_multi_pipeline.py --target_column Factor Value[Spaceflight] --test_size 0.2 --algorithm random_forest --min_features 1000 --osd_ids 47,48,137,168
+2026-08-27 10:36:46,974 - INFO - Pipeline execution completed
+2026-08-27 10:36:46,975 - INFO - Return code: 0
+2026-08-27 10:36:46,975 - INFO - STDOUT:
+================================================================================
+MULTI-DATASET PIPELINE (Filtered & Transformed)
+================================================================================
+
+================================================================================
+STEP 1-3: RESOLVE, DOWNLOAD, AND COMBINE DATASETS
+================================================================================
+Using specified OSD IDs: ['47', '48', '137', '168']
+
+✓ Combined dataset loaded: 7497aaba-8b7b-4882-9221-b24ec02dd600
+  Samples: 46
+  Genes: 51916
+  Samples per source: {'47': 6, '137': 12, '168': 28}
+  Condition column: Factor Value[Spaceflight]
+
+================================================================================
+STEP 4: PREPARE DATA
+================================================================================
+Target column: Factor Value[Spaceflight]
+Converting Factor Value[Spaceflight] from 0/1 to string values
+
+================================================================================
+STEP 5: FILTER AND TRANSFORM DATA
+================================================================================
+before trans:                               ENSMUSG00000076612  ...  ENSMUSG00000095545
+sample                                           ...                    
+Mmus_C57-6T_LVR_GC_Rep1_G2               477.38  ...             1036.83
+Mmus_C57-6T_LVR_GC_Rep2_G3                92.70  ...              711.98
+Mmus_C57-6T_LVR_GC_Rep3_G5              6743.25  ...              983.59
+Mmus_C57-6T_LVR_FLT_Rep1_F1              114.67  ...              708.90
+Mmus_C57-6T_LVR_FLT_Rep2_F2               55.74  ...              791.63
+
+[5 rows x 1000 columns]
+after trans:                               ENSMUSG00000076612  ...  ENSMUSG00000095545
+sample                                           ...                    
+Mmus_C57-6T_LVR_GC_Rep1_G2               477.38  ...             1036.83
+Mmus_C57-6T_LVR_GC_Rep2_G3                92.70  ...              711.98
+Mmus_C57-6T_LVR_GC_Rep3_G5              6743.25  ...              983.59
+Mmus_C57-6T_LVR_FLT_Rep1_F1              114.67  ...              708.90
+Mmus_C57-6T_LVR_FLT_Rep2_F2               55.74  ...              791.63
+
+[5 rows x 1000 columns]
+after adding back source_dataset:                               ENSMUSG00000076612  ...  source_dataset
+sample                                           ...                
+Mmus_C57-6T_LVR_GC_Rep1_G2               477.38  ...              47
+Mmus_C57-6T_LVR_GC_Rep2_G3                92.70  ...              47
+Mmus_C57-6T_LVR_GC_Rep3_G5              6743.25  ...              47
+Mmus_C57-6T_LVR_FLT_Rep1_F1              114.67  ...              47
+Mmus_C57-6T_LVR_FLT_Rep2_F2               55.74  ...              47
+
+[5 rows x 1002 columns]
+
+================================================================================
+STEP 6: SAVE FILTERED & TRANSFORMED DATASET
+================================================================================
+✓ Filtered & transformed dataset saved: 502a7e81-d66e-4f77-a69e-f9d80d176dff
+  Samples: 46
+  Features: 1000
+
+================================================================================
+STEP 7: TRAIN SINGLE MODEL
+================================================================================
+
+============================================================
+STEP 7: Run ML Pipeline
+============================================================
+
+Configuration:
+  Algorithm: random_forest
+  Target: Factor Value[Spaceflight]
+  Features: All except target
+  Test size: 0.2
+
+Streaming progress:
+------------------------------------------------------------
+[████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░]  30% | starting     | Initializing training...
+[█████████████████░░░░░░░░░░░░░░░░░░░░░░░]  44% | training     | Preparing data...
+[███████████████████████░░░░░░░░░░░░░░░░░]  58% | training     | Training random_forest model...
+[██████████████████████████████████░░░░░░]  86% | evaluating   | Evaluating model...
+[████████████████████████████████████████] 100% | completed    | Training completed successfully
+[████████████████████████████████████████] 100% | completed    | Pipeline completed successfully
+------------------------------------------------------------
+
+✓ Model trained: model_2c9aa63eabab
+✓ Metrics: {'accuracy': 0.5, 'precision': 0.5, 'recall': 0.5, 'roc_auc': 0.6799999999999999, 'f1_score': 0.494949494949495}
+
+================================================================================
+STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)
+================================================================================
+✗ Feature importance computation failed
+
+================================================================================
+STEP 9: ENSEMBLE TRAINING & CONSENSUS FEATURES
+================================================================================
+✓ Trained 4 models
+Computing importance for random_forest (model_bde705bb9ac0)...
+Computing importance for svm (model_535bf0e1c4a4)...
+Computing importance for logistic_regression (model_122bde1a36ce)...
+Computing importance for neural_network (model_4b60302846f1)...
+
+✓ Consensus Analysis:
+  Total models: 4
+  Consensus features: 64
+  Perfect consensus: 0
+  High consensus: 0
+
+Top 10 Consensus Features:
+  1. ENSMUSG00000092341
+     - Selected by 3/4 models
+     - Avg rank: 1.7 (best: 1)
+  2. ENSMUSG00000092837
+     - Selected by 3/4 models
+     - Avg rank: 2.7 (best: 1)
+  3. ENSMUSG00000064339
+     - Selected by 3/4 models
+     - Avg rank: 3.7 (best: 1)
+  4. ENSMUSG00000057003
+     - Selected by 3/4 models
+     - Avg rank: 24.0 (best: 5)
+  5. ENSMUSG00000076612
+     - Selected by 3/4 models
+     - Avg rank: 27.3 (best: 4)
+  6. ENSMUSG00000031972
+     - Selected by 3/4 models
+     - Avg rank: 29.0 (best: 6)
+  7. ENSMUSG00000030730
+     - Selected by 3/4 models
+     - Avg rank: 30.0 (best: 7)
+  8. ENSMUSG00000030399
+     - Selected by 3/4 models
+     - Avg rank: 31.0 (best: 8)
+  9. ENSMUSG00000061723
+     - Selected by 3/4 models
+     - Avg rank: 32.0 (best: 9)
+  10. ENSMUSG00000051747
+     - Selected by 3/4 models
+     - Avg rank: 33.0 (best: 10)
+✓ Ensemble training completed successfully
+
+Consensus Features (3+ models):
+  Total consensus features: 64
+
+  Top 10 Consensus Features:
+    1. ENSMUSG00000092341
+       - Selected by 3/5 models
+       - Average rank: 1.7
+       - Average importance: 0.1638
+    2. ENSMUSG00000092837
+       - Selected by 3/5 models
+       - Average rank: 2.7
+       - Average importance: 0.1536
+    3. ENSMUSG00000064339
+       - Selected by 3/5 models
+       - Average rank: 3.7
+       - Average importance: 0.1058
+    4. ENSMUSG00000057003
+       - Selected by 3/5 models
+       - Average rank: 24.0
+       - Average importance: 0.0014
+    5. ENSMUSG00000076612
+       - Selected by 3/5 models
+       - Average rank: 27.3
+       - Average importance: 0.0000
+    6. ENSMUSG00000031972
+       - Selected by 3/5 models
+       - Average rank: 29.0
+       - Average importance: 0.0000
+    7. ENSMUSG00000030730
+       - Selected by 3/5 models
+       - Average rank: 30.0
+       - Average importance: 0.0000
+    8. ENSMUSG00000030399
+       - Selected by 3/5 models
+       - Average rank: 31.0
+       - Average importance: 0.0000
+    9. ENSMUSG00000061723
+       - Selected by 3/5 models
+       - Average rank: 32.0
+       - Average importance: 0.0000
+    10. ENSMUSG00000051747
+       - Selected by 3/5 models
+       - Average rank: 33.0
+       - Average importance: 0.0000
+
+  Individual Model Performance:
+
+================================================================================
+✓ MULTI-DATASET PIPELINE COMPLETED SUCCESSFULLY
+================================================================================
+
+Results Summary:
+  Combined dataset ID: 7497aaba-8b7b-4882-9221-b24ec02dd600
+  Total samples: 46
+  Raw common genes: 51916
+  Filtered & transformed genes: 1000
+  Single model ID: model_2c9aa63eabab
+  Single model metrics: {'accuracy': 0.5, 'precision': 0.5, 'recall': 0.5, 'roc_auc': 0.6799999999999999, 'f1_score': 0.494949494949495}
+  Feature importance: ✗
+  Ensemble analysis: ✓
+  KEGG enrichment: ✓
+
+2026-08-27 10:36:46,976 - ERROR - STDERR:
+INFO:__main__:sys.path (first 3): ['/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service', '/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE', '/Users/jcasalet/miniconda3/envs/mlpipe/lib/python310.zip']
+INFO:data_client:Downloaded 3 datasets
+INFO:data_client:Found 51916 common genes
+INFO:data_client:here is the number of common genes 51916
+INFO:data_client:here is the list of dataset ids ['47', '137', '168']
+INFO:data_client:here is the output name None
+INFO:data_client:here is the response from self.multi_stub.CombineDatasets success: true
+combined_dataset_id: "7497aaba-8b7b-4882-9221-b24ec02dd600"
+total_samples: 46
+total_genes: 51916
+samples_per_source {
+  key: "47"
+  value: 6
+}
+samples_per_source {
+  key: "168"
+  value: 28
+}
+samples_per_source {
+  key: "137"
+  value: 12
+}
+condition_column: "Factor Value[Spaceflight]"
+
+INFO:data_client:Combined dataset created: 7497aaba-8b7b-4882-9221-b24ec02dd600
+INFO:data_client:  Total samples: 46
+INFO:data_client:  Total genes: 51916
+INFO:__main__:================================================================================
+INFO:__main__:FILTERING AND TRANSFORMING DATA
+INFO:__main__:================================================================================
+INFO:__main__:Original features: 51916
+INFO:__main__:
+Applying CV filtering...
+INFO:__main__:================================================================================
+INFO:__main__:FILTERING BY COEFFICIENT OF VARIATION
+INFO:__main__:================================================================================
+INFO:__main__:Starting genes: 51916
+INFO:__main__:Target genes: 1000
+INFO:__main__:
+Removing low-count genes...
+INFO:__main__:After removing low-count: 12976 genes
+INFO:__main__:
+Calculating coefficient of variation...
+INFO:__main__:Selecting top 1000 genes by CV...
+INFO:__main__:CV range: 0.191512 - 5.590846
+INFO:__main__:Top gene CV: ENSMUSG00000076612 = 5.590846
+INFO:__main__:Bottom gene CV (rank 1000): ENSMUSG00000095545 = 0.727078
+INFO:__main__:
+Filtered dataset: 46 samples × 1000 genes
+INFO:__main__:
+Applying transformations: ['']...
+INFO:__main__:
+Filtered & Transformed dataset:
+INFO:__main__:  Samples: 46
+WARNING:__main__:Feature importance computation failed: cannot import name 'feature_importance_service_pb2' from 'generated' (/Users/jcasalet/Desktop/CODES/NASA/AI4LS/ML_PIPELINE/orchestration_service/generated/__init__.py)
+WARNING:__main__:Continuing without feature importance...
+
+2026-08-27 10:36:46,977 - INFO - Sending email to jcasalet@ucsc.edu...
+2026-08-27 10:36:46,977 - INFO - Using SMTP: smtp.gmail.com:587
+2026-08-27 10:36:50,227 - INFO - ✓ Email sent to jcasalet@ucsc.edu
+2026-08-27 10:36:50,227 - INFO - ✓ Pipeline completed in 112.5 seconds

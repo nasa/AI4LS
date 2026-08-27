@@ -462,3 +462,255 @@ class DataService(object):
             timeout,
             metadata,
             _registered_method=True)
+
+
+class MultiDatasetServiceStub(object):
+    """Service definition
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.GetOSDIDsForTissue = channel.unary_unary(
+                '/data.MultiDatasetService/GetOSDIDsForTissue',
+                request_serializer=data__service__pb2.GetOSDIDsRequest.SerializeToString,
+                response_deserializer=data__service__pb2.GetOSDIDsResponse.FromString,
+                _registered_method=True)
+        self.DownloadMultipleDatasets = channel.unary_unary(
+                '/data.MultiDatasetService/DownloadMultipleDatasets',
+                request_serializer=data__service__pb2.DownloadMultipleDatasetsRequest.SerializeToString,
+                response_deserializer=data__service__pb2.DownloadMultipleDatasetsResponse.FromString,
+                _registered_method=True)
+        self.FindCommonGenes = channel.unary_unary(
+                '/data.MultiDatasetService/FindCommonGenes',
+                request_serializer=data__service__pb2.FindCommonGenesRequest.SerializeToString,
+                response_deserializer=data__service__pb2.FindCommonGenesResponse.FromString,
+                _registered_method=True)
+        self.CombineDatasets = channel.unary_unary(
+                '/data.MultiDatasetService/CombineDatasets',
+                request_serializer=data__service__pb2.CombineDatasetsRequest.SerializeToString,
+                response_deserializer=data__service__pb2.CombineDatasetsResponse.FromString,
+                _registered_method=True)
+        self.CombineByTissue = channel.unary_unary(
+                '/data.MultiDatasetService/CombineByTissue',
+                request_serializer=data__service__pb2.CombineByTissueRequest.SerializeToString,
+                response_deserializer=data__service__pb2.CombineByTissueResponse.FromString,
+                _registered_method=True)
+
+
+class MultiDatasetServiceServicer(object):
+    """Service definition
+    """
+
+    def GetOSDIDsForTissue(self, request, context):
+        """Get OSD IDs for a tissue
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DownloadMultipleDatasets(self, request, context):
+        """Download multiple datasets
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def FindCommonGenes(self, request, context):
+        """Find common genes across datasets
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CombineDatasets(self, request, context):
+        """Combine datasets
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CombineByTissue(self, request, context):
+        """Convenience: combine by tissue name in one call
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_MultiDatasetServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'GetOSDIDsForTissue': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetOSDIDsForTissue,
+                    request_deserializer=data__service__pb2.GetOSDIDsRequest.FromString,
+                    response_serializer=data__service__pb2.GetOSDIDsResponse.SerializeToString,
+            ),
+            'DownloadMultipleDatasets': grpc.unary_unary_rpc_method_handler(
+                    servicer.DownloadMultipleDatasets,
+                    request_deserializer=data__service__pb2.DownloadMultipleDatasetsRequest.FromString,
+                    response_serializer=data__service__pb2.DownloadMultipleDatasetsResponse.SerializeToString,
+            ),
+            'FindCommonGenes': grpc.unary_unary_rpc_method_handler(
+                    servicer.FindCommonGenes,
+                    request_deserializer=data__service__pb2.FindCommonGenesRequest.FromString,
+                    response_serializer=data__service__pb2.FindCommonGenesResponse.SerializeToString,
+            ),
+            'CombineDatasets': grpc.unary_unary_rpc_method_handler(
+                    servicer.CombineDatasets,
+                    request_deserializer=data__service__pb2.CombineDatasetsRequest.FromString,
+                    response_serializer=data__service__pb2.CombineDatasetsResponse.SerializeToString,
+            ),
+            'CombineByTissue': grpc.unary_unary_rpc_method_handler(
+                    servicer.CombineByTissue,
+                    request_deserializer=data__service__pb2.CombineByTissueRequest.FromString,
+                    response_serializer=data__service__pb2.CombineByTissueResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'data.MultiDatasetService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('data.MultiDatasetService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class MultiDatasetService(object):
+    """Service definition
+    """
+
+    @staticmethod
+    def GetOSDIDsForTissue(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.MultiDatasetService/GetOSDIDsForTissue',
+            data__service__pb2.GetOSDIDsRequest.SerializeToString,
+            data__service__pb2.GetOSDIDsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DownloadMultipleDatasets(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.MultiDatasetService/DownloadMultipleDatasets',
+            data__service__pb2.DownloadMultipleDatasetsRequest.SerializeToString,
+            data__service__pb2.DownloadMultipleDatasetsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def FindCommonGenes(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.MultiDatasetService/FindCommonGenes',
+            data__service__pb2.FindCommonGenesRequest.SerializeToString,
+            data__service__pb2.FindCommonGenesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CombineDatasets(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.MultiDatasetService/CombineDatasets',
+            data__service__pb2.CombineDatasetsRequest.SerializeToString,
+            data__service__pb2.CombineDatasetsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CombineByTissue(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.MultiDatasetService/CombineByTissue',
+            data__service__pb2.CombineByTissueRequest.SerializeToString,
+            data__service__pb2.CombineByTissueResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
