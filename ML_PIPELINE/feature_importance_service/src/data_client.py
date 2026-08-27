@@ -183,7 +183,6 @@ class DataServiceClient:
                 common_genes=common_genes,
                 output_name=output_name or ""
             )
-            logger.info(f"here is the request for self.data_service_pb2.CombineDatasetsRequest {request}") 
             # JC this is the call that is failing
             response = self.multi_stub.CombineDatasets(request)
             logger.info(f"here is the response from self.multi_stub.CombineDatasets {response}") 
