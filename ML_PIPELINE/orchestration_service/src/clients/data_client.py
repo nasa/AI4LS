@@ -36,7 +36,8 @@ class DataServiceClient:
         
         # Import here to avoid issues if protobuf files not yet generated
         try:
-            from data_service.generated import data_service_pb2, data_service_pb2_grpc
+            #from data_service.generated import data_service_pb2, data_service_pb2_grpc
+            from generated import data_service_pb2, data_service_pb2_grpc
             self.data_service_pb2 = data_service_pb2
             self.data_service_pb2_grpc = data_service_pb2_grpc
         except ImportError as e:
@@ -182,7 +183,6 @@ class DataServiceClient:
                 common_genes=common_genes,
                 output_name=output_name or ""
             )
-            logger.info(f"here is the request for self.data_service_pb2.CombineDatasetsRequest {request}") 
             # JC this is the call that is failing
             response = self.multi_stub.CombineDatasets(request)
             logger.info(f"here is the response from self.multi_stub.CombineDatasets {response}") 
@@ -255,6 +255,26 @@ class DataServiceClient:
     def close(self):
         """Close the channel"""
         self.channel.close()
+
+    def get_dataset(self, dataset_id):
+        """Load a dataset from disk"""
+        try:
+            from pathlib import Path
+            import pandas as pd
+
+            dataset_path = Path("./datasets") / f"{dataset_id}.parquet"
+
+            if not dataset_path.exists():
+                raise FileNotFoundError(f"Dataset not found: {dataset_path}")
+
+            df = pd.read_parquet(dataset_path)
+            logger.info(f"✓ Loaded dataset {dataset_id}: {df.shape[0]} samples × {df.shape[1]} features")
+
+            return df
+
+        except Exception as e:
+            logger.error(f"Error loading dataset {dataset_id}: {e}")
+            raise
 
 
 # ============================================================================
