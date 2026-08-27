@@ -1,0 +1,7 @@
+response_variable,randomforest_r2,randomforest_features,tabpfn_r2,tabpfn_features
+POST:3_2:LV_mass,0.39337410712654,"['PRE:2_3:LVDV', 'PRE:2_3:LV_mass', 'Treatment'"],0.3952979469255471,"['Treatment', 'PRE:2_3:LVSV', 'PRE:2_3:LVDV'"]
+POST:3_2:LVDV,0.49315183106056815,"['PRE:2_3:LVDV', 'PRE:2_3:LV_mass', 'PRE:2_3:LVSV'"],0.6866646074257096,"['PRE:2_3:LVSV', 'Treatment', 'PRE:2_3:LVDV'"]
+POST:3_2:LVSV,-0.02814534717296202,"['PRE:2_3:LVSV', 'PRE:2_3:LVDV', 'PRE:2_3:LV_mass'"],0.5145448140996497,"['Treatment', 'PRE:2_3:LV_mass', 'PRE:2_3:LVDV'"]
+POST:3_3:LV_mass,0.5156924998878882,"['PRE:2_3:LVDV', 'PRE:2_3:LV_mass', 'PRE:2_3:LVSV'"],0.541757963217278,"['Treatment', 'PRE:2_3:LVSV', 'PRE:2_3:LVDV'"]
+POST:3_3:LVDV,0.17121499150610275,"['PRE:2_3:LVDV', 'PRE:2_3:LVSV', 'PRE:2_3:LV_mass'"],0.5156658690148178,"['Treatment', 'PRE:2_3:LV_mass', 'PRE:2_3:LVSV'"]
+POST:3_3:LVSV,0.06935258981134473,"['PRE:2_3:LVSV', 'PRE:2_3:LV_mass', 'PRE:2_3:LVDV'"],0.5554079445494601,"['PRE:2_3:LV_mass', 'Treatment', 'PRE:2_3:LVDV'"]

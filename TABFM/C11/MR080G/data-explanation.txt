@@ -1,0 +1,65 @@
+This is the CPET (cardiopulmonary exercise test) dataset
+ 
+==============================================
+Row identifiers / study metadata
+==============================================
+ID — row identifier (not a real measurement)
+SUBJECT — subject ID
+GROUP — likely the treatment/study arm (e.g. Control vs. Exercise, similar to what you had in the LV mass data)
+TEST — probably a test number/name if subjects did more than one CPET
+PROTOCOL — the exercise protocol used (e.g. a specific ramp/step protocol on cycle ergometer or treadmill — different protocols aren't directly comparable)
+DATE — date the test was performed
+TEST_PHASE — PRE_TEST / IN_TEST / POST_TEST, same convention as your other files
+BR DAY — bedrest day, same resets-per-phase convention we've discussed
+
+
+==============================================
+Demographics
+==============================================
+AGE, SEX, HEIGHT, WEIGHT — self-explanatory, used to normalize other values (e.g. relative VO2)
+
+==============================================
+Test conditions / environment
+==============================================
+MED MONITOR — likely which medical staff member monitored the test (an "analyzer"-style metadata column, similar to the two analyzers in your echo LV mass data)
+pBAR (mmHG) — barometric pressure at test time — affects gas exchange calculations, so it's recorded for correction purposes
+TEMP (0C) — ambient temperature
+REL HUM (%) — relative humidity — temperature/humidity/pressure together are standard environmental corrections for metabolic cart calibration
+
+==============================================
+Resting vitals (before exercise, two positions)
+==============================================
+HRsupine/SBPsupine/DBPsupine — heart rate and blood pressure lying down
+HRseated/SBPseated/DBPseated — same, seated (orthostatic comparison, relevant to bedrest deconditioning)
+
+==============================================
+Exercise capacity / workload
+==============================================
+TIMETOT — total test duration
+WKLD @ VO2PK — workload at the moment peak VO2 was reached
+MAX WKLD — highest workload achieved
+TERMINATION — reason the test ended (e.g. volitional fatigue, target HR reached, symptoms) — important for interpreting whether VO2PK reflects a true maximal effort
+Peak gas exchange / cardiovascular response
+HRPK — peak heart rate
+VO2PK — peak oxygen uptake (L/min)
+REL VO2PK — peak VO2 normalized to body weight (mL/kg/min) — the standard "VO2max" value
+VCO2PK — peak CO2 output
+RERPK — peak respiratory exchange ratio (VCO2/VO2) — confirms maximal effort if elevated
+VEPK — peak minute ventilation
+VTPK — peak tidal volume
+BR FREQPK — peak breathing frequency
+FEO2PK/FECO2PK — fraction of expired O2/CO2 at peak
+SBPPK/DBPPK — peak blood pressure during exercise
+RPEPK — peak perceived exertion (Borg scale, subjective)
+COMMENTS — free-text notes (like the "bad images"/analyzer comments in your echo data)
+
+
+==============================================
+Ventilatory thresholds
+==============================================
+VT1, VT2, VT3 — as before, VT1/VT2 are fairly standard (aerobic and anaerobic thresholds); VT3 is less standardized terminology
+VT FINAL — the threshold value ultimately used for analysis
+%VO2MAX @ VT, HR @ VT, %MHR @ VT — intensity metrics at that final threshold
+MatLab VT — new column here: looks like a threshold value derived by an automated MATLAB algorithm, likely to be compared against (or reconciled with) the manually-determined VT1/VT2/VT3/VT FINAL values — worth checking whether VT FINAL is meant to be "whichever of MatLab VT or the manual reads was used," similar to how the echo data reconciled two human analyzers.
+
+Same caveat as before: VT3, VT FINAL, and now MatLab VT aren't standardized terms the way VO2PK or VT1/VT2 are — if there's a data dictionary from the study, I'd check those specifically to understand exactly how they relate to each other.

@@ -1,0 +1,87 @@
+pre:BR DAY
+pre:AGE
+pre:HEIGHT
+pre:WEIGHT
+pre:pBAR (mmHG)
+pre:TEMP (0C)
+pre:REL HUM (%)
+pre:HRsupine
+pre:SBPsupine
+pre:DBPsupine
+pre:HRseated
+pre:SBPseated
+pre:DBPseated
+pre:TIMETOT
+pre:WKLD @ VO2PK
+pre:MAX WKLD
+pre:HRPK
+pre:VO2PK
+pre:VCO2PK
+pre:RERPK
+pre:REL VO2PK
+pre:VEPK
+pre:VTPK
+pre:BR FREQPK
+pre:FEO2PK
+pre:FECO2PK
+pre:SBPPK
+pre:DBPPK
+pre:RPEPK
+SUBJECT
+post1:BR DAY
+post1:AGE
+post1:HEIGHT
+post1:WEIGHT
+post1:pBAR (mmHG)
+post1:TEMP (0C)
+post1:REL HUM (%)
+post1:HRsupine
+post1:SBPsupine
+post1:DBPsupine
+post1:HRseated
+post1:SBPseated
+post1:DBPseated
+post1:TIMETOT
+post1:WKLD @ VO2PK
+post1:MAX WKLD
+post1:HRPK
+post1:VO2PK
+post1:VCO2PK
+post1:RERPK
+post1:REL VO2PK
+post1:VEPK
+post1:VTPK
+post1:BR FREQPK
+post1:FEO2PK
+post1:FECO2PK
+post1:SBPPK
+post1:DBPPK
+post2:BR DAY
+post2:AGE
+post2:HEIGHT
+post2:WEIGHT
+post2:pBAR (mmHG)
+post2:TEMP (0C)
+post2:REL HUM (%)
+post2:HRsupine
+post2:SBPsupine
+post2:DBPsupine
+post2:HRseated
+post2:SBPseated
+post2:DBPseated
+post2:TIMETOT
+post2:WKLD @ VO2PK
+post2:MAX WKLD
+post2:HRPK
+post2:VO2PK
+post2:VCO2PK
+post2:RERPK
+post2:REL VO2PK
+post2:VEPK
+post2:VTPK
+post2:BR FREQPK
+post2:FEO2PK
+post2:FECO2PK
+post2:SBPPK
+post2:DBPPK
+post2:RPEPK
