@@ -1,8 +1,0 @@
-# feature_importance_service/requirements.txt
-grpcio==1.62.0
-grpcio-tools==1.62.0
-protobuf==4.25.1
-scikit-learn==1.3.2
-pandas==2.1.4
-numpy==1.26.2
-joblib==1.3.2
