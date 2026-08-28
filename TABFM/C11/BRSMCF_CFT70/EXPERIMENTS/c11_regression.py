@@ -46,6 +46,9 @@ X_array = np.array(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X_array, y, test_size=0.2, random_state=42)
 
+#X_test=X_test[:2]
+#y_test=y_test[:2]
+
 
 # first try to train a RF
 rf = RandomForestRegressor(
@@ -75,7 +78,7 @@ feature_importance_df = pd.DataFrame({
 top_3_rf_features = list(feature_importance_df['Feature'])[:3]
 
 # create new row of output
-new_row = colname + ',' + str(rf_r2) + ',' + str(top_3_rf_features) + ','
+new_row = colname + '\t' + str(rf_r2) + '\t' + str(top_3_rf_features) + '\t'
 
 # Initialize a classifier
 reg = TabPFNRegressor(n_estimators=1)
@@ -86,7 +89,7 @@ y_pred = reg.predict(X_test)
 tab_r2 = r2_score(y_test, y_pred)
 
 # append score to new row for output
-new_row =  new_row + str(tab_r2) + ','
+new_row =  new_row + str(tab_r2) + '\t'
 
 # Feature selection
 '''feature_names =  list(X.columns)

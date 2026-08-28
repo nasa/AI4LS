@@ -8,7 +8,7 @@ input_file=sys.argv[1]
 # response_variable,randomforest_r2,randomforest_features,tabpfn_r2,tabpfn_features
 # post2:WKLD_@_VO2PK,0.5084084191757556,['pre:SBPseated', 'pre:VO2PK', 'pre:WKLD_@_VO2PK'],0.5182547344292523,['pre:WKLD_@_VO2PK', 'pre:VO2PK', 'pre:VEPK']
 
-results=pd.read_csv(input_file, sep=',', header=0)
+results=pd.read_csv(input_file, sep='\t', header=0)
 
 
 experiments=list(results['response_variable'])
@@ -64,7 +64,9 @@ ax.set_xticklabels(
 
 # R² ranges from -10 to 1
 min_rfr2=min(rf_r2)
+print('min rf r2: ', min_rfr2)
 min_tabpfnr2=min(tabpfn_r2)
+print('min tabpfn r2: ', min_tabpfnr2)
 ylim_min=min(min_rfr2, min_tabpfnr2)
 
 ax.set_ylim(ylim_min, 1)
