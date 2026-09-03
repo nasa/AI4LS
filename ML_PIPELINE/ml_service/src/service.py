@@ -265,6 +265,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
             ]
         
             logger.info(f"Training ensemble with {len(algorithms)} algorithms")
+            logger.info(f"Training ensemble with algorithms: {algorithms}")
         
             # Fetch dataset
             df = self.data_client.get_dataset(dataset_id)
@@ -293,12 +294,33 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
             for algorithm in algorithms:
                 try:
                     logger.info(f"Training {algorithm}...")
+                    # Set hyperparameters based on algorithm
+                    if algorithm == 'logistic_regression':
+                        hyperparams = {
+                            'max_iter': 100,
+                            'solver': 'lbfgs'
+                        }
+                    elif algorithm == 'random_forest':
+                        hyperparams = {
+                            'n_estimators': 50
+                        }
+                    elif algorithm == 'mlp':
+                        hyperparams = {
+                            'max_iter': 100,
+                            'early_stopping': True,
+                            'n_iter_no_change': 10,
+                            'random_state': 42,
+                            'hidden_layer_sizes': (100,50)
+                          
+                        }
+                    else:
+                        hyperparams = {}
                 
                     # Create model using ModelTrainer factory
                     model = self.model_trainer.create_model(
                         algorithm=algorithm,
                         task_type="classification",
-                        hyperparameters={}  # Use defaults
+                        hyperparameters=hyperparams  # Use defaults
                     )
                 
                     # Train model

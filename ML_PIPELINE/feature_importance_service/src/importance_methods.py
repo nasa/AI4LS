@@ -1,9 +1,8 @@
-# feature_importance_service/src/importance_methods.py
-import numpy as np
-import pandas as pd
-from sklearn.feature_selection import RFE
+from sklearn.feature_selection import SequentialFeatureSelector, RFE
 from sklearn.inspection import permutation_importance
-from typing import Dict, List, Tuple
+
+import pandas as pd
+from typing import List, Dict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -91,8 +90,8 @@ class FeatureImportanceMethods:
                 results.append({
                     "feature_name": name,
                     "importance": float(importance),
-                    "rank": int(ranking),
-                    "selected": bool(selected)
+                    "rank": int(ranking)
+                    #"selected": bool(selected)
                 })
             
             # Sort by rank (lower rank = more important)
@@ -102,6 +101,91 @@ class FeatureImportanceMethods:
             
         except Exception as e:
             logger.error(f"Error computing RFE: {e}", exc_info=True)
+            return []
+    
+    @staticmethod
+    def sequential_feature_selection(
+        model,
+        X: pd.DataFrame,
+        y: pd.Series,
+        n_features_to_select: int = None,
+        direction: str = 'forward',
+        cv: int = 5
+    ) -> List[Dict]:
+        """
+        Sequential Feature Selection (SFS)
+        
+        Iteratively adds (forward) or removes (backward) features based on 
+        cross-validated estimator performance. Works with any sklearn model.
+        
+        Args:
+            model: Sklearn model to use for selection
+            X: Feature matrix
+            y: Target variable
+            n_features_to_select: Number of features to select (default: half)
+            direction: 'forward' (add features) or 'backward' (remove features)
+            cv: Number of cross-validation folds
+        
+        Returns:
+            List of dicts with feature name, importance score, rank, and selection order
+        """
+        try:
+            if n_features_to_select is None:
+                n_features_to_select = max(1, len(X.columns) // 2)
+            
+            if direction not in ['forward', 'backward']:
+                raise ValueError("direction must be 'forward' or 'backward'")
+            
+            logger.info(f"Running SFS ({direction}): selecting {n_features_to_select} features")
+            
+            # Create Sequential Feature Selector
+            sfs = SequentialFeatureSelector(
+                estimator=model,
+                n_features_to_select=n_features_to_select,
+                direction=direction,
+                cv=cv,
+                n_jobs=-1,  # Use all CPU cores
+                scoring=None  # Use estimator's default scoring
+            )
+            
+            # Fit SFS
+            sfs.fit(X, y)
+            
+            results = []
+            
+            # Get feature names that were selected
+            selected_features = X.columns[sfs.get_support()].tolist()
+            
+            # Assign ranks based on selection order
+            # Features selected earlier (in forward) or later (in backward) are more important
+            for i, name in enumerate(X.columns):
+                is_selected = name in selected_features
+                
+                if is_selected:
+                    # Selected features ranked by order
+                    rank = selected_features.index(name) + 1
+                    importance = 1.0 / rank  # Earlier selection = higher importance
+                else:
+                    # Non-selected features ranked after selected ones
+                    rank = len(selected_features) + 1
+                    importance = 0.0
+                
+                results.append({
+                    "feature_name": name,
+                    "importance": float(importance),
+                    "rank": int(rank)
+                    #"selected": bool(is_selected)
+                })
+            
+            # Sort by rank
+            results.sort(key=lambda x: x['rank'])
+            
+            logger.info(f"SFS completed: selected {len(selected_features)} features")
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error computing Sequential Feature Selection: {e}", exc_info=True)
             return []
     
     @staticmethod
@@ -143,7 +227,7 @@ class FeatureImportanceMethods:
                 results.append({
                     "feature_name": name,
                     "importance": float(perm_importance.importances_mean[i]),
-                    "std": float(perm_importance.importances_std[i]),
+                    #"std": float(perm_importance.importances_std[i]),
                     "rank": i + 1
                 })
             

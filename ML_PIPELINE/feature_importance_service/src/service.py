@@ -54,10 +54,14 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
             
             # Get model metadata
             model_info = self.model_store.get_model_info(model_id)
+            logger.info(f"model_info: {model_info}")
+            
+
             feature_names = model_info["feature_columns"]
             
             # Get dataset from data service
             df = self.data_client.get_dataset(dataset_id)
+            logger.info(f"shape of data in model: {df.shape}")
             if df is None:
                 return feature_importance_service_pb2.ImportanceResponse(
                     success=False,
@@ -71,6 +75,8 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
             
             # Compute importance for each requested method
             all_importances = {}
+            
+            logger.info(f"calling feature importance across all methods: {methods}")
             
             for method in methods:
                 start_time = time.time()
@@ -100,6 +106,15 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
                         "n_repeats": str(n_repeats)
                     }
                 
+                elif method == "sequential":
+                    scores = self.importance_methods.sequential_feature_selection(
+                        model, X, y, n_features_to_select=20, direction='forward', cv=3
+                    )
+                    metadata = {
+                        "execution_time": f"{time.time() - start_time:.2f}s"
+                        
+                    }
+
                 else:
                     logger.warning(f"Unknown method: {method}")
                     continue

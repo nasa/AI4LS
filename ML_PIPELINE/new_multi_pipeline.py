@@ -130,13 +130,15 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
     # Step 1: CV Filtering - Keep exactly top min_features by CV
     logger.info(f"\nApplying CV filtering...")
 
-    X_filtered, selected_features = _filter_cvs(X, start=0.25, step=0.25, min_features=1000)
+    X_filtered, selected_features = _filter_cvs(X, start=0.25, step=0.25, min_features=min_features)
 
     print('before trans: ', X_filtered.head())
     
     # Step 2: Apply transformations
     if trans_list:
         logger.info(f"\nApplying transformations: {trans_list}...")
+
+        # ["[{'type': 'standardize'", "'columns': []", "'params': {}}", "{'type': 'log'", "'columns': []", "'params': {}}]"]
         
         X_transformed = X_filtered.copy()
         
@@ -225,7 +227,7 @@ def combine_and_run_pipeline(
         patterns = ["unnormalized"]
     
     if fi_methods is None:
-        fi_methods = ["built_in"]
+        fi_methods = ["sequential"]
     
     # Filter out RFE for neural network algorithms (they don't have feature_importances_)
     if algorithm in ["neural_network", "mlp", "nn"]:
@@ -266,7 +268,6 @@ def combine_and_run_pipeline(
                 cv_step=cv_step
             )
             common_genes = data_client.find_common_genes(list(dataset_map.values()))
-            #common_genes = ['ENSMUSG00000000001', 'ENSMUSG00000000003', 'ENSMUSG00000000028', 'ENSMUSG00000000031', 'ENSMUSG00000000037', 'ENSMUSG00000000049', 'ENSMUSG00000000056', 'ENSMUSG00000000058', 'ENSMUSG00000000078']
             combined_dataset_id, samples_per_source, condition_column = data_client.combine_datasets(
                 dataset_ids=list(dataset_map.values()),
                 common_genes=common_genes
@@ -310,6 +311,8 @@ def combine_and_run_pipeline(
         return None
     
     print(f"Target column: {target_column}")
+   
+    # JC 1 
     
     # Ensure target has string values
     df_clean = combined_df.copy()
@@ -329,6 +332,7 @@ def combine_and_run_pipeline(
     print("=" * 80)
 
     try:
+        logger.info(f"calling filter_and_transform with transformations: {trans_list}")
         df_filtered_transformed, selected_genes = filter_and_transform_data(
             df_clean,
             target_column=target_column,
@@ -336,12 +340,15 @@ def combine_and_run_pipeline(
             min_features=min_features,
             trans_list=trans_list
         )
+        print('head of filtered/transformed df: ', df_filtered_transformed.head())
     except Exception as e:
         print(f"✗ Failed to filter/transform data: {e}")
         import traceback
         traceback.print_exc()
         return None
-    
+  
+     
+    # JC 2 
     # ============================================================================
     # STEP 6: Save filtered & transformed dataset
     # ============================================================================
@@ -378,6 +385,8 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 7: Train single model
     # ============================================================================
+    # JC 3
+    
     print("\n" + "=" * 80)
     print("STEP 7: TRAIN SINGLE MODEL")
     print("=" * 80)
@@ -417,6 +426,9 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 8: Feature Importance (single model)
     # ============================================================================
+
+    # JC 4
+    
     if do_feature_importance:
         print("\n" + "=" * 80)
         print("STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)")
@@ -459,6 +471,8 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 9: Ensemble Training with Consensus Features
     # ============================================================================
+    # JC 5
+    
     if do_ensemble:
         print("\n" + "=" * 80)
         print("STEP 9: ENSEMBLE TRAINING & CONSENSUS FEATURES")
@@ -509,6 +523,9 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 10: KEGG Pathway Enrichment Analysis
     # ============================================================================
+
+    # JC 6
+    
     if do_kegg_analysis and feature_importance_response:
         print("\n" + "=" * 80)
         print("STEP 10: KEGG PATHWAY ENRICHMENT")
@@ -557,6 +574,7 @@ def combine_and_run_pipeline(
     print(f"  KEGG enrichment: {'✓' if do_kegg_analysis else '✗'}")
     
     return model_id
+    #return None
 
 
 def get_data_client():
@@ -600,7 +618,7 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
     if target_column in columns:
         columns.remove(target_column)
 
-    transformations = []
+    '''transformations = []
     if 'l' in trans_list:
         transformations.append({"type": "log", "columns": columns, "params": {}})
     if 'n' in trans_list:
@@ -608,7 +626,7 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
     if 's' in trans_list:
         transformations.append({"type": "standardize", "columns": columns, "params": {}})
     if 't' in trans_list:
-        transformations.append({"type": "tpm", "columns": columns, "params": {}})
+        transformations.append({"type": "tpm", "columns": columns, "params": {}})'''
 
     payload = {
         "dataset_id": dataset_id,
@@ -616,7 +634,7 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
             "target_column": target_column,
             "task_type": task_type,
             "feature_columns": [],
-            "transformations": transformations,
+            #"transformations": transformations,
             "algorithm": algorithm,
             "hyperparameters": {},
             "metrics": ["accuracy", "f1_score"],
@@ -707,6 +725,10 @@ def compute_feature_importance(model_id, dataset_id, methods=['built_in']):
         params['random_state'] = '42'
 
     if 'recursive' in methods:
+        params['step'] = '1'
+        params['n_features_to_select'] = '100'
+
+    if 'sequential' in methods:
         params['step'] = '1'
         params['n_features_to_select'] = '100'
     
@@ -887,7 +909,7 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
     ensemble_request = ml_service_pb2.EnsembleRequest(
         dataset_id=dataset_id,
         target_column=target_column,
-        algorithms=["random_forest", "svm", "logistic_regression", "neural_network"]
+        algorithms=["random_forest", "svm", "logistic_regression", "neural_network", "gradient_boosting"]
     )
     
     ensemble_response = ml_stub.TrainEnsemble(ensemble_request)
@@ -910,7 +932,7 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
         fi_request = feature_importance_service_pb2.ImportanceRequest(
             model_id=model_result.model_id,
             dataset_id=dataset_id,
-            methods=["permutation", "recursive"]
+            methods=["permutation", "sequential"]
         )
         
         fi_response = fi_stub.ComputeImportance(fi_request)
@@ -927,6 +949,42 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
                         'rank': score.rank
                     }
                     for score in perm_results.scores
+                ]
+        
+                feature_importance_results.append({
+                    'model_id': model_result.model_id,
+                    'algorithm': model_result.algorithm,
+                    'features': features
+                })
+            if "recursive" in fi_response.importances:
+                rec_results = fi_response.importances["recursive"]
+        
+                # Access the scores from FeatureImportances
+                features = [
+                    {
+                        'feature': score.feature_name,
+                        'importance': score.importance,
+                        'rank': score.rank
+                    }
+                    for score in rec_results.scores
+                ]
+        
+                feature_importance_results.append({
+                    'model_id': model_result.model_id,
+                    'algorithm': model_result.algorithm,
+                    'features': features
+                })
+            if "built-in" in fi_response.importances:
+                builtin_results = fi_response.importances["built-in"]
+        
+                # Access the scores from FeatureImportances
+                features = [
+                    {
+                        'feature': score.feature_name,
+                        'importance': score.importance,
+                        'rank': score.rank
+                    }
+                    for score in builtin_results.scores
                 ]
         
                 feature_importance_results.append({
@@ -991,25 +1049,25 @@ def main():
     parser.add_argument('-fl', '--factor_name', default='Factor Value[Spaceflight]', help='factor name')
     parser.add_argument('-fv', '--factor_values', default='Ground Control,Space Flight', help='factor values')
     parser.add_argument('-pa', '--patterns', default='unnormalized', help='data patterns')
-    parser.add_argument('-tl', '--trans_list', default='', help='transformations (t=tpm, l=log, s=stdize)')
+    parser.add_argument('-tl', '--trans_list', default='s', help='transformations (t=tpm, l=log, s=stdize)')
     parser.add_argument('-cs', '--cv_step', type=float, default=0.25, help='CV filtering step')
     parser.add_argument('-mf', '--min_features', type=int, default=1000, help='minimum features after filtering')
-    parser.add_argument('-fi', '--fi_methods', default='built_in', help='feature importance methods')
+    parser.add_argument('-fi', '--fi_methods', default='sequential', help='feature importance methods')
     
     # Feature Importance options
-    parser.add_argument('--no-feature-importance', action='store_true', help='Skip feature importance')
+    parser.add_argument('--no_feature_importance', action='store_true', help='Skip feature importance')
     
     # Ensemble options
-    parser.add_argument('--no-ensemble', action='store_true', help='Skip ensemble training')
-    parser.add_argument('--consensus-threshold', type=int, default=3, help='consensus threshold')
-    parser.add_argument('--top-features', type=int, default=100, help='top N features per model')
+    parser.add_argument('--no_ensemble', action='store_true', help='Skip ensemble training')
+    parser.add_argument('--consensus_threshold', type=int, default=3, help='consensus threshold')
+    parser.add_argument('--top_features', type=int, default=100, help='top N features per model')
     
     # KEGG options
-    parser.add_argument('--no-kegg', action='store_true', help='Skip KEGG enrichment')
+    parser.add_argument('--no_kegg', action='store_true', help='Skip KEGG enrichment')
     parser.add_argument('--organism', default='mmu', help='organism code')
     parser.add_argument('--pvalue', type=float, default=0.1, help='KEGG p-value cutoff')
     parser.add_argument('--qvalue', type=float, default=0.1, help='KEGG q-value cutoff')
-    parser.add_argument('--kegg-max-genes', type=int, default=500, help='max genes for KEGG')
+    parser.add_argument('--kegg_max_genes', type=int, default=500, help='max genes for KEGG')
     
     args = parser.parse_args()
     

@@ -281,6 +281,34 @@ class PipelineRunner:
         except:
             return None
 
+def parse_trans_list_to_config(trans_list_str):
+    """Convert trans_list string (e.g., 's,l') to TransformationConfig objects"""
+    if not trans_list_str:
+        return []
+    
+    mapping = {
+        's': 'standardize',
+        'std': 'standardize',
+        'l': 'log',
+        'log': 'log',
+        't': 'tpm',
+        'tpm': 'tpm',
+        'n': 'normalize',
+        'normalize': 'normalize',
+    }
+    
+    transformations = []
+    for t in trans_list_str.split(','):
+        t = t.strip().lower()
+        if t in mapping:
+            transformations.append({
+                "type": mapping[t],
+                "columns": [],  # Empty = apply to all feature columns
+                "params": {}
+            })
+    
+    return transformations
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -314,8 +342,8 @@ Examples:
     parser.add_argument('-ts', '--test_size', type=float, default=0.2, help='Test set fraction')
     parser.add_argument('-al', '--algorithm', default='random_forest', help='ML algorithm')
     parser.add_argument('-mf', '--min_features', type=int, default=1000, help='Minimum features')
-    parser.add_argument('--no-ensemble', action='store_true', help='Skip ensemble')
-    parser.add_argument('--no-kegg', action='store_true', help='Skip KEGG analysis')
+    parser.add_argument('--no_ensemble', action='store_true', help='Skip ensemble')
+    parser.add_argument('--no_kegg', action='store_true', help='Skip KEGG analysis')
     parser.add_argument('--no_feature_importance', action='store_true', help='Skip feature importance')
     
     # Email arguments
@@ -327,7 +355,7 @@ Examples:
     parser.add_argument('--smtp_server', type=str, help='Custom SMTP server (overrides provider)')
     parser.add_argument('--smtp_port', type=int, help='Custom SMTP port (overrides provider)')
     parser.add_argument('--no_tls', action='store_true', help='Disable TLS encryption')
-    
+    parser.add_argument('-tl', '--trans_list', default='s', help='transformations (t=tpm, l=log, s=stdize)')
     parser.add_argument('--sender_email', type=str, help='Email to send from (default: prompt or EMAIL_USER env var)')
     parser.add_argument('--sender_password', type=str, help='Password/API key (default: prompt or EMAIL_PASSWORD env var)')
     
@@ -358,7 +386,13 @@ Examples:
         '--test_size': args.test_size,
         '--algorithm': args.algorithm,
         '--min_features': args.min_features,
+        '--trans_list': args.trans_list
     }
+
+    if args.trans_list:
+        #transformations = parse_trans_list_to_config(args.trans_list)
+        #pipeline_args['--trans_list'] = transformations
+        pipeline_args['--trans_list'] = args.trans_list
     
     if args.tissue:
         pipeline_args['--tissue'] = args.tissue
@@ -366,11 +400,15 @@ Examples:
         pipeline_args['--osd_ids'] = args.osd_ids
     
     if args.no_ensemble:
-        pipeline_args['--no-ensemble'] = True
+        pipeline_args['--no_ensemble'] = True
     if args.no_kegg:
-        pipeline_args['--no-kegg'] = True
+        pipeline_args['--no_kegg'] = True
     if args.no_feature_importance:
-        pipeline_args['--no-feature-importance'] = True
+        pipeline_args['--no_feature_importance'] = True
+
+
+    for key, value in vars(args).items():
+        pipeline_args[key] = value
     
     # Create notifier and runner
     try:

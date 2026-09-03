@@ -287,6 +287,7 @@ async def transform_dataset(
             for t in request.transformations
         ]
         
+        logger.info(f"applying transformations: {request.transformations}")
         result = data_client.apply_transformations(dataset_id, transformations)
         
         response = TransformationResponse(
@@ -337,6 +338,25 @@ async def get_dataset_info(dataset_id: str):
 async def run_pipeline(request: PipelineRequest):
     """Run a complete ML pipeline with streaming progress"""
     pipeline_id = str(uuid.uuid4())
+
+    from fastapi import HTTPException
+
+    VALID_ALGORITHMS = [
+        'random_forest',
+        'gradient_boosting',
+        'xgboost',
+        'svm',
+        'neural_network',  # Not 'mlp'
+        'logistic_regression',
+        'naive_bayes'
+    ]
+
+    if request.config.algorithm.value not in VALID_ALGORITHMS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid algorithm: '{request.config.algorithm.value}'. "
+                   f"Valid options are: {', '.join(VALID_ALGORITHMS)}"
+        )
     
     async def generate_progress():
         try:
