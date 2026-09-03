@@ -200,6 +200,7 @@ def combine_and_run_pipeline(
     kegg_max_genes=500,
     consensus_threshold=3,
     top_features=100,
+    ensemble_algorithms=None,
     **kwargs
 ):
     """
@@ -480,6 +481,7 @@ def combine_and_run_pipeline(
         
         try:
             ensemble_result = run_ensemble_pipeline(
+                algorithms=ensemble_algorithms,
                 dataset_id=dataset_id,
                 target_column=target_column,
                 factor_values=factor_values,
@@ -894,7 +896,7 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     return kegg_response
 
 
-def run_ensemble_pipeline(dataset_id, target_column, factor_values, 
+def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values, 
                           top_n=100, consensus_threshold=3):
     """Run ensemble training and compute consensus features"""
 
@@ -909,7 +911,8 @@ def run_ensemble_pipeline(dataset_id, target_column, factor_values,
     ensemble_request = ml_service_pb2.EnsembleRequest(
         dataset_id=dataset_id,
         target_column=target_column,
-        algorithms=["random_forest", "svm", "logistic_regression", "neural_network", "gradient_boosting"]
+        #algorithms=["random_forest", "svm", "logistic_regression", "neural_network", "gradient_boosting"]
+        algorithms = algorithms
     )
     
     ensemble_response = ml_stub.TrainEnsemble(ensemble_request)
@@ -1038,7 +1041,7 @@ def main():
     dataset_group.add_argument(
         '--osd_ids',
         type=str,
-        help="Comma-separated list of OSD IDs (e.g., 'OSD-48,OSD-51,OSD-71')"
+        help="Comma-separated list of OSD IDs (e.g., '47,48,137,168')"
     )
     
     # Pipeline parameters
@@ -1061,6 +1064,7 @@ def main():
     parser.add_argument('--no_ensemble', action='store_true', help='Skip ensemble training')
     parser.add_argument('--consensus_threshold', type=int, default=3, help='consensus threshold')
     parser.add_argument('--top_features', type=int, default=100, help='top N features per model')
+    parser.add_argument('--ensemble_algorithms', type=str, default='random_forest', help='neural_network, logistic_regression, svm, random_forest, gradient_boosting')
     
     # KEGG options
     parser.add_argument('--no_kegg', action='store_true', help='Skip KEGG enrichment')
@@ -1081,6 +1085,11 @@ def main():
     osd_ids = None
     if args.osd_ids:
         osd_ids = [id.strip() for id in args.osd_ids.split(',')]
+
+    # Parse ensemble algorithms 
+    ensemble_algorithms = None
+    if args.ensemble_algorithms:
+        ensemble_algorithms = [alg.strip() for alg in args.ensemble_algorithms.split(',')]
     
     # Run the pipeline
     result = combine_and_run_pipeline(
@@ -1105,7 +1114,8 @@ def main():
         qvalue_threshold=args.qvalue,
         kegg_max_genes=args.kegg_max_genes,
         consensus_threshold=args.consensus_threshold,
-        top_features=args.top_features
+        top_features=args.top_features,
+        ensemble_algorithms=ensemble_algorithms
     )
     
     if result:

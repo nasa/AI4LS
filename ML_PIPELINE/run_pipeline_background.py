@@ -343,6 +343,7 @@ Examples:
     parser.add_argument('-al', '--algorithm', default='random_forest', help='ML algorithm')
     parser.add_argument('-mf', '--min_features', type=int, default=1000, help='Minimum features')
     parser.add_argument('--no_ensemble', action='store_true', help='Skip ensemble')
+    parser.add_argument('--ensemble_algorithms', type=str, help='list of algorithms from : neural_network, logistic_regression, svm, random_forest, gradient_boosting')
     parser.add_argument('--no_kegg', action='store_true', help='Skip KEGG analysis')
     parser.add_argument('--no_feature_importance', action='store_true', help='Skip feature importance')
     
@@ -401,6 +402,8 @@ Examples:
     
     if args.no_ensemble:
         pipeline_args['--no_ensemble'] = True
+    elif args.ensemble_algorithms:
+        pipeline_args['--ensemble_algorithms'] = args.ensemble_algorithms
     if args.no_kegg:
         pipeline_args['--no_kegg'] = True
     if args.no_feature_importance:
