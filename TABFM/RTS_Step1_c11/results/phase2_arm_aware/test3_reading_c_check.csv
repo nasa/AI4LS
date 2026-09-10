@@ -1,0 +1,25 @@
+arm,variable,label,n_arm,n_valid,rho,p_value,p_bonferroni,significant,status,bonferroni_threshold
+CONTROL,total_lean____idxa_cft70_body_composition_total,Total lean mass,11,11,0.3090909090909091,0.35502843970150694,1.0,False,TESTABLE,0.00625
+EXERCISE,total_lean____idxa_cft70_body_composition_total,Total lean mass,19,19,-0.1736842105263158,0.4770171488822206,1.0,False,TESTABLE,0.00625
+FLY,total_lean____idxa_cft70_body_composition_total,Total lean mass,8,8,,,,False,UNTESTABLE: n_valid < 10,0.00625
+CONTROL,weight____mr080g_cft70_pre_all,Body weight,11,11,-0.14545454545454548,0.6695786456420787,1.0,False,TESTABLE,0.00625
+EXERCISE,weight____mr080g_cft70_pre_all,Body weight,19,19,-0.4473684210526316,0.05478932920175399,0.8766292672280639,False,TESTABLE,0.00625
+FLY,weight____mr080g_cft70_pre_all,Body weight,8,8,,,,False,UNTESTABLE: n_valid < 10,0.00625
+CONTROL,height____mr080g_cft70_pre_all,Height,11,11,-0.06378148666094874,0.8522059712863589,1.0,False,TESTABLE,0.00625
+EXERCISE,height____mr080g_cft70_pre_all,Height,19,19,-0.16237183509087483,0.5065991656483226,1.0,False,TESTABLE,0.00625
+FLY,height____mr080g_cft70_pre_all,Height,8,8,,,,False,UNTESTABLE: n_valid < 10,0.00625
+CONTROL,BMI_COMPUTED,BMI (computed),11,11,-0.30000000000000004,0.37008312228206763,1.0,False,TESTABLE,0.00625
+EXERCISE,BMI_COMPUTED,BMI (computed),19,19,-0.39473684210526316,0.09442052145646511,1.0,False,TESTABLE,0.00625
+FLY,BMI_COMPUTED,BMI (computed),8,8,,,,False,UNTESTABLE: n_valid < 10,0.00625
+CONTROL,fat____idxa_cft70_body_composition_trunk,Trunk fat,11,11,-0.7818181818181819,0.004473162252783043,0.07157059604452869,False,TESTABLE,0.00625
+EXERCISE,fat____idxa_cft70_body_composition_trunk,Trunk fat,19,19,-0.5877192982456141,0.008139305847095222,0.13022889355352354,False,TESTABLE,0.00625
+FLY,fat____idxa_cft70_body_composition_trunk,Trunk fat,8,8,,,,False,UNTESTABLE: n_valid < 10,0.00625
+CONTROL,lean____idxa_cft70_body_composition_legs,Leg lean mass,11,11,0.20000000000000004,0.5554454421055853,1.0,False,TESTABLE,0.00625
+EXERCISE,lean____idxa_cft70_body_composition_legs,Leg lean mass,19,19,-0.37719298245614036,0.1113882030181702,1.0,False,TESTABLE,0.00625
+FLY,lean____idxa_cft70_body_composition_legs,Leg lean mass,8,8,,,,False,UNTESTABLE: n_valid < 10,0.00625
+CONTROL,fat____idxa_cft70_body_composition_legs,Leg fat,11,11,-0.6363636363636364,0.03528698122006231,0.564591699520997,False,TESTABLE,0.00625
+EXERCISE,fat____idxa_cft70_body_composition_legs,Leg fat,19,19,-0.40350877192982454,0.08668081166957645,1.0,False,TESTABLE,0.00625
+FLY,fat____idxa_cft70_body_composition_legs,Leg fat,8,8,,,,False,UNTESTABLE: n_valid < 10,0.00625
+CONTROL,total_fat____idxa_cft70_body_composition_total,Total fat,11,11,-0.8000000000000002,0.0031104283103858456,0.04976685296617353,False,TESTABLE,0.00625
+EXERCISE,total_fat____idxa_cft70_body_composition_total,Total fat,19,19,-0.5228070175438596,0.021636910536196253,0.34619056857914005,False,TESTABLE,0.00625
+FLY,total_fat____idxa_cft70_body_composition_total,Total fat,8,8,,,,False,UNTESTABLE: n_valid < 10,0.00625

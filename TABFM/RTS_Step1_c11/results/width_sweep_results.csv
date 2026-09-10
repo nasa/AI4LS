@@ -1,0 +1,6 @@
+width,n_draws,mean_spearman,sd_across_draws,selection_method,note
+5,5,-0.2272245044643888,0.2264374492057374,"uniform random draw without replacement (5 draws per width); exact RNG call not preserved in current workspace","sd_across_draws is the SD across the 5 random feature draws, not a permutation null"
+25,5,-0.2624811940546245,0.3387504894955974,"uniform random draw without replacement (5 draws per width); exact RNG call not preserved in current workspace","sd_across_draws is the SD across the 5 random feature draws, not a permutation null"
+100,5,0.0043297688970465,0.3208411307561117,"uniform random draw without replacement (5 draws per width); exact RNG call not preserved in current workspace","sd_across_draws is the SD across the 5 random feature draws, not a permutation null"
+250,5,0.0374878460116729,0.3089252357060227,"uniform random draw without replacement (5 draws per width); exact RNG call not preserved in current workspace","sd_across_draws is the SD across the 5 random feature draws, not a permutation null"
+628,1,0.3762038995750089,,full table (no subset drawn),full table = the observed run (no refit)

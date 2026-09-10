@@ -1,0 +1,532 @@
+{
+ "root": "/Users/rtscott2/Desktop/AI/20260429/BR TFM Project/bedrest_tfm/03_raw_downloads",
+ "n_csv": 3553,
+ "n_readable": 3553,
+ "subject_column": {
+  "keyable": 3349,
+  "weak_only": 165,
+  "none": 39,
+  "ambiguous": 0,
+  "spellings": {
+   "STRONG|Subject": 2462,
+   "WEAK|ID": 138,
+   "WEAK|\ufeffID": 27,
+   "STRONG|SUBJECT": 872,
+   "STRONG|\ufeffSubject": 13,
+   "STRONG|Subject ID": 2
+  },
+  "value_formats": {
+   "num3-4": 3017,
+   "C1Gxxxx": 235,
+   "C3x_nnnn": 10,
+   "other_numeric": 2,
+   "non_subject": 85
+  },
+  "folders_with_multiple_spellings": {
+   "BEDREST_iRATS": {
+    "Subject": 39,
+    "SUBJECT": 6
+   },
+   "BRSMCF": {
+    "Subject": 12,
+    "\ufeffSubject": 1
+   },
+   "BRSMImmune": {
+    "Subject": 1,
+    "SUBJECT": 22
+   },
+   "BRSMpQCT": {
+    "Subject": 67,
+    "SUBJECT": 34
+   },
+   "CRF": {
+    "Subject": 285,
+    "\ufeffSubject": 12,
+    "Subject ID": 2
+   },
+   "MR035G": {
+    "Subject": 248,
+    "SUBJECT": 806
+   },
+   "MR080G": {
+    "SUBJECT": 4,
+    "Subject": 784
+   }
+  },
+  "files_without_subject_column": [
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70 _Data_Jump_TimeToPeakVerticalForce.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_Jump_AirTime.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_Jump_PeakVerticalForce.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_Jump_SettlingTime.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_Jump_TakeOffLatency.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TorsoAccRRMS_trial.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TorsoAccRRMS_win.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TorsoPitchRMS_trial.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TorsoPitchRMS_win.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TorsoRollRMS_trial.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TorsoRollRMS_win.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TorsoYawRMS_trial.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TorsoYawRMS_win.csv",
+   "BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_Data_LineTest_TrialTotalTime.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Adrenocorticotropic_Hormone/MR001G_Campaign_3_Blood_Data_ACTH_All_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Adrenocorticotropic_Hormone/MR001G_Campaign_3_Blood_Data_ACTH_Female_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Adrenocorticotropic_Hormone/MR001G_Campaign_3_Blood_Data_ACTH_Male_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Aldosterone/MR001G_Campaign_3_Blood_Data_Aldosterone_All_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Aldosterone/MR001G_Campaign_3_Blood_Data_Aldosterone_Female_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Aldosterone/MR001G_Campaign_3_Blood_Data_Aldosterone_Male_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Angiotensin/MR001G_Campaign_3_Blood_Data_Angiotensin_All_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Angiotensin/MR001G_Campaign_3_Blood_Data_Angiotensin_Female_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Angiotensin/MR001G_Campaign_3_Blood_Data_Angiotensin_Male_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Arginine_Vasopressin/MR001G_Campaign_3_Blood_Data_Arginine_Vasopressin_All_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Arginine_Vasopressin/MR001G_Campaign_3_Blood_Data_Arginine_Vasopressin_Female_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Arginine_Vasopressin/MR001G_Campaign_3_Blood_Data_Arginine_Vasopressin_Male_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Atrial_Natriuretic_Peptide/MR001G_Campaign_3_Blood_Data_Atrial_Natriuretic_Peptide_All_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Atrial_Natriuretic_Peptide/MR001G_Campaign_3_Blood_Data_Atrial_Natriuretic_Peptide_Female_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Atrial_Natriuretic_Peptide/MR001G_Campaign_3_Blood_Data_Atrial_Natriuretic_Peptide_Male_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Epinephrine/MR001G_Campaign_3_Blood_Data_Epinephrine_All_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Epinephrine/MR001G_Campaign_3_Blood_Data_Epinephrine_Female_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Epinephrine/MR001G_Campaign_3_Blood_Data_Epinephrine_Male_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Norepinephrine/MR001G_Campaign_3_Blood_Data_Norepinephrine_All_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Norepinephrine/MR001G_Campaign_3_Blood_Data_Norepinephrine_Female_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Norepinephrine/MR001G_Campaign_3_Blood_Data_Norepinephrine_Male_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Plasma_Renin_Activity/MR001G_Campaign_3_Blood_Data_Plasma_Renin_Activity_All_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Plasma_Renin_Activity/MR001G_Campaign_3_Blood_Data_Plasma_Renin_Activity_Female_Avg.csv",
+   "MR001G/MR001G_Campaign_3_Blood_Data_Plasma_Renin_Activity/MR001G_Campaign_3_Blood_Data_Plasma_Renin_Activity_Male_Avg.csv",
+   "MR079G/MR079G_Campaign_17_Isokinetic_DataSum/MR079G_Campaign_17_Isokinetic_DataSum_Parameter_Reference_ALL.csv"
+  ]
+ },
+ "nomenclature": {
+  "distinct_raw_headers": 2398,
+  "normalized_concepts": 2186,
+  "concepts_with_multiple_spellings": 197,
+  "column_instances_affected": 30280,
+  "drift_groups": {
+   "id": [
+    "ID",
+    "\ufeffID"
+   ],
+   "subject": [
+    "SUBJECT",
+    "Subject",
+    "\ufeffSubject"
+   ],
+   "test phase": [
+    "TEST_PHASE",
+    "Test Phase",
+    "Test_Phase"
+   ],
+   "br day": [
+    " BR Day",
+    "BR DAY",
+    "BR Day",
+    "BR_DAY",
+    "BR_Day",
+    "\ufeffBR_Day"
+   ],
+   "campaign": [
+    "CAMPAIGN",
+    "Campaign"
+   ],
+   "date": [
+    "DATE",
+    "Date"
+   ],
+   "test": [
+    "TEST",
+    "Test"
+   ],
+   "sex": [
+    "SEX",
+    "Sex"
+   ],
+   "height": [
+    "HEIGHT",
+    "Height"
+   ],
+   "weight": [
+    "WEIGHT",
+    "Weight"
+   ],
+   "ethnicity": [
+    "ETHNICITY",
+    "ethnicity"
+   ],
+   "age": [
+    "AGE",
+    "Age"
+   ],
+   "neck bmd": [
+    "NECK_BMD",
+    "Neck_BMD"
+   ],
+   "troch bmd": [
+    "TROCH_BMD",
+    "Troch_BMD"
+   ],
+   "tot bmd": [
+    "TOT_BMD",
+    "Tot_BMD"
+   ],
+   "group": [
+    "GROUP",
+    "Group"
+   ],
+   "neck bmc": [
+    "NECK_BMC",
+    "Neck_BMC"
+   ],
+   "neck area": [
+    "NECK_AREA",
+    "Neck_AREA"
+   ],
+   "troch bmc": [
+    "TROCH_BMC",
+    "Troch_BMC"
+   ],
+   "troch area": [
+    "TROCH_AREA",
+    "Troch_AREA"
+   ],
+   "wards bmd": [
+    "WARDS_BMD",
+    "Wards_BMD"
+   ],
+   "wards bmc": [
+    "WARDS_BMC",
+    "Wards_BMC"
+   ],
+   "wards area": [
+    "WARDS_AREA",
+    "Wards_AREA"
+   ],
+   "scan type": [
+    "SCAN_TYPE",
+    "Scan Type"
+   ],
+   "comments": [
+    "COMMENTS",
+    "Comments"
+   ],
+   "record": [
+    "Record",
+    "\ufeffRecord"
+   ],
+   "notes": [
+    "NOTES",
+    "Notes"
+   ],
+   "larm bmc": [
+    "LARM_BMC",
+    "LArm_BMC"
+   ],
+   "rarm bmc": [
+    "RARM_BMC",
+    "RArm_BMC"
+   ],
+   "lleg bmc": [
+    "LLEG_BMC",
+    "LLeg_BMC"
+   ],
+   "rleg bmc": [
+    "RLEG_BMC",
+    "RLeg_BMC"
+   ],
+   "avg": [
+    "AVG",
+    "Avg"
+   ],
+   "stdev": [
+    "STDev",
+    "StDev"
+   ],
+   "trochanter bmd": [
+    "Trochanter    BMD",
+    "Trochanter BMD"
+   ],
+   "tot bmc": [
+    "TOT_BMC",
+    "Tot_BMC"
+   ],
+   "tot area": [
+    "TOT_AREA",
+    "Tot_AREA"
+   ],
+   "head bmd": [
+    "HEAD_BMD",
+    "Head_BMD"
+   ],
+   "head bmc": [
+    "HEAD_BMC",
+    "Head_BMC"
+   ],
+   "head area": [
+    "HEAD_AREA",
+    "Head_AREA"
+   ],
+   "larm bmd": [
+    "LARM_BMD",
+    "LArm_BMD"
+   ],
+   "larm area": [
+    "LARM_AREA",
+    "LArm_AREA"
+   ],
+   "rarm bmd": [
+    "RARM_BMD",
+    "RArm_BMD"
+   ],
+   "rarm area": [
+    "RARM_AREA",
+    "RArm_AREA"
+   ],
+   "lleg bmd": [
+    "LLEG_BMD",
+    "LLeg_BMD"
+   ],
+   "lleg area": [
+    "LLEG_AREA",
+    "LLeg_AREA"
+   ],
+   "rleg bmd": [
+    "RLEG_BMD",
+    "RLeg_BMD"
+   ],
+   "rleg area": [
+    "RLEG_AREA",
+    "RLeg_AREA"
+   ],
+   "rtot bmd": [
+    "RTOT_BMD",
+    "RTot_BMD"
+   ],
+   "rtot bmc": [
+    "RTOT_BMC",
+    "RTot_BMC"
+   ],
+   "rtot area": [
+    "RTOT_AREA",
+    "RTot_AREA"
+   ],
+   "weight (kg)": [
+    "Weight (Kg)",
+    "Weight (kg)",
+    "Weight_(kg)"
+   ],
+   "height (cm)": [
+    "Height (cm)",
+    "Height_(cm)"
+   ],
+   "horzank": [
+    "horzAnk",
+    "horzAnk_"
+   ],
+   "comment": [
+    "COMMENT",
+    "Comment"
+   ],
+   "test date": [
+    "Test Date",
+    "Test_Date"
+   ],
+   "age at test": [
+    "Age at Test",
+    "Age_at_Test"
+   ],
+   "primary operator": [
+    "Primary Operator",
+    "Primary_Operator"
+   ],
+   "secondary operator": [
+    "Secondary Operator",
+    "Secondary_Operator"
+   ],
+   "emg amplifier s/n": [
+    "EMG Amplifier S/N",
+    "EMG_Amplifier_S/N",
+    "EMG_Amplifier_S/N_"
+   ],
+   "trial type": [
+    "Trial Type",
+    "Trial_Type"
+   ],
+   "analyzed by": [
+    "Analyzed By",
+    "Analyzed_By"
+   ],
+   "analyzed date": [
+    "Analyzed Date",
+    "Analyzed_Date"
+   ],
+   "starting position": [
+    "Starting Position",
+    "Starting_Position"
+   ],
+   "issue reported number": [
+    "Issue Reported Number",
+    "Issue_Reported_Number"
+   ],
+   "power amplifier s/n": [
+    "Power Amplifier S/N",
+    "Power_Amplifier_S/N"
+   ],
+   "power amp": [
+    "Power Amp",
+    "Power_Amp"
+   ],
+   "drive config": [
+    "Drive Config",
+    "Drive_Config"
+   ],
+   "amp power": [
+    "Amp Power",
+    "Amp_Power"
+   ],
+   "motor behave": [
+    "Motor Behave",
+    "Motor_Behave"
+   ],
+   "anatomical zero": [
+    "Anatomical Zero",
+    "Anatomical_Zero"
+   ],
+   "issues reported": [
+    "Issues Reported",
+    "Issues_Reported"
+   ],
+   "": [
+    "",
+    "\ufeff"
+   ],
+   "nurse comments": [
+    "Nurse Comments",
+    "Nurse_comments"
+   ],
+   "start latency": [
+    "Start Latency",
+    "Start_Latency"
+   ],
+   "start amp": [
+    "Start Amp",
+    "Start_Amp"
+   ],
+   "peak latency": [
+    "Peak Latency",
+    "Peak_Latency"
+   ],
+   "peak amp": [
+    "Peak Amp",
+    "Peak_Amp"
+   ],
+   "fifty amp": [
+    "fifty Amp",
+    "fifty_Amp"
+   ],
+   "propagation latency": [
+    "Propagation Latency",
+    "Propagation_Latency"
+   ],
+   "l5 to c1 meas (cm)": [
+    "L5 to C1 meas (cm)",
+    "L5_to_C1_meas_(cm)"
+   ],
+   "s1 to c1 meas (cm)": [
+    "S1 to C1 meas (cm)",
+    "S1_to_C1_meas_(cm)"
+   ],
+   "l5 to tib meas (cm)": [
+    "L5 to Tib meas (cm)",
+    "L5_to_Tib_meas_(cm)"
+   ],
+   "s1 to gast meas (cm)": [
+    "S1 to Gast meas (cm)",
+    "S1_to_Gast_meas_(cm)"
+   ],
+   "s1 to sol meas (cm)": [
+    "S1 to Sol meas (cm)",
+    "S1_to_Sol_meas_(cm)"
+   ],
+   "sot order": [
+    "SOT Order",
+    "SOT_Order"
+   ],
+   "eq score": [
+    "EQ Score",
+    "EQ_Score"
+   ],
+   "fifty latency": [
+    "fifty Latency",
+    "fifty_Latency"
+   ],
+   "s1 to inter meas (cm)": [
+    "S1 to Inter meas (cm)",
+    "S1_to_Inter_meas_(cm)"
+   ],
+   "indeter start msr": [
+    "indeter Start MSR",
+    "indeter_Start_MSR"
+   ],
+   "noisy msr": [
+    "noisy MSR",
+    "noisy_MSR"
+   ],
+   "no msr": [
+    "No MSR",
+    "No_MSR"
+   ],
+   "show mill msr": [
+    "Show Mill MSR",
+    "Show_Mill_MSR"
+   ],
+   "push up": [
+    "Push-up",
+    "push up"
+   ],
+   "related to test": [
+    "Related to Test",
+    "Related_to_Test"
+   ],
+   "comments msr": [
+    "Comments MSR",
+    "Comments_MSR"
+   ],
+   "action taken": [
+    "Action Taken",
+    "Action_Taken"
+   ],
+   "meal completed": [
+    "Meal Completed",
+    "Meal completed",
+    "Meal_Completed",
+    "Meal_completed"
+   ],
+   "protocol": [
+    "PROTOCOL",
+    "Protocol"
+   ],
+   "reported by": [
+    "Reported By",
+    "Reported_ By",
+    "Reported_By"
+   ],
+   "test time": [
+    "Test Time",
+    "Test_Time"
+   ]
+  }
+ },
+ "anomalies": {
+  "encodings": {
+   "utf-8": 3419,
+   "cp1252": 134
+  },
+  "delimiters": {
+   ",": 3553
+  },
+  "bom_files": 869,
+  "ws_padded_header_files": 10,
+  "blank_header_files": 33,
+  "dup_header_files": 8,
+  "zero_row_files": 0,
+  "unreadable": []
+ }
+}

@@ -1,0 +1,26 @@
+{
+  "observed_spearman": 0.3762038995750089,
+  "expected_spearman": 0.3762039,
+  "reproduced_3dp": true,
+  "gate_passed": true,
+  "n_subjects": 38,
+  "n_features": 628,
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "prerequisite",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_totalhipBMD_change_features_all.csv",
+    "input_table_md5": "ffd3c4fec75ab2d627985e03c162dddb",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": "8.3.0"
+    },
+    "timestamp_utc": "2026-08-20T08:05:05Z",
+    "loocv_elapsed_sec": 115.17808437347412
+  }
+}

@@ -1,0 +1,37 @@
+framing,endpoint,model,n,n_features,spearman,p_null,clears_p05,n_shuffle
+sparse,Total Hip BMD,XGBoost,54,8,0.1945,0.1045,no,200
+sparse,Total Hip BMD,TabICL,54,8,0.3033,0.0299,YES,200
+sparse,Spine BMD (L1-L4),XGBoost,63,8,-0.2693,0.9552,no,200
+sparse,Spine BMD (L1-L4),TabICL,63,8,-0.2925,0.9104,no,200
+sparse,VO2peak (relative),XGBoost,51,8,-0.0991,0.607,no,200
+sparse,VO2peak (relative),TabICL,51,8,-0.2294,0.8109,no,200
+sparse,Plasma Volume,XGBoost,55,8,0.0688,0.2786,no,200
+sparse,Plasma Volume,TabICL,55,8,0.1543,0.1294,no,200
+sparse,LV Mass,XGBoost,36,8,-0.1912,0.7711,no,200
+sparse,LV Mass,TabICL,36,8,-0.0064,0.4229,no,200
+sparse,Jump Max Power,XGBoost,36,8,-0.1089,0.6368,no,200
+sparse,Jump Max Power,TabICL,36,8,-0.2826,0.7463,no,200
+sparse,MRI Quadriceps CSA,XGBoost,26,8,-0.4749,0.9602,no,200
+sparse,MRI Quadriceps CSA,TabICL,26,8,-0.453,0.8905,no,200
+sparse,OGTT Glucose,XGBoost,24,8,-0.2713,0.7562,no,200
+sparse,OGTT Glucose,TabICL,24,8,-0.2357,0.6617,no,200
+sparse,FTT Egress Time,XGBoost,35,8,-0.1482,0.6915,no,200
+sparse,FTT Egress Time,TabICL,35,8,-0.0997,0.5323,no,200
+rich,Total Hip BMD,XGBoost,38,628,0.1325,0.2687,no,200
+rich,Total Hip BMD,TabICL,38,628,0.2381,0.1343,no,200
+rich,Spine BMD (L1-L4),XGBoost,38,627,0.1153,0.2687,no,200
+rich,Spine BMD (L1-L4),TabICL,38,627,-0.1206,0.5821,no,200
+rich,VO2peak (relative),XGBoost,37,618,-0.0946,0.5672,no,200
+rich,VO2peak (relative),TabICL,37,618,0.1107,0.2637,no,200
+rich,Plasma Volume,XGBoost,36,598,0.1282,0.2338,no,200
+rich,Plasma Volume,TabICL,36,598,0.104,0.3383,no,200
+rich,LV Mass,XGBoost,36,628,-0.1892,0.7214,no,200
+rich,LV Mass,TabICL,36,628,-0.156,0.6766,no,200
+rich,Jump Max Power,XGBoost,36,603,-0.0718,0.4776,no,200
+rich,Jump Max Power,TabICL,36,603,0.0806,0.3532,no,200
+rich,MRI Quadriceps CSA,XGBoost,26,623,0.1562,0.2637,no,200
+rich,MRI Quadriceps CSA,TabICL,26,623,0.133,0.2587,no,200
+rich,OGTT Glucose,XGBoost,24,628,-0.193,0.5771,no,200
+rich,OGTT Glucose,TabICL,24,628,0.0035,0.4378,no,200
+rich,FTT Egress Time,XGBoost,35,487,0.0311,0.3781,no,200
+rich,FTT Egress Time,TabICL,—,—,MISSING,—,—,—

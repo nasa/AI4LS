@@ -1,0 +1,8 @@
+Rank,Group,Features,Obs Drop,Null Drop,z,p (Spearman),Note
+1,Screening_fitness,73,+0.2956,+0.0096,+1.68,0.0588,Top driver — treatment-exposed
+2,Cardiovascular_hemo,44,+0.0894,+0.0203,+0.73,0.1176,
+3,Echo_cardiac,54,+0.0238,+0.0046,+0.26,0.3725,
+4,Cognitive_NCC,17,+0.0142,+0.0047,+0.11,0.5294,
+5,MRI_ultrasound_muscle,13,+0.0116,-0.0036,+0.40,0.2353,
+6,Amino_acids,40,+0.0112,-0.0069,+0.30,0.4510,
+10,Bone_mineral_regional,22,-0.0024,+0.0021,-0.06,0.7647,Target domain — no signal

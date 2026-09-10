@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="408.003438pt" height="347.234259pt" viewBox="0 0 408.003438 347.234259" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2022-01-01T05:00:00+00:00</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.5, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 347.234259 
+L 408.003438 347.234259 
+L 408.003438 -0 
+L 0 -0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 55.501719 274.091103 
+L 362.401719 274.091103 
+L 362.401719 24.611103 
+L 55.501719 24.611103 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 69.451719 274.091103 
+L 123.890743 274.091103 
+L 123.890743 130.950961 
+L 69.451719 130.950961 
+z
+" clip-path="url(#pb21af31db8)" style="fill: #ff9400; stroke: #ffffff; stroke-width: 0.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 239.57367 274.091103 
+L 294.012694 274.091103 
+L 294.012694 60.005012 
+L 239.57367 60.005012 
+z
+" clip-path="url(#pb21af31db8)" style="fill: #ff9400; stroke: #ffffff; stroke-width: 0.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 123.890743 274.091103 
+L 178.329768 274.091103 
+L 178.329768 36.491103 
+L 123.890743 36.491103 
+z
+" clip-path="url(#pb21af31db8)" style="fill: url(#h3da6db8c62); opacity: 0.4; stroke: #ffffff; stroke-width: 0.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 294.012694 274.091103 
+L 348.451719 274.091103 
+L 348.451719 64.856867 
+L 294.012694 64.856867 
+z
+" clip-path="url(#pb21af31db8)" style="fill: url(#h3da6db8c62); opacity: 0.4; stroke: #ffffff; stroke-width: 0.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="mb64f01c93e" d="M 0 0 
+L 0 3.5 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#mb64f01c93e" x="123.890743" y="274.091103" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 9px; font-family: 'Liberation Sans'" transform="translate(93.378634 287.61329)">Positive control</text>
+      <text style="font-size: 9px; font-family: 'Liberation Sans'" transform="translate(93.124806 297.307415)">(planted signal)</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#mb64f01c93e" x="294.012694" y="274.091103" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 9px; font-family: 'Liberation Sans'" transform="translate(261.497382 287.61329)">Negative control</text>
+      <text style="font-size: 9px; font-family: 'Liberation Sans'" transform="translate(270.003085 297.307415)">(pure noise)</text>
+     </g>
+    </g>
+    <g id="text_3">
+     <text style="font-size: 10px; font-family: 'Liberation Sans'; text-anchor: middle" x="208.951719" y="310.42179" transform="rotate(-0 208.951719 310.42179)">Control type</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_3">
+      <defs>
+       <path id="m848229ec48" d="M 0 0 
+L -3.5 0 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m848229ec48" x="55.501719" y="274.091103" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 10px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: end" x="48.501719" y="277.71454" transform="rotate(-0 48.501719 277.71454)">0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m848229ec48" x="55.501719" y="219.116607" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 10px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: end" x="48.501719" y="222.740045" transform="rotate(-0 48.501719 222.740045)">2</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#m848229ec48" x="55.501719" y="164.142112" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 10px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: end" x="48.501719" y="167.76555" transform="rotate(-0 48.501719 167.76555)">4</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m848229ec48" x="55.501719" y="109.167617" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 10px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: end" x="48.501719" y="112.791054" transform="rotate(-0 48.501719 112.791054)">6</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m848229ec48" x="55.501719" y="54.193122" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <text style="font-size: 10px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: end" x="48.501719" y="57.816559" transform="rotate(-0 48.501719 57.816559)">8</text>
+     </g>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 10px; font-family: 'Liberation Sans'; text-anchor: middle" x="36.865781" y="149.351103" transform="rotate(-90 36.865781 149.351103)">MAE (absolute error)</text>
+    </g>
+   </g>
+   <g id="line2d_8">
+    <path d="M 55.501719 274.091103 
+L 362.401719 274.091103 
+" clip-path="url(#pb21af31db8)" style="fill: none; stroke: #cccccc; stroke-width: 0.5; stroke-linecap: square"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 55.501719 274.091103 
+L 55.501719 24.611103 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 362.401719 274.091103 
+L 362.401719 24.611103 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 55.501719 274.091103 
+L 362.401719 274.091103 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 55.501719 24.611103 
+L 362.401719 24.611103 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans'; text-anchor: middle; fill: #75a025" x="96.671231" y="120.837286" transform="rotate(-0 96.671231 120.837286)">+39.8%</text>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans'; text-anchor: middle; fill: #cc4444" x="266.793182" y="49.891338" transform="rotate(-0 266.793182 49.891338)">-2.3%</text>
+   </g>
+   <g id="patch_11">
+    <path d="M 325.760469 34.356972 
+Q 311.442579 45.92395 298.168317 56.647814 
+" style="fill: none; stroke: #cc4444; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 301.444569 55.929364 
+L 298.168317 56.647814 
+L 299.559309 53.595742 
+" style="fill: none; stroke: #cc4444; stroke-width: 1.2; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <g id="patch_12">
+     <path d="M 308.432288 32.598281 
+L 381.666272 32.598281 
+Q 383.916272 32.598281 383.916272 30.348281 
+L 383.916272 7.2 
+Q 383.916272 4.95 381.666272 4.95 
+L 308.432288 4.95 
+Q 306.182288 4.95 306.182288 7.2 
+L 306.182288 30.348281 
+Q 306.182288 32.598281 308.432288 32.598281 
+z
+" style="fill: #ffffff; opacity: 0.9; stroke: #cc4444; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 7.5px; font-family: 'Liberation Sans'; fill: #cc4444" transform="translate(319.210608 12.635156)">Correctly silent:</text>
+    <text style="font-size: 7.5px; font-family: 'Liberation Sans'; fill: #cc4444" transform="translate(308.432288 20.713594)">model does NOT beat</text>
+    <text style="font-size: 7.5px; font-family: 'Liberation Sans'; fill: #cc4444" transform="translate(322.536389 28.792031)">floor on noise</text>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Liberation Sans'; text-anchor: middle" x="208.951719" y="18.611103" transform="rotate(-0 208.951719 18.611103)">Controls: planted signal recovered, pure noise silent</text>
+   </g>
+   <g id="legend_1">
+    <g id="patch_13">
+     <path d="M 61.101719 53.926103 
+L 175.614219 53.926103 
+Q 177.214219 53.926103 177.214219 52.326103 
+L 177.214219 30.211103 
+Q 177.214219 28.611103 175.614219 28.611103 
+L 61.101719 28.611103 
+Q 59.501719 28.611103 59.501719 30.211103 
+L 59.501719 52.326103 
+Q 59.501719 53.926103 61.101719 53.926103 
+z
+" style="fill: #ffffff; opacity: 0.9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="patch_14">
+     <path d="M 62.701719 37.608603 
+L 78.701719 37.608603 
+L 78.701719 32.008603 
+L 62.701719 32.008603 
+z
+" style="fill: #ff9400; stroke: #ffffff; stroke-width: 0.5; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="85.101719" y="37.608603" transform="rotate(-0 85.101719 37.608603)">TabPFN MAE</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 62.701719 49.066103 
+L 78.701719 49.066103 
+L 78.701719 43.466103 
+L 62.701719 43.466103 
+z
+" style="fill: url(#h3da6db8c62); opacity: 0.4; stroke: #ffffff; stroke-width: 0.5; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="85.101719" y="49.066103" transform="rotate(-0 85.101719 49.066103)">Floor MAE (mean guess)</text>
+    </g>
+   </g>
+  </g>
+  <g id="text_16">
+   <text style="font-style: italic; font-size: 6.5px; font-family: 'Liberation Sans'" transform="translate(7.2 317.681571)">Shows: MAE for TabPFN (orange) vs mean-guess floor (hatched) on positive and negative controls (Colab T4, 5-fold CV, n=38). Positive:</text>
+   <text style="font-style: italic; font-size: 6.5px; font-family: 'Liberation Sans'" transform="translate(107.631602 324.682884)">+39.8% improvement. Negative: -2.3% (model does not beat floor).</text>
+   <text style="font-style: italic; font-size: 6.5px; font-family: 'Liberation Sans'" transform="translate(97.944063 331.684196)">Does NOT show: permutation null (n_shuffle=0); LOOCV; the BMD result.</text>
+   <text style="font-style: italic; font-size: 6.5px; font-family: 'Liberation Sans'" transform="translate(76.952109 338.685509)">Source: results/colab/summary_c11_poscontrol_*.json, summary_c11_negcontrol_*.json</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pb21af31db8">
+   <rect x="55.501719" y="24.611103" width="306.9" height="249.48"/>
+  </clipPath>
+ </defs>
+ <defs>
+  <pattern id="h3da6db8c62" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
+   <rect x="0" y="0" width="73" height="73" fill="#000000"/>
+   <path d="M -36 36 
+L 36 -36 
+M -30 42 
+L 42 -30 
+M -24 48 
+L 48 -24 
+M -18 54 
+L 54 -18 
+M -12 60 
+L 60 -12 
+M -6 66 
+L 66 -6 
+M 0 72 
+L 72 0 
+M 6 78 
+L 78 6 
+M 12 84 
+L 84 12 
+M 18 90 
+L 90 18 
+M 24 96 
+L 96 24 
+M 30 102 
+L 102 30 
+M 36 108 
+L 108 36 
+" style="fill: #ffffff; stroke: #ffffff; stroke-width: 1.0; stroke-linecap: butt; stroke-linejoin: miter; stroke-opacity: 0.4"/>
+  </pattern>
+ </defs>
+</svg>

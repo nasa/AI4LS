@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="993.6pt" height="401.340937pt" viewBox="0 0 993.6 401.340937" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2022-01-01T05:00:00+00:00</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.5, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 401.340937 
+L 993.6 401.340937 
+L 993.6 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 93.6 55.24448 
+L 209.664 55.24448 
+L 209.664 29.187337 
+L 93.6 29.187337 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="151.632" y="44.284659" transform="rotate(-0 151.632 44.284659)">A survives?</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 209.664 55.24448 
+L 272.16 55.24448 
+L 272.16 29.187337 
+L 209.664 29.187337 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="240.912" y="44.284659" transform="rotate(-0 240.912 44.284659)">C alive?</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 272.16 55.24448 
+L 397.152 55.24448 
+L 397.152 29.187337 
+L 272.16 29.187337 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="334.656" y="44.284659" transform="rotate(-0 334.656 44.284659)">Verdict</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 397.152 55.24448 
+L 691.776 55.24448 
+L 691.776 29.187337 
+L 397.152 29.187337 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="544.464" y="44.284659" transform="rotate(-0 544.464 44.284659)">Aim 2 action</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 691.776 55.24448 
+L 986.4 55.24448 
+L 986.4 29.187337 
+L 691.776 29.187337 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="839.088" y="44.284659" transform="rotate(-0 839.088 44.284659)">HMTA/DAG action</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 93.6 81.301623 
+L 209.664 81.301623 
+L 209.664 55.24448 
+L 93.6 55.24448 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="105.2064" y="70.341802" transform="rotate(-0 105.2064 70.341802)">Yes (both p&lt;0.05)</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 209.664 81.301623 
+L 272.16 81.301623 
+L 272.16 55.24448 
+L 209.664 55.24448 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="215.9136" y="70.341802" transform="rotate(-0 215.9136 70.341802)">No</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 272.16 81.301623 
+L 397.152 81.301623 
+L 397.152 55.24448 
+L 272.16 55.24448 
+z
+" style="fill: #c8e6c9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="284.6592" y="70.341802" transform="rotate(-0 284.6592 70.341802)">A CONFIRMED</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 397.152 81.301623 
+L 691.776 81.301623 
+L 691.776 55.24448 
+L 397.152 55.24448 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="426.6144" y="70.341802" transform="rotate(-0 426.6144 70.341802)">Proceed with BMD as target. Reproduce known finding using TFM feature importance.</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 691.776 81.301623 
+L 986.4 81.301623 
+L 986.4 55.24448 
+L 691.776 55.24448 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="721.2384" y="70.341802" transform="rotate(-0 721.2384 70.341802)">Feature group importance (fitness #1, bone #10) becomes candidate mechanism. Build DAG from top features.</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 93.6 107.358766 
+L 209.664 107.358766 
+L 209.664 81.301623 
+L 93.6 81.301623 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="105.2064" y="96.398945" transform="rotate(-0 105.2064 96.398945)">Yes (both p&lt;0.05)</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 209.664 107.358766 
+L 272.16 107.358766 
+L 272.16 81.301623 
+L 209.664 81.301623 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="215.9136" y="96.398945" transform="rotate(-0 215.9136 96.398945)">Yes</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 272.16 107.358766 
+L 397.152 107.358766 
+L 397.152 81.301623 
+L 272.16 81.301623 
+z
+" style="fill: #fff9c4; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="284.6592" y="96.398945" transform="rotate(-0 284.6592 96.398945)">A + C CONTAMINATION</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 397.152 107.358766 
+L 691.776 107.358766 
+L 691.776 81.301623 
+L 397.152 81.301623 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="426.6144" y="96.398945" transform="rotate(-0 426.6144 96.398945)">Proceed cautiously. Investigate which body-comp variables drive C signal before Aim 2.</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 691.776 107.358766 
+L 986.4 107.358766 
+L 986.4 81.301623 
+L 691.776 81.301623 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="721.2384" y="96.398945" transform="rotate(-0 721.2384 96.398945)">Feature importance may conflate biology with noise. Do not build DAG until C source identified.</text>
+    </g>
+    <g id="patch_17">
+     <path d="M 93.6 133.415909 
+L 209.664 133.415909 
+L 209.664 107.358766 
+L 93.6 107.358766 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="105.2064" y="122.456087" transform="rotate(-0 105.2064 122.456087)">No (B survives)</text>
+    </g>
+    <g id="patch_18">
+     <path d="M 209.664 133.415909 
+L 272.16 133.415909 
+L 272.16 107.358766 
+L 209.664 107.358766 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_17">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="215.9136" y="122.456087" transform="rotate(-0 215.9136 122.456087)">No</text>
+    </g>
+    <g id="patch_19">
+     <path d="M 272.16 133.415909 
+L 397.152 133.415909 
+L 397.152 107.358766 
+L 272.16 107.358766 
+z
+" style="fill: #bbdefb; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_18">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="284.6592" y="122.456087" transform="rotate(-0 284.6592 122.456087)">B CONFIRMED</text>
+    </g>
+    <g id="patch_20">
+     <path d="M 397.152 133.415909 
+L 691.776 133.415909 
+L 691.776 107.358766 
+L 397.152 107.358766 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_19">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="426.6144" y="122.456087" transform="rotate(-0 426.6144 122.456087)">Do NOT proceed with BMD as-is. Options: arm-residualized target, within-arm modeling, or non-arm-graded target.</text>
+    </g>
+    <g id="patch_21">
+     <path d="M 691.776 133.415909 
+L 986.4 133.415909 
+L 986.4 107.358766 
+L 691.776 107.358766 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_20">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="721.2384" y="122.456087" transform="rotate(-0 721.2384 122.456087)">Feature importance is arm-detection, not biology. DAG would encode treatment assignment, not bone physiology.</text>
+    </g>
+    <g id="patch_22">
+     <path d="M 93.6 159.473052 
+L 209.664 159.473052 
+L 209.664 133.415909 
+L 93.6 133.415909 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_21">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="105.2064" y="148.51323" transform="rotate(-0 105.2064 148.51323)">No (B survives)</text>
+    </g>
+    <g id="patch_23">
+     <path d="M 209.664 159.473052 
+L 272.16 159.473052 
+L 272.16 133.415909 
+L 209.664 133.415909 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_22">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="215.9136" y="148.51323" transform="rotate(-0 215.9136 148.51323)">Yes</text>
+    </g>
+    <g id="patch_24">
+     <path d="M 272.16 159.473052 
+L 397.152 159.473052 
+L 397.152 133.415909 
+L 272.16 133.415909 
+z
+" style="fill: #ffcdd2; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_23">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="284.6592" y="148.51323" transform="rotate(-0 284.6592 148.51323)">B + C</text>
+    </g>
+    <g id="patch_25">
+     <path d="M 397.152 159.473052 
+L 691.776 159.473052 
+L 691.776 133.415909 
+L 397.152 133.415909 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_24">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="426.6144" y="148.51323" transform="rotate(-0 426.6144 148.51323)">BMD not viable for Aim 2. Signal is arm-confounded and noise-contaminated. Return to Aim 1 boundary map.</text>
+    </g>
+    <g id="patch_26">
+     <path d="M 691.776 159.473052 
+L 986.4 159.473052 
+L 986.4 133.415909 
+L 691.776 133.415909 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_25">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="721.2384" y="148.51323" transform="rotate(-0 721.2384 148.51323)">HMTA premature. Cannot generate biological hypotheses from arm-detection + noise-ranking.</text>
+    </g>
+   </g>
+   <g id="text_26">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="93.6" y="16.620937" transform="rotate(-0 93.6 16.620937)">Decision Matrix — Stated BEFORE Running, Fixed Thresholds</text>
+   </g>
+  </g>
+  <g id="text_27">
+   <text style="font-style: italic; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #555555" x="7.2" y="392.478047" transform="rotate(-0 7.2 392.478047)">A survives: p_stratified &lt; 0.05 AND p_residualized &lt; 0.05. B survives: either fails. C alive: |rho| &gt; 0.4 AND p &lt; 0.10 in CONTROL (n=11) or EXERCISE (n=19) after Bonferroni. FLY (n=8) excluded from C criterion. Negative C check = undetectable, not absent.</text>
+  </g>
+ </g>
+</svg>

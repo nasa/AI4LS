@@ -1,0 +1,24 @@
+{
+  "baseline_accuracy": 0.6052631578947368,
+  "n_groups": 16,
+  "n_shuffles_per_group": 50,
+  "top_group": "Muscle_function",
+  "top_drop": 0.0021052631578947346,
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "c3",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_totalhipBMD_change_features_all.csv",
+    "input_table_md5": "ffd3c4fec75ab2d627985e03c162dddb",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-20T08:15:48Z"
+  }
+}

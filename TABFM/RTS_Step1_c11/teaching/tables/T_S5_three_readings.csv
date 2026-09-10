@@ -1,0 +1,18 @@
+Reading,Evidence,Tier,Direction
+A — Physiology,"Within-arm Spearman positive in all 3 arms (CTRL +0.405, EX +0.502 p=0.029, FLY +0.072)",EXPLORATORY,FOR
+A — Physiology,"Sign flip: arm vs actual +0.367, arm vs predicted -0.356 (wrong direction for arm detector)",EXPLORATORY,FOR
+A — Physiology,"OOD replication: obs=0.374, z=+2.89, p=0.010 (200 shuffles, different checkpoint)",VERIFIED,FOR
+A — Physiology,Naive p at n=8-19; EX p=0.029 fails Bonferroni (threshold p<0.017 for 3 arms),EXPLORATORY,AGAINST
+A — Physiology,LOOCV per-subject predictions computed then discarded — cannot verify within-arm on primary harness,VERIFIED,AGAINST
+A — Physiology,Prediction compressed: predicted SD = 22.5% of actual SD,VERIFIED,AGAINST
+B — Arm membership,"Target is arm-graded: CTRL mean -0.013 (10/11 lost), EX mean -0.001 (7/19 lost)",VERIFIED,FOR
+B — Arm membership,"Fitness features (VO2peak, bench press, jump power) encode training status = arm proxy",LITERATURE+VERIFIED,FOR
+B — Arm membership,"Spearman(arm, predicted) = -0.356, p=0.028 — predictions correlate with arm",EXPLORATORY,FOR
+B — Arm membership,Sign flip: predictions track arm in OPPOSITE direction from actual target,EXPLORATORY,AGAINST
+B — Arm membership,Within-arm correlations not zero (all 3 arms positive) — pure arm detector should produce ~0,EXPLORATORY,AGAINST
+C — Noise ranking,"Prediction compressed: predicted SD = 22.5% of actual SD — weak structure, not strong biology",VERIFIED,FOR
+C — Noise ranking,"Null centered at -0.393 (not zero): model always finds structure, even on shuffled targets",VERIFIED,FOR
+C — Noise ranking,|mean|/SD = 0.33 (pooled): individual variation is 3x the group effect — mostly noise,VERIFIED,FOR
+C — Noise ranking,No direct test of noise-body-composition coupling (Reading C check not run),NOT RUN,AGAINST
+C — Noise ranking,OOD replication at near-identical magnitude (0.374 vs 0.376) — noise should be checkpoint-dependent,VERIFIED,AGAINST
+C — Noise ranking,Within-arm correlations positive in all arms — noise ranking should produce random signs,EXPLORATORY,AGAINST

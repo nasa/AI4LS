@@ -1,0 +1,4 @@
+target,published_effect,published_source,tfm_spearman,tfm_p_value,tfm_verdict,environment,cv_method,n,n_features,n_shuffle,arm_target_rho,arm_target_p,anova_p
+Hip BMD,"No significant change (""maintained in all groups"")",Ploutz-Snyder 2018,+0.376,0.007,SIGNAL,Biomni A10G,LOOCV,38,628,1000,+0.367,0.023,0.195
+Fat Mass %,Significant interaction (CONT +12.4% FM),Ploutz-Snyder 2018,-0.320,no null run,SILENCE,Colab T4,5-fold CV,38,226,0,-0.204,0.220,0.010
+Tandem Walk,"Highly significant (p=5.8e-25, never recovered in CONT)",Miller 2018,-0.430,0.81 (MAE null),SILENCE,Colab T4,LOOCV,35,235,20,+0.553,0.001,0.003

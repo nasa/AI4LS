@@ -1,0 +1,61 @@
+{
+  "pair": "CONTROL_vs_FLY",
+  "arm_a": "CONTROL",
+  "arm_b": "FLY",
+  "n": 19,
+  "observed_accuracy": 1.0,
+  "observed_balanced_accuracy": 1.0,
+  "observed_metrics": {
+    "accuracy": 1.0,
+    "balanced_accuracy": 1.0,
+    "confusion_matrix": [
+      [
+        11,
+        0
+      ],
+      [
+        0,
+        8
+      ]
+    ],
+    "classes": [
+      "CONTROL",
+      "FLY"
+    ],
+    "per_class": {
+      "CONTROL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 11
+      },
+      "FLY": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 8
+      }
+    }
+  },
+  "n_shuffles": 200,
+  "empirical_p": 0.004975124378109453,
+  "null_mean": 0.4584210526315789,
+  "null_sd": 0.11763952640054766,
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "c2_CONTROL_vs_FLY",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_totalhipBMD_change_features_all.csv",
+    "input_table_md5": "ffd3c4fec75ab2d627985e03c162dddb",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-20T08:12:49Z"
+  }
+}

@@ -1,0 +1,6 @@
+Features,Draws,Mean Spearman,SD,vs Null (-0.393),Signal?
+5,5,-0.227,0.226,Above,No
+25,5,-0.262,0.339,Above,No
+100,5,+0.004,0.321,Above,No
+250,5,+0.037,0.309,Above,No
+628 (full),1,+0.376,—,Far above,YES (p=0.007)

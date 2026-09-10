@@ -1,0 +1,18 @@
+{
+ "root": "/Users/rtscott2/Desktop/AI/20260429/BR TFM Project/bedrest_tfm/03_raw_downloads",
+ "n_files": 4809,
+ "total_bytes": 132249621,
+ "n_top_level_folders": 38,
+ "extensions": {
+  "csv": 3553,
+  "pdf": 407,
+  "txt": 322,
+  "zip": 259,
+  "md5sum": 140,
+  "png": 89,
+  "json": 38,
+  "docx": 1
+ },
+ "zero_byte_files": 1,
+ "duplicate_name_groups": 1
+}

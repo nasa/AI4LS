@@ -1,0 +1,30 @@
+{
+  "observed_spearman": 0.3762038995750089,
+  "n_shuffles": 500,
+  "empirical_p": 0.007984031936127744,
+  "null_mean": -0.40487580593651185,
+  "null_sd": 0.2757576198111379,
+  "null_p95": 0.07746089100761976,
+  "arm_names": [
+    "CONTROL",
+    "EXERCISE",
+    "FLY"
+  ],
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "test1",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_totalhipBMD_change_features_all.csv",
+    "input_table_md5": "ffd3c4fec75ab2d627985e03c162dddb",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-20T08:06:55Z"
+  }
+}

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1288.8pt" height="424.145625pt" viewBox="0 0 1288.8 424.145625" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2022-01-01T05:00:00+00:00</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.5, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 424.145625 
+L 1288.8 424.145625 
+L 1288.8 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 7.2 155.251686 
+L 325.8 155.251686 
+L 325.8 107.322393 
+L 7.2 107.322393 
+z
+" style="fill: #333333; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="166.5" y="133.226492" transform="rotate(-0 166.5 133.226492)">Aim 1 Deliverable</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 325.8 155.251686 
+L 644.4 155.251686 
+L 644.4 107.322393 
+L 325.8 107.322393 
+z
+" style="fill: #333333; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="485.1" y="133.226492" transform="rotate(-0 485.1 133.226492)">Status</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 644.4 155.251686 
+L 963 155.251686 
+L 963 107.322393 
+L 644.4 107.322393 
+z
+" style="fill: #333333; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="803.7" y="133.226492" transform="rotate(-0 803.7 133.226492)">Evidence</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 963 155.251686 
+L 1281.6 155.251686 
+L 1281.6 107.322393 
+L 963 107.322393 
+z
+" style="fill: #333333; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-weight: 700; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="1122.3" y="133.226492" transform="rotate(-0 1122.3 133.226492)">Setup</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 7.2 203.180979 
+L 325.8 203.180979 
+L 325.8 155.251686 
+L 7.2 155.251686 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="39.06" y="181.155785" transform="rotate(-0 39.06 181.155785)">TFM finds stable rank structure</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 325.8 203.180979 
+L 644.4 203.180979 
+L 644.4 155.251686 
+L 325.8 155.251686 
+z
+" style="fill: #75a025; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-weight: 700; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #ffffff" x="357.66" y="181.155785" transform="rotate(-0 357.66 181.155785)">DEMONSTRATED</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 644.4 203.180979 
+L 963 203.180979 
+L 963 155.251686 
+L 644.4 155.251686 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="676.26" y="181.155785" transform="rotate(-0 676.26 181.155785)">Spearman +0.376 p=0.007 (LOOCV); replicated OOD z=2.89 p=0.010; TabICL echo rho=0.303 p=0.030</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 963 203.180979 
+L 1281.6 203.180979 
+L 1281.6 155.251686 
+L 963 155.251686 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="994.86" y="181.155785" transform="rotate(-0 994.86 181.155785)">Biomni A10G, n=38, 628 features, 35% missing</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 7.2 251.110271 
+L 325.8 251.110271 
+L 325.8 203.180979 
+L 7.2 203.180979 
+z
+" style="fill: #f5f5f0; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="39.06" y="229.085078" transform="rotate(-0 39.06 229.085078)">Permutation harness works; null documented</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 325.8 251.110271 
+L 644.4 251.110271 
+L 644.4 203.180979 
+L 325.8 203.180979 
+z
+" style="fill: #75a025; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-weight: 700; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #ffffff" x="357.66" y="229.085078" transform="rotate(-0 357.66 229.085078)">DEMONSTRATED</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 644.4 251.110271 
+L 963 251.110271 
+L 963 203.180979 
+L 644.4 203.180979 
+z
+" style="fill: #f5f5f0; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="676.26" y="229.085078" transform="rotate(-0 676.26 229.085078)">1000-shuffle null centers at -0.393 (not zero); one-sided p justified; add-1 correction p=7/1001</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 963 251.110271 
+L 1281.6 251.110271 
+L 1281.6 203.180979 
+L 963 203.180979 
+z
+" style="fill: #f5f5f0; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="994.86" y="229.085078" transform="rotate(-0 994.86 229.085078)">Teachable methods finding about high-dimensional small-n prediction</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 7.2 299.039564 
+L 325.8 299.039564 
+L 325.8 251.110271 
+L 7.2 251.110271 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="39.06" y="277.014371" transform="rotate(-0 39.06 277.014371)">Machinery limits precisely mapped</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 325.8 299.039564 
+L 644.4 299.039564 
+L 644.4 251.110271 
+L 325.8 251.110271 
+z
+" style="fill: #ff9400; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-weight: 700; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #ffffff" x="357.66" y="277.014371" transform="rotate(-0 357.66 277.014371)">DELIVERED</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 644.4 299.039564 
+L 963 299.039564 
+L 963 251.110271 
+L 644.4 251.110271 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="676.26" y="277.014371" transform="rotate(-0 676.26 277.014371)">p=0.007 cannot distinguish Reading A (biology) vs B (arm) vs C (noise); standard null blind to C; test battery specified as open items #1 and #7. Exploratory within-arm reads (Results 6-7) point away from pure arm membership but are not conclusive — naive Spearman p at n=8-19 with sign flips across arms is exactly what noise looks like at these sample sizes. The arm-aware null (item #1) decides.</text>
+    </g>
+    <g id="patch_17">
+     <path d="M 963 299.039564 
+L 1281.6 299.039564 
+L 1281.6 251.110271 
+L 963 251.110271 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="994.86" y="277.014371" transform="rotate(-0 994.86 277.014371)">This IS the Aim 1 contribution, not a project defect</text>
+    </g>
+    <g id="patch_18">
+     <path d="M 7.2 346.968857 
+L 325.8 346.968857 
+L 325.8 299.039564 
+L 7.2 299.039564 
+z
+" style="fill: #f5f5f0; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_17">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="39.06" y="324.943664" transform="rotate(-0 39.06 324.943664)">Silences as boundary map</text>
+    </g>
+    <g id="patch_19">
+     <path d="M 325.8 346.968857 
+L 644.4 346.968857 
+L 644.4 299.039564 
+L 325.8 299.039564 
+z
+" style="fill: #e9ed4c; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_18">
+     <text style="font-weight: 700; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="357.66" y="324.943664" transform="rotate(-0 357.66 324.943664)">DELIVERED (CONDITIONAL)</text>
+    </g>
+    <g id="patch_20">
+     <path d="M 644.4 346.968857 
+L 963 346.968857 
+L 963 299.039564 
+L 644.4 299.039564 
+z
+" style="fill: #f5f5f0; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_19">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="676.26" y="324.943664" transform="rotate(-0 676.26 324.943664)">Fat (rho=-0.320, no null, Colab T4 5-fold 226 features) and tandem (rho=-0.430, MAE null p=0.81, Colab T4 LOOCV 235 features) are silent; 34/35 matrix cells silent. CONDITIONAL because fat and tandem never received the primary harness (full 628-width, LOOCV, 1000-shuffle Spearman null). Given the width-sweep finding that BMD signal emerges only at full width, these silences may be harness artifacts. Reruns elevated to open items #2-3. The dissociation framing (published effect -&gt; silence; no published effect -&gt; signal) holds as an observation but is conditional until reruns complete.</text>
+    </g>
+    <g id="patch_21">
+     <path d="M 963 346.968857 
+L 1281.6 346.968857 
+L 1281.6 299.039564 
+L 963 299.039564 
+z
+" style="fill: #f5f5f0; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_20">
+     <text style="font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="994.86" y="324.943664" transform="rotate(-0 994.86 324.943664)">Boundary of TFM detection at NASA sample sizes; conditional on harness equivalence</text>
+    </g>
+   </g>
+   <g id="text_21">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="644.4" y="17.345625" transform="rotate(-0 644.4 17.345625)">Aim 1 Scorecard</text>
+   </g>
+  </g>
+ </g>
+</svg>

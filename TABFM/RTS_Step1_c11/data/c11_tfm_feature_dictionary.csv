@@ -1,0 +1,629 @@
+slug,measure_label,unit,source_file,n_subjects_with_value,n_subjects_multitrial,max_trials_in_cell,is_dxa,dxa_zero_to_nan,n_missing,n_present
+1_methyl_l_histidine____nnx10ap86g_cft70_amino_acids,1-Methyl-L-histidine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+3_methyl_l_histidine____nnx10ap86g_cft70_amino_acids,3-Methyl-L-histidine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+activityboard____bedrest_ftt_cft70_hr_acrosstests_datatab,ActivityBoard,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+adductors____mri_ultrasound_cft70_mri_adductors,Adductors,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Adductors,26,0,1,False,0,12,26
+aec____nnx10ap86g_cft70_amino_acids,AEC,,NNX10AP86G_CFT70_Amino_Acids,2,0,1,False,0,36,2
+air_time__msec__bedrest_ftt_cft70_data_jump_airtime,Air Time,msec,BEDREST_FTT_CFT70_Data_Jump_AirTime_obsv,35,35,9,False,0,3,35
+ambient_temperature__fahrenheit__crf_cft70_vitals_5160,Ambient Temperature,Fahrenheit,CRF_CFT70_VITALS_5160,1,1,21,False,0,37,1
+ambient_temperature__fahrenheit__crf_cft70_vitals_8072,Ambient Temperature,Fahrenheit,CRF_CFT70_VITALS_8072,1,1,21,False,0,37,1
+ambient_temperature__fahrenheit__crf_cft70_vitals_8936,Ambient Temperature,Fahrenheit,CRF_CFT70_VITALS_8936,1,1,13,False,0,37,1
+anger_hostility____nnx10ap86g_cft70_poms_anger_hostility,Anger-hostility,,NNX10AP86G_CFT70_POMS_Anger-hostility,24,24,4,False,0,14,24
+aortic_valve_close_open____brsmcf_cft70_2d_echo_7_subjects,Aortic Valve Close Open,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+aortic_valve_close_open____brsmcf_cft70_2d_echo_all,Aortic Valve Close Open,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+avg_step_time_sec____bedrest_ftt_cft70_dva_steptime_avg,Avg_Step_Time_sec,,BEDREST_FTT_CFT70_DVA_StepTime_avg_obsv,35,35,3,False,0,3,35
+benchpress_forcecontrol____bedrest_ftt_cft70_hr_acrosstests_datatab,BenchPress_ForceControl,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+benchpress_maxisoforce____bedrest_ftt_cft70_hr_acrosstests_datatab,BenchPress_MaxIsoForce,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+benchpress_powerendurance____bedrest_ftt_cft70_hr_acrosstests_datatab,BenchPress_PowerEndurance,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+beta_alanine____nnx10ap86g_cft70_amino_acids,beta-Alanine,,NNX10AP86G_CFT70_Amino_Acids,24,22,2,False,0,14,24
+blood_volume__l__bedrest_ftt_cft70_bloodvolume,Blood_Volume,L,BEDREST_FTT_CFT70_BloodVolume_obsv,35,33,2,False,0,3,35
+bmc____idxa_cft70_body_composition_android,BMC,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Android_obsv,38,0,1,True,0,0,38
+bmc____idxa_cft70_body_composition_gynoid,BMC,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Gynoid_obsv,38,0,1,True,0,0,38
+bmc____idxa_cft70_body_composition_trunk,BMC,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Trunk_obsv,38,0,1,True,0,0,38
+bmc_android____nnx10ap86g_cft70_idxa,BMC_Android,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_arms____nnx10ap86g_cft70_idxa,BMC_Arms,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_gynoid____nnx10ap86g_cft70_idxa,BMC_Gynoid,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_left_arm____nnx10ap86g_cft70_idxa,BMC_Left_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_left_leg____nnx10ap86g_cft70_idxa,BMC_Left_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_left_total____nnx10ap86g_cft70_idxa,BMC_Left_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_left_trunk____nnx10ap86g_cft70_idxa,BMC_Left_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_legs____nnx10ap86g_cft70_idxa,BMC_Legs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_right_arm____nnx10ap86g_cft70_idxa,BMC_Right_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_right_leg____nnx10ap86g_cft70_idxa,BMC_Right_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_right_total____nnx10ap86g_cft70_idxa,BMC_Right_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_right_trunk____nnx10ap86g_cft70_idxa,BMC_Right_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_total____nnx10ap86g_cft70_idxa,BMC_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmc_trunk____nnx10ap86g_cft70_idxa,BMC_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmd_arms____nnx10ap86g_cft70_idxa,BMD_Arms,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmd_head____nnx10ap86g_cft70_idxa,BMD_Head,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmd_legs____nnx10ap86g_cft70_idxa,BMD_Legs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmd_pelvis____nnx10ap86g_cft70_idxa,BMD_Pelvis,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmd_ribs____nnx10ap86g_cft70_idxa,BMD_Ribs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmd_spine____nnx10ap86g_cft70_idxa,BMD_Spine,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmd_total____nnx10ap86g_cft70_idxa,BMD_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+bmd_trunk____nnx10ap86g_cft70_idxa,BMD_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+body_temp__celsius__crf_cft70_vitals_5160,Body Temp,Celsius,CRF_CFT70_VITALS_5160,1,1,21,False,0,37,1
+body_temp__celsius__crf_cft70_vitals_8072,Body Temp,Celsius,CRF_CFT70_VITALS_8072,1,1,21,False,0,37,1
+body_temp__celsius__crf_cft70_vitals_8936,Body Temp,Celsius,CRF_CFT70_VITALS_8936,1,1,13,False,0,37,1
+bp3__ug_ml__nnx10ap86g_cft70_immulite,BP3,ug/mL,NNX10AP86G_CFT70_IMMULITE,24,23,2,False,0,14,24
+br_freqpk____mr080g_cft70_pre_all,BR FREQPK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+br_freqpk____mr080g_cft70_screen_all,BR FREQPK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+bvtot__l__brsmpv_cft70_plasma_volume_all_subjects,BVtot,L,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+bvtot__l__brsmpv_cft70_plasma_volume_results,BVtot,L,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+card_rotation_completion_time__sec__ncc958sa02802_cft70_cardrotationcompleti,Card Rotation-Completion Time,sec,NCC958SA02802_CFT70_CardRotationCompletionTime,18,18,2,False,0,20,18
+cd16_56____brsmimmune_cft70_obsv_all,CD16/56+,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+cd19____brsmimmune_cft70_obsv_all,CD19+,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+cd3____brsmimmune_cft70_obsv_all,CD3+,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+cd3_cd4____brsmimmune_cft70_obsv_all,CD3+/CD4+,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+cd3_cd8____brsmimmune_cft70_obsv_all,CD3+/CD8+,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+cd4_cd45ro____brsmimmune_cft70_obsv_all,CD4+/CD45RO+,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+cd4_cd69____brsmimmune_cft70_obsv_all,CD4+/CD69+,%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd4_cd69____brsmimmune_cft70_obsv_all__2,CD4+/CD69+ %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd4_cd69_cd25_3_28_24hr____brsmimmune_cft70_obsv_all,CD4+/CD69+/CD25+ (%) 3/28 24hr,,BRSMIMMUNE_CFT70_obsv_All,7,0,1,False,0,31,7
+cd4_cd69_cd25_3_28_24hr____brsmimmune_cft70_obsv_all__2,CD4+/CD69+/CD25+ 3/28 24hr %,,BRSMIMMUNE_CFT70_obsv_All,7,0,1,False,0,31,7
+cd4_cd69_cd25_a_b_24hr____brsmimmune_cft70_obsv_all,CD4+/CD69+/CD25+ (%) A+B-24hr,,BRSMIMMUNE_CFT70_obsv_All,8,0,1,False,0,30,8
+cd4_cd69_cd25_a_b_24hr____brsmimmune_cft70_obsv_all__2,CD4+/CD69+/CD25+ A+B-24hr %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd4_hla_dr____brsmimmune_cft70_obsv_all,CD4+/HLA-DR+,%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd4_hla_dr____brsmimmune_cft70_obsv_all__2,CD4+/HLA-DR+ %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd4_ifng____brsmimmune_cft70_obsv_all,CD4+/IFNg+,%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd4_ifng____brsmimmune_cft70_obsv_all__2,CD4+/IFNg+ %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd4_il_2_ifng____brsmimmune_cft70_obsv_all,CD4+/IL-2+ (IFNg-),%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd4_il_2_ifng____brsmimmune_cft70_obsv_all__2,CD4+/IL-2+ (IFNg-) %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd8_cd45ro____brsmimmune_cft70_obsv_all,CD8+/CD45RO+,%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd8_cd45ro____brsmimmune_cft70_obsv_all__2,CD8+/CD45RO+ %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd8_cd69____brsmimmune_cft70_obsv_all,CD8+/CD69+,%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd8_cd69____brsmimmune_cft70_obsv_all__2,CD8+/CD69+ %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd8_cd69_cd25_3_28_24hr____brsmimmune_cft70_obsv_all,CD8+/CD69+/CD25+ (%) 3/28/24hr,,BRSMIMMUNE_CFT70_obsv_All,7,0,1,False,0,31,7
+cd8_cd69_cd25_3_28_24hr____brsmimmune_cft70_obsv_all__2,CD8+/CD69+/CD25+ 3/28/24hr %,,BRSMIMMUNE_CFT70_obsv_All,7,0,1,False,0,31,7
+cd8_cd69_cd25_a_b_24hr____brsmimmune_cft70_obsv_all,CD8+/CD69+/CD25+ (%) A+B-24hr,,BRSMIMMUNE_CFT70_obsv_All,8,0,1,False,0,30,8
+cd8_cd69_cd25_a_b_24hr____brsmimmune_cft70_obsv_all__2,CD8+/CD69+/CD25+ A+B-24hr %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd8_hla_dr____brsmimmune_cft70_obsv_all,CD8+/HLA-DR+,%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd8_hla_dr____brsmimmune_cft70_obsv_all__2,CD8+/HLA-DR+ %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd8_ifng_il_2____brsmimmune_cft70_obsv_all,CD8+/IFNg+ (IL-2-),%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd8_ifng_il_2____brsmimmune_cft70_obsv_all__2,CD8+/IFNg+ (IL-2-) %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+cd8_il_2____brsmimmune_cft70_obsv_all,CD8+/IL-2+,%,BRSMIMMUNE_CFT70_obsv_All,19,0,1,False,0,19,19
+cd8_il_2____brsmimmune_cft70_obsv_all__2,CD8+/IL-2+ %,,BRSMIMMUNE_CFT70_obsv_All,10,0,1,False,0,28,10
+central_activation_capacity____bedrest_ftt_cft70_interptwitch_cntractvc,Central_Activation_Capacity,,BEDREST_FTT_CFT70_InterpTwitch_CntrActvCapacity_obsv,35,32,3,False,0,3,35
+central_activation_ratio____bedrest_ftt_cft70_interptwitch_cntractvr,Central_Activation_Ratio,,BEDREST_FTT_CFT70_InterpTwitch_CntrActvRatio_obsv,35,32,3,False,0,3,35
+cmv____brsmvsi_cft70_a_c_subjects,CMV,,BRSMVSI_CFT70_A_C_Subjects,6,0,1,False,0,32,6
+cmv____brsmvsi_cft70_all_subjects,CMV,,BRSMVSI_CFT70_All_Subjects,23,0,1,False,0,15,23
+cmv_tet____brsmvsi_cft70_a_c_subjects,%CMV Tet,,BRSMVSI_CFT70_A_C_Subjects,2,0,1,False,0,36,2
+cmv_tet____brsmvsi_cft70_all_subjects,%CMV Tet,,BRSMVSI_CFT70_All_Subjects,12,0,1,False,0,26,12
+color_m_mode_velocity_propagation_time____brsmcf_cft70_2d_echo_7_subjects,Color M-Mode Velocity Propagation Time,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+color_m_mode_velocity_propagation_time____brsmcf_cft70_2d_echo_all,Color M-Mode Velocity Propagation Time,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+comments____mr080g_cft70_pre_all,COMMENTS,,MR080G_CFT70_PRE_ALL,33,0,1,False,0,5,33
+comments____mr080g_cft70_screen_all,COMMENTS,,MR080G_CFT70_Screen_ALL,13,0,1,False,0,25,13
+completion_time_sec____bedrest_ftt_cft70_pegboardtime,Completion_Time_sec,,BEDREST_FTT_CFT70_PegboardTime_obsv,35,35,3,False,0,3,35
+conduction_velocity_m_sec____bedrest_ftt_cft70_msr_pkcondvel,Conduction_Velocity_m_sec,,BEDREST_FTT_CFT70_MSR_PkCondVel_obsv,34,34,3,False,0,4,34
+conduction_velocity_m_sec____bedrest_ftt_cft70_msr_stcondvel,Conduction_Velocity_m_sec,,BEDREST_FTT_CFT70_MSR_StCondVel_obsv,34,34,3,False,0,4,34
+confusion____nnx10ap86g_cft70_poms_confusion,Confusion,,NNX10AP86G_CFT70_POMS_Confusion,24,24,4,False,0,14,24
+cor__ug_ml__nnx10ap86g_cft70_immulite,COR,ug/mL,NNX10AP86G_CFT70_IMMULITE,24,24,2,False,0,14,24
+cortisol__ug_dl__brsmvsi_cft70_a_c_subjects,Cortisol,ug/dL,BRSMVSI_CFT70_A_C_Subjects,6,0,1,False,0,32,6
+cortisol__ug_dl__brsmvsi_cft70_all_subjects,Cortisol,ug/dL,BRSMVSI_CFT70_All_Subjects,23,0,1,False,0,15,23
+count_correct_counttask_4_100____ncc958sa02802_cft70_countnumbercorrect,"Count Correct (CountTask), 4 = 100%",,NCC958SA02802_CFT70_CountNumberCorrect,17,16,2,False,0,21,17
+count_correct_dual_task_4_100____ncc958sa02802_cft70_countdualcorrect,"Count Correct (Dual Task), 4 = 100%",,NCC958SA02802_CFT70_CountDualCorrect,17,16,2,False,0,21,17
+cross_correlation____bedrest_ftt_cft70_dva_hpitchtpitch_xcorr,Cross_correlation,,BEDREST_FTT_CFT70_DVA_HpitchTpitch_XcorrMxVal_obsv,35,35,3,False,0,3,35
+cross_correlation____bedrest_ftt_cft70_dva_hpitchtz_xcorrmxva,Cross_correlation,,BEDREST_FTT_CFT70_DVA_HpitchTz_XcorrMxVal_obsv,35,35,3,False,0,3,35
+cube_rotation_avg_response_time__sec__ncc958sa02802_cft70_cuberotationresponse,Cube rotation avg response time,sec,NCC958SA02802_CFT70_CubeRotationResponseTime,18,18,2,False,0,20,18
+daily_energy_intake__kcal_day__mr016g_cft70_daily_intake,Daily Energy Intake,kcal/day,MR016G_CFT70_DAILY_INTAKE,14,14,22,False,0,24,14
+daily_goal__g__crf_cft70_waterintake_obsv_8936,Daily Goal,g,CRF_CFT70_WATERINTAKE_obsv_8936,1,1,12,False,0,37,1
+daily_goal__g__crf_cft70_waterintake_summary_5160,Daily Goal,g,CRF_CFT70_WATERINTAKE_summary_5160,1,1,20,False,0,37,1
+daily_goal__g__crf_cft70_waterintake_summary_8072,Daily Goal,g,CRF_CFT70_WATERINTAKE_summary_8072,1,1,20,False,0,37,1
+daily_total__g__crf_cft70_waterintake_obsv_8936,Daily Total,g,CRF_CFT70_WATERINTAKE_obsv_8936,1,1,12,False,0,37,1
+daily_total__g__crf_cft70_waterintake_summary_5160,Daily Total,g,CRF_CFT70_WATERINTAKE_summary_5160,1,1,20,False,0,37,1
+daily_total__g__crf_cft70_waterintake_summary_8072,Daily Total,g,CRF_CFT70_WATERINTAKE_summary_8072,1,1,20,False,0,37,1
+dbppk____mr080g_cft70_pre_all,DBPPK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+dbppk____mr080g_cft70_screen_all,DBPPK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+dbpseated____mr080g_cft70_pre_all,DBPseated,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+dbpseated____mr080g_cft70_screen_all,DBPseated,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+dbpsupine____mr080g_cft70_pre_all,DBPsupine,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+dbpsupine____mr080g_cft70_screen_all,DBPsupine,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+delta_dl_hydroxylysine____nnx10ap86g_cft70_amino_acids,delta-DL-Hydroxylysine,,NNX10AP86G_CFT70_Amino_Acids,22,14,2,False,0,16,22
+depression____nnx10ap86g_cft70_poms_depression,Depression,,NNX10AP86G_CFT70_POMS_Depression,24,24,4,False,0,14,24
+dhs__ug_ml__nnx10ap86g_cft70_immulite,DHS,ug/mL,NNX10AP86G_CFT70_IMMULITE,24,24,2,False,0,14,24
+diabp__mmhg__crf_cft70_vitals_5160,DiaBP,mmHg,CRF_CFT70_VITALS_5160,1,1,21,False,0,37,1
+diabp__mmhg__crf_cft70_vitals_8072,DiaBP,mmHg,CRF_CFT70_VITALS_8072,1,1,21,False,0,37,1
+diabp__mmhg__crf_cft70_vitals_8936,DiaBP,mmHg,CRF_CFT70_VITALS_8936,1,1,13,False,0,37,1
+diastolic_bp__mmhg__bedrest_ftt_cft70_dbp_fallrecovery_diff,Diastolic_BP,mmHg,BEDREST_FTT_CFT70_DBP_FallRecovery_Diff_obsv,35,35,3,False,0,3,35
+diastolic_bp_mm_hg____bedrest_ftt_cft70_dbp_fallrecoverypr,Diastolic_BP_mm_Hg,,BEDREST_FTT_CFT70_DBP_FallRecoveryPr_obsv,35,35,3,False,0,3,35
+diastolic_bp_mm_hg____bedrest_ftt_cft70_dbp_fallrecoveryst,Diastolic_BP_mm_Hg,,BEDREST_FTT_CFT70_DBP_FallRecoverySt_obsv,35,35,3,False,0,3,35
+digit_symbol_completion_time__sec__ncc958sa02802_cft70_digit_symbol_complet,Digit Symbol- Completion Time,sec,NCC958SA02802_CFT70_Digit_Symbol_Completion,18,18,2,False,0,20,18
+digit_symbol_number_correct____ncc958sa02802_cft70_digit_symbol_number_,Digit Symbol Number correct,,NCC958SA02802_CFT70_Digit_Symbol_Number_Correct_obsv,18,18,2,False,0,20,18
+digit_symbol_percent_correct____ncc958sa02802_cft70_digit_symbol_percent,Digit Symbol Percent Correct,,NCC958SA02802_CFT70_Digit_Symbol_Percent_Correct_obsv,18,18,2,False,0,20,18
+dl_beta_aminoisobutyric_acid____nnx10ap86g_cft70_amino_acids,DL-beta-Aminoisobutyric Acid,,NNX10AP86G_CFT70_Amino_Acids,18,6,2,False,0,20,18
+dual_reaction_time_avg____ncc958sa02802_cft70_dualtaskingtappingre,Dual reaction time Avg,,NCC958SA02802_CFT70_DualTaskingTappingResponseTime,18,17,2,False,0,20,18
+e2__pg_ml__nnx10ap86g_cft70_immulite,E2,pg/ml,NNX10AP86G_CFT70_IMMULITE,23,22,2,False,0,15,23
+ea____brsmvsi_cft70_a_c_subjects,EA,,BRSMVSI_CFT70_A_C_Subjects,6,0,1,False,0,32,6
+ea____brsmvsi_cft70_all_subjects,EA,,BRSMVSI_CFT70_All_Subjects,23,0,1,False,0,15,23
+ebna____brsmvsi_cft70_a_c_subjects,EBNA,,BRSMVSI_CFT70_A_C_Subjects,4,0,1,False,0,34,4
+ebv_dna____brsmvsi_cft70_all_subjects,EBV DNA*,,BRSMVSI_CFT70_All_Subjects,13,0,1,False,0,25,13
+ebv_dna__per_10e6_pbmcs__brsmvsi_cft70_a_c_subjects,EBV DNA,per 10e6 PBMCs,BRSMVSI_CFT70_A_C_Subjects,3,0,1,False,0,35,3
+ebv_tet____brsmvsi_cft70_a_c_subjects,%EBV Tet,,BRSMVSI_CFT70_A_C_Subjects,2,0,1,False,0,36,2
+ebv_tet____brsmvsi_cft70_all_subjects,%EBV Tet,,BRSMVSI_CFT70_All_Subjects,12,0,1,False,0,26,12
+egress_recline____bedrest_ftt_cft70_hr_acrosstests_datatab,Egress_Recline,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+egress_seated____bedrest_ftt_cft70_hr_acrosstests_datatab,Egress_Seated,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+ejection_time____brsmcf_cft70_2d_echo_7_subjects,Ejection Time,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+ejection_time____brsmcf_cft70_2d_echo_all,Ejection Time,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+emotional_scale____nnx10ap86g_cft70_mfsi_sf_emotional_scale,Emotional Scale,,NNX10AP86G_CFT70_MFSI-SF_Emotional_Scale,23,23,4,False,0,15,23
+ethanolamine____nnx10ap86g_cft70_amino_acids,Ethanolamine,,NNX10AP86G_CFT70_Amino_Acids,22,4,2,False,0,16,22
+fallrecovery_prone____bedrest_ftt_cft70_hr_acrosstests_datatab,FallRecovery_Prone,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+fallrecovery_stand____bedrest_ftt_cft70_hr_acrosstests_datatab,FallRecovery_Stand,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+fat____idxa_cft70_body_composition_android,Fat,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Android_obsv,38,0,1,True,0,0,38
+fat____idxa_cft70_body_composition_arms,Fat,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Arms_obsv,38,0,1,True,0,0,38
+fat____idxa_cft70_body_composition_gynoid,Fat,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Gynoid_obsv,38,0,1,True,0,0,38
+fat____idxa_cft70_body_composition_legs,Fat,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Legs_obsv,38,0,1,True,0,0,38
+fat____idxa_cft70_body_composition_trunk,Fat,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Trunk_obsv,38,0,1,True,0,0,38
+fat_android____nnx10ap86g_cft70_idxa,Fat_Android,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_arms____nnx10ap86g_cft70_idxa,Fat_Arms,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_gynoid____nnx10ap86g_cft70_idxa,Fat_Gynoid,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_left_arm____nnx10ap86g_cft70_idxa,Fat_Left_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_left_leg____nnx10ap86g_cft70_idxa,Fat_Left_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_left_total____nnx10ap86g_cft70_idxa,Fat_Left_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_left_trunk____nnx10ap86g_cft70_idxa,Fat_Left_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_legs____nnx10ap86g_cft70_idxa,Fat_Legs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_right_arm____nnx10ap86g_cft70_idxa,Fat_Right_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_right_leg____nnx10ap86g_cft70_idxa,Fat_Right_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_right_total____nnx10ap86g_cft70_idxa,Fat_Right_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_right_trunk____nnx10ap86g_cft70_idxa,Fat_Right_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_total____nnx10ap86g_cft70_idxa,Fat_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fat_trunk____nnx10ap86g_cft70_idxa,Fat_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fatigue____nnx10ap86g_cft70_poms_fatigue,Fatigue,,NNX10AP86G_CFT70_POMS_Fatigue,24,24,4,False,0,14,24
+fatigue_index____bedrest_ftt_cft70_legpress_fatigueindex,Fatigue_Index,,BEDREST_FTT_CFT70_LegPress_FatigueIndex_obsv,35,35,3,False,0,3,35
+fatigue_index____bedrest_ftt_cft70_upperbody_fatigueindex,Fatigue_Index,,BEDREST_FTT_CFT70_UpperBody_FatigueIndex_obsv,35,35,3,False,0,3,35
+fatmass_arms_legs_trunk____nnx10ap86g_cft70_idxa,FatMass_(Arms+Legs)/Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fatmass_legs_total____nnx10ap86g_cft70_idxa,FatMass_Legs/Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+fatmass_trunk_total____nnx10ap86g_cft70_idxa,FatMass_Trunk/Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+feco2pk____mr080g_cft70_pre_all,FECO2PK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+feco2pk____mr080g_cft70_screen_all,FECO2PK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+feo2pk____mr080g_cft70_pre_all,FEO2PK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+feo2pk____mr080g_cft70_screen_all,FEO2PK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+fmt_1st_half_course_split_completion_time_sec____ncc958sa02802_cft70_fmt_total_completion,FMT_1st_half_Course_Split_Completion_Time_sec,,NCC958SA02802_CFT70_FMT_Total_Completion_Time_First_Half,18,18,20,False,0,20,18
+fmt_2nd_half_course_split_completion_time_sec____ncc958sa02802_cft70_fmt_total_completion,FMT_2nd_half_Course_Split_Completion_Time_sec,,NCC958SA02802_CFT70_FMT_Total_Completion_Time_Second_Half,18,18,20,False,0,20,18
+fmt_completion_time_sec____ncc958sa02802_cft70_fmt_total_completion,FMT_Completion_Time_sec,,NCC958SA02802_CFT70_FMT_Total_Completion_Time,18,18,20,False,0,20,18
+force_control_cv____bedrest_ftt_cft70_kneeextforcecontrol_no,Force_Control_CV,,BEDREST_FTT_CFT70_KneeExtForceControl_NoVisual_obsv,35,35,3,False,0,3,35
+force_control_cv____bedrest_ftt_cft70_kneeextforcecontrol_vi,Force_Control_CV,,BEDREST_FTT_CFT70_KneeExtForceControl_Visual_obsv,35,35,3,False,0,3,35
+force_control_cv____bedrest_ftt_cft70_upperbodyforcecontrol_,Force_Control_CV,,BEDREST_FTT_CFT70_UpperBodyForceControl_NoVisual_obsv,35,35,3,False,0,3,35
+force_control_cv____bedrest_ftt_cft70_upperbodyforcecontrol___2,Force_Control_CV,,BEDREST_FTT_CFT70_UpperBodyForceControl_Visual_obsv,35,35,3,False,0,3,35
+force_lbs____bedrest_ftt_cft70_torqgenmaxforce,Force_lbs,,BEDREST_FTT_CFT70_TorqGenMaxForce_obsv,35,35,3,False,0,3,35
+force_n____bedrest_ftt_cft70_kneeext_maxisometricfo,Force_N,,BEDREST_FTT_CFT70_KneeExt_MaxIsometricForce_obsv,35,35,3,False,0,3,35
+force_n____bedrest_ftt_cft70_legpress_maxisometricf,Force_N,,BEDREST_FTT_CFT70_LegPress_MaxIsometricForce_obsv,35,35,3,False,0,3,35
+force_n____bedrest_ftt_cft70_torqgenmaxforce_n,Force_N,,BEDREST_FTT_CFT70_TorqGenMaxForce_N_obsv,35,35,3,False,0,3,35
+force_n____bedrest_ftt_cft70_upperbody_maxisometric,Force_N,,BEDREST_FTT_CFT70_UpperBody_MaxIsometricForce_obsv,35,35,3,False,0,3,35
+fsh__miu_ml__nnx10ap86g_cft70_immulite,FSH,mIU/mL,NNX10AP86G_CFT70_IMMULITE,24,0,1,False,0,14,24
+gama_amino_n_butyric_acid____nnx10ap86g_cft70_amino_acids,gama-Amino-n-butyric Acid,,NNX10AP86G_CFT70_Amino_Acids,18,5,2,False,0,20,18
+general_scale____nnx10ap86g_cft70_mfsi_sf_general_scale,General Scale,,NNX10AP86G_CFT70_MFSI-SF_General_Scale,23,23,4,False,0,15,23
+glycine____nnx10ap86g_cft70_amino_acids,Glycine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+granulocytes____brsmimmune_cft70_obsv_all,GRANULOCYTES,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+hamstrings____mri_ultrasound_cft70_mri_hamstrings,Hamstrings,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Hamstrings,26,0,1,False,0,12,26
+heart_rate__bpm__bedrest_ftt_cft70_hr_fallrecovery_diff,Heart_Rate,bpm,BEDREST_FTT_CFT70_HR_FallRecovery_Diff_obsv,35,35,3,False,0,3,35
+heart_rate__bpm__bedrest_ftt_cft70_hr_fallrecoverypr,Heart_Rate,bpm,BEDREST_FTT_CFT70_HR_FallRecoveryPr_obsv,35,35,3,False,0,3,35
+heart_rate__bpm__bedrest_ftt_cft70_hr_fallrecoveryst,Heart_Rate,bpm,BEDREST_FTT_CFT70_HR_FallRecoverySt_obsv,35,35,3,False,0,3,35
+height____brsmvj_cft70_vertical_jump_pre1_jumps_ob,Height,,BRSMVJ_CFT70_Vertical_Jump_Pre1_jumps_obsv_ALL,37,37,3,False,0,1,37
+height____brsmvj_cft70_vertical_jump_pre2_jumps_ob,Height,,BRSMVJ_CFT70_Vertical_Jump_Pre2_jumps_obsv_ALL,37,37,3,False,0,1,37
+height____mr080g_cft70_pre_all,HEIGHT,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+height____mr080g_cft70_screen_all,HEIGHT,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+height__cm__crf_cft70_vitals_5160,Height,cm,CRF_CFT70_VITALS_5160,1,0,1,False,0,37,1
+height__cm__crf_cft70_vitals_8072,Height,cm,CRF_CFT70_VITALS_8072,1,0,1,False,0,37,1
+height__cm__crf_cft70_vitals_8936,Height,cm,CRF_CFT70_VITALS_8936,1,0,1,False,0,37,1
+hematocrit____bedrest_ftt_cft70_hematocrit,Hematocrit,,BEDREST_FTT_CFT70_Hematocrit_obsv,35,35,3,False,0,3,35
+hemoglobin_g_dl____bedrest_ftt_cft70_hemoglobin,Hemoglobin_g_dl,,BEDREST_FTT_CFT70 _Hemoglobin_obsv,35,35,3,False,0,3,35
+hr_vt____mr080g_cft70_pre_all,HR @ VT,,MR080G_CFT70_PRE_ALL,35,0,1,False,0,3,35
+hr_vt____mr080g_cft70_screen_all,HR @ VT,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+hrpk____mr080g_cft70_pre_all,HRPK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+hrpk____mr080g_cft70_screen_all,HRPK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+hrseated____mr080g_cft70_pre_all,HRseated,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+hrseated____mr080g_cft70_screen_all,HRseated,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+hrsupine____mr080g_cft70_pre_all,HRsupine,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+hrsupine____mr080g_cft70_screen_all,HRsupine,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+hscrp__mg_l__nnx10ap86g_cft70_immulite,hsCRP,mg/L,NNX10AP86G_CFT70_IMMULITE,18,0,1,False,0,20,18
+humidity____crf_cft70_vitals_5160,Humidity,%,CRF_CFT70_VITALS_5160,1,1,21,False,0,37,1
+humidity____crf_cft70_vitals_8072,Humidity,%,CRF_CFT70_VITALS_8072,1,1,21,False,0,37,1
+humidity____crf_cft70_vitals_8936,Humidity,%,CRF_CFT70_VITALS_8936,1,1,13,False,0,37,1
+hydroxy_l_proline____nnx10ap86g_cft70_amino_acids,Hydroxy-L-proline,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+ifn_g_cmv____brsmvsi_cft70_a_c_subjects,%IFN-g CMV,,BRSMVSI_CFT70_A_C_Subjects,2,0,1,False,0,36,2
+ifn_g_cmv____brsmvsi_cft70_all_subjects,%IFN-g CMV,,BRSMVSI_CFT70_All_Subjects,12,0,1,False,0,26,12
+ifn_g_ebv____brsmvsi_cft70_a_c_subjects,%IFN-g EBV,,BRSMVSI_CFT70_A_C_Subjects,2,0,1,False,0,36,2
+ifn_g_ebv____brsmvsi_cft70_all_subjects,%IFN-g EBV,,BRSMVSI_CFT70_All_Subjects,12,0,1,False,0,26,12
+ig1__ng_ml__nnx10ap86g_cft70_immulite,IG1,ng/mL,NNX10AP86G_CFT70_IMMULITE,24,24,2,False,0,14,24
+ins__uiu_ml__nnx10ap86g_cft70_immulite,INS,uIU/mL,NNX10AP86G_CFT70_IMMULITE,21,17,2,False,0,17,21
+isovolumic_contraction_time____brsmcf_cft70_2d_echo_7_subjects,Isovolumic Contraction Time,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+isovolumic_contraction_time____brsmcf_cft70_2d_echo_all,Isovolumic Contraction Time,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+isovolumic_relaxation_time____brsmcf_cft70_2d_echo_7_subjects,Isovolumic Relaxation Time,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+isovolumic_relaxation_time____brsmcf_cft70_2d_echo_all,Isovolumic Relaxation Time,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+jumptask_1____bedrest_ftt_cft70_hr_acrosstests_datatab,JumpTask_1,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+jumptask_2____bedrest_ftt_cft70_hr_acrosstests_datatab,JumpTask_2,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+jumptask_3____bedrest_ftt_cft70_hr_acrosstests_datatab,JumpTask_3,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+kneeextension_forcecontrol____bedrest_ftt_cft70_hr_acrosstests_datatab,KneeExtension_ForceControl,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,35,35,3,False,0,3,35
+kneeextension_twitch____bedrest_ftt_cft70_hr_acrosstests_datatab,KneeExtension_Twitch,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,35,35,3,False,0,3,35
+l_a_amino_n_butyric_acid____nnx10ap86g_cft70_amino_acids,L-a-Amino-n-butyric Acid,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_alanine____nnx10ap86g_cft70_amino_acids,L-Alanine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_alpha_aminoadipic_acid____nnx10ap86g_cft70_amino_acids,L-alpha-Aminoadipic Acid,,NNX10AP86G_CFT70_Amino_Acids,21,17,2,False,0,17,21
+l_anserine____nnx10ap86g_cft70_amino_acids,L-Anserine,,NNX10AP86G_CFT70_Amino_Acids,6,0,1,False,0,32,6
+l_arginine____nnx10ap86g_cft70_amino_acids,L-Arginine,,NNX10AP86G_CFT70_Amino_Acids,24,22,2,False,0,14,24
+l_asparagine____nnx10ap86g_cft70_amino_acids,L-Asparagine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_aspartic_acid____nnx10ap86g_cft70_amino_acids,L-Aspartic Acid,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_citrulline____nnx10ap86g_cft70_amino_acids,L-Citrulline,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_cystine____nnx10ap86g_cft70_amino_acids,L-Cystine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_glutamic_acid____nnx10ap86g_cft70_amino_acids,L-Glutamic Acid,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_glutamine____nnx10ap86g_cft70_amino_acids,L-Glutamine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_histidine____nnx10ap86g_cft70_amino_acids,L-Histidine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_homocystine____nnx10ap86g_cft70_amino_acids,L-Homocystine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_isoleucine____nnx10ap86g_cft70_amino_acids,L-Isoleucine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_leucine____nnx10ap86g_cft70_amino_acids,L-Leucine,,NNX10AP86G_CFT70_Amino_Acids,24,23,2,False,0,14,24
+l_lysine____nnx10ap86g_cft70_amino_acids,L-Lysine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_methionine____nnx10ap86g_cft70_amino_acids,L-Methionine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_ornithine____nnx10ap86g_cft70_amino_acids,L-Ornithine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_phenylalanine____nnx10ap86g_cft70_amino_acids,L-Phenylalanine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_proline____nnx10ap86g_cft70_amino_acids,L-Proline,,NNX10AP86G_CFT70_Amino_Acids,23,21,2,False,0,15,23
+l_sarcosine____nnx10ap86g_cft70_amino_acids,L-Sarcosine,,NNX10AP86G_CFT70_Amino_Acids,23,18,2,False,0,15,23
+l_serine____nnx10ap86g_cft70_amino_acids,L-Serine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_threonine____nnx10ap86g_cft70_amino_acids,L-Threonine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_tryptophan____nnx10ap86g_cft70_amino_acids,L-Tryptophan,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_tyrsine____nnx10ap86g_cft70_amino_acids,L-Tyrsine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+l_valine____nnx10ap86g_cft70_amino_acids,L-Valine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+ladderclimb____bedrest_ftt_cft70_hr_acrosstests_datatab,LadderClimb,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+lag_sec____bedrest_ftt_cft70_dva_hpitchtpitch_xcorr,Lag_sec,,BEDREST_FTT_CFT70_DVA_HpitchTpitch_XcorrMxLag_obsv,35,35,3,False,0,3,35
+lag_sec____bedrest_ftt_cft70_dva_hpitchtz_xcorrmxla,Lag_sec,,BEDREST_FTT_CFT70_DVA_HpitchTz_XcorrMxLag_obsv,35,35,3,False,0,3,35
+lag_sec____bedrest_ftt_cft70_segresshdtryawlag,Lag_sec,,BEDREST_FTT_CFT70_sEgressHdTrYawLag_obsv,35,31,3,False,0,3,35
+lag_sec____bedrest_ftt_cft70_uegresshdtryawlag,Lag_sec,,BEDREST_FTT_CFT70_uEgressHdTrYawLag_obsv,35,35,3,False,0,3,35
+latency_msec____bedrest_ftt_cft70_lc_medpklatency,Latency_msec,,BEDREST_FTT_CFT70_LC_MedPkLatency_obsv,34,34,3,False,0,4,34
+latency_msec____bedrest_ftt_cft70_lc_stlatency,Latency_msec,,BEDREST_FTT_CFT70_LC_StLatency_obsv,34,34,3,False,0,4,34
+lateral_gastrocnemius____mri_ultrasound_cft70_mri_lateral_gastroc,Lateral Gastrocnemius,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Lateral_Gastrocnemius,26,0,1,False,0,12,26
+lateral_gastrocnemius____mri_ultrasound_cft70_ultrasound_lateral_,Lateral Gastrocnemius,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_Ultrasound_Lateral_Gastrocnemius,26,0,1,False,0,12,26
+lbm_android____nnx10ap86g_cft70_idxa,LBM_Android,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_arms____nnx10ap86g_cft70_idxa,LBM_Arms,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_gynoid____nnx10ap86g_cft70_idxa,LBM_Gynoid,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_left_arm____nnx10ap86g_cft70_idxa,LBM_Left_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_left_leg____nnx10ap86g_cft70_idxa,LBM_Left_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_left_total____nnx10ap86g_cft70_idxa,LBM_Left_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_left_trunk____nnx10ap86g_cft70_idxa,LBM_Left_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_legs____nnx10ap86g_cft70_idxa,LBM_Legs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_right_arm____nnx10ap86g_cft70_idxa,LBM_Right_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_right_leg____nnx10ap86g_cft70_idxa,LBM_Right_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_right_total____nnx10ap86g_cft70_idxa,LBM_Right_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_right_trunk____nnx10ap86g_cft70_idxa,LBM_Right_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_total____nnx10ap86g_cft70_idxa,LBM_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lbm_trunk____nnx10ap86g_cft70_idxa,LBM_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+lean____idxa_cft70_body_composition_android,Lean,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Android_obsv,38,0,1,True,0,0,38
+lean____idxa_cft70_body_composition_arms,Lean,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Arms_obsv,38,0,1,True,0,0,38
+lean____idxa_cft70_body_composition_gynoid,Lean,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Gynoid_obsv,38,0,1,True,0,0,38
+lean____idxa_cft70_body_composition_legs,Lean,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Legs_obsv,38,0,1,True,0,0,38
+lean____idxa_cft70_body_composition_trunk,Lean,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Trunk_obsv,38,0,1,True,0,0,38
+left_ventricular_diameter_diastole____brsmcf_cft70_2d_echo_7_subjects,Left Ventricular Diameter Diastole,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+left_ventricular_diameter_diastole____brsmcf_cft70_2d_echo_all,Left Ventricular Diameter Diastole,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+left_ventricular_diameter_systole____brsmcf_cft70_2d_echo_7_subjects,Left Ventricular Diameter Systole,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+left_ventricular_diameter_systole____brsmcf_cft70_2d_echo_all,Left Ventricular Diameter Systole,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+legpress_maxisoforce____bedrest_ftt_cft70_hr_acrosstests_datatab,LegPress_MaxIsoForce,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+legpress_powerendurance____bedrest_ftt_cft70_hr_acrosstests_datatab,LegPress_PowerEndurance,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+lh__miu_ml__nnx10ap86g_cft70_immulite,LH,mIU/mL,NNX10AP86G_CFT70_IMMULITE,24,0,1,False,0,14,24
+linetest_1____bedrest_ftt_cft70_hr_acrosstests_datatab,LineTest_1,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+linetest_2____bedrest_ftt_cft70_hr_acrosstests_datatab,LineTest_2,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+linetest_3____bedrest_ftt_cft70_hr_acrosstests_datatab,LineTest_3,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+low_high_frequency_ratio____bedrest_ftt_cft70_rr_intv_lowhighratio_f,Low_High_Frequency_Ratio,,BEDREST_FTT_CFT70_RR_Intv_LowHighRatio_FallRecPr_obsv,35,35,3,False,0,3,35
+low_high_frequency_ratio____bedrest_ftt_cft70_rr_intv_lowhighratio_f__2,Low_High_Frequency_Ratio,,BEDREST_FTT_CFT70_RR_Intv_LowHighRatio_FallRecSt_obsv,35,35,3,False,0,3,35
+lvot_velocity_time_integral____brsmcf_cft70_2d_echo_7_subjects,LVOT Velocity Time Integral,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+lvot_velocity_time_integral____brsmcf_cft70_2d_echo_all,LVOT Velocity Time Integral,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+lymphocytes____brsmimmune_cft70_obsv_all,LYMPHOCYTES,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+matlab_vt____mr080g_cft70_pre_all,MatLab VT,,MR080G_CFT70_PRE_ALL,8,0,1,False,0,30,8
+matlab_vt____mr080g_cft70_screen_all,MatLab VT,,MR080G_CFT70_Screen_ALL,5,0,1,False,0,33,5
+max_acceleration__g__brsmvj_cft70_vertical_jump_pre1_jumps_ob,Max Acceleration,g,BRSMVJ_CFT70_Vertical_Jump_Pre1_jumps_obsv_ALL,37,37,3,False,0,1,37
+max_acceleration__g__brsmvj_cft70_vertical_jump_pre2_jumps_ob,Max Acceleration,g,BRSMVJ_CFT70_Vertical_Jump_Pre2_jumps_obsv_ALL,38,38,3,False,0,0,38
+max_velocity__m_s__brsmvj_cft70_vertical_jump_pre1_jumps_ob,Max Velocity,m/s,BRSMVJ_CFT70_Vertical_Jump_Pre1_jumps_obsv_ALL,37,37,3,False,0,1,37
+max_velocity__m_s__brsmvj_cft70_vertical_jump_pre2_jumps_ob,Max Velocity,m/s,BRSMVJ_CFT70_Vertical_Jump_Pre2_jumps_obsv_ALL,38,38,3,False,0,0,38
+max_wkld____mr080g_cft70_pre_all,MAX WKLD,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+max_wkld____mr080g_cft70_screen_all,MAX WKLD,,MR080G_CFT70_Screen_ALL,11,0,1,False,0,27,11
+maxaccel__g__brsmvj_cft70_vertical_jump_pre1_jumps_ob,MaxAccel,g,BRSMVJ_CFT70_Vertical_Jump_Pre1_jumps_obsv_ALL,37,37,3,False,0,1,37
+maxaccel__g__brsmvj_cft70_vertical_jump_pre2_jumps_ob,MaxAccel,g,BRSMVJ_CFT70_Vertical_Jump_Pre2_jumps_obsv_ALL,38,38,3,False,0,0,38
+maxaccel__g__brsmvj_cft70_vertical_jump_summary_obsv_,MaxAccel,g,BRSMVJ_CFT70_Vertical_Jump_Summary_obsv_ALL,38,37,2,False,0,0,38
+maximum_power__w__bedrest_ftt_cft70_legpress_maxpower_endu,Maximum_Power,W,BEDREST_FTT_CFT70_LegPress_MaxPower_endurance_obsv,35,35,3,False,0,3,35
+maximum_power__w__bedrest_ftt_cft70_upperbody_maxpower_end,Maximum_Power,W,BEDREST_FTT_CFT70_UpperBody_MaxPower_endurance_obsv,35,35,3,False,0,3,35
+maxvelocity__m_s__brsmvj_cft70_vertical_jump_pre1_jumps_ob,MaxVelocity,m/s,BRSMVJ_CFT70_Vertical_Jump_Pre1_jumps_obsv_ALL,37,37,3,False,0,1,37
+maxvelocity__m_s__brsmvj_cft70_vertical_jump_pre2_jumps_ob,MaxVelocity,m/s,BRSMVJ_CFT70_Vertical_Jump_Pre2_jumps_obsv_ALL,38,38,3,False,0,0,38
+maxvelocity__m_s__brsmvj_cft70_vertical_jump_summary_obsv_,MaxVelocity,m/s,BRSMVJ_CFT70_Vertical_Jump_Summary_obsv_ALL,38,37,2,False,0,0,38
+mean_arterial_pressure_mm_hg____bedrest_ftt_cft70_map_fallrecoveryst,Mean_Arterial_Pressure_mm_Hg,,BEDREST_FTT_CFT70_MAP_FallRecoverySt_obsv,35,35,3,False,0,3,35
+mean_sway_speed_mm_sec____bedrest_ftt_cft70_standtest_mss_2d,Mean_Sway_Speed_mm_sec,,BEDREST_FTT_CFT70_StandTest_MSS_2D_obsv,35,35,3,False,0,3,35
+mean_sway_speed_mm_sec____bedrest_ftt_cft70_standtest_mss_ap,Mean_Sway_Speed_mm_sec,,BEDREST_FTT_CFT70_StandTest_MSS_AP_obsv,35,35,3,False,0,3,35
+mean_sway_speed_mm_sec____bedrest_ftt_cft70_standtest_mss_ml,Mean_Sway_Speed_mm_sec,,BEDREST_FTT_CFT70_ StandTest_MSS_ML_obsv,35,35,3,False,0,3,35
+medial_gastrocnemius____mri_ultrasound_cft70_mri_medial_gastrocn,Medial Gastrocnemius,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Medial_Gastrocnemius,26,0,1,False,0,12,26
+medial_gastrocnemius____mri_ultrasound_cft70_ultrasound_medial_g,Medial Gastrocnemius,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_Ultrasound_Medial_Gastrocnemius,26,0,1,False,0,12,26
+mental_scale____nnx10ap86g_cft70_mfsi_sf_mental_scale,Mental Scale,,NNX10AP86G_CFT70_MFSI-SF_Mental_Scale,23,23,4,False,0,15,23
+mhr_vt____mr080g_cft70_pre_all,%MHR @ VT,,MR080G_CFT70_PRE_ALL,31,0,1,False,0,7,31
+mhr_vt____mr080g_cft70_screen_all,%MHR @ VT,,MR080G_CFT70_Screen_ALL,10,0,1,False,0,28,10
+mitral_a_wave_velocity____brsmcf_cft70_2d_echo_7_subjects,Mitral A Wave Velocity,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+mitral_a_wave_velocity____brsmcf_cft70_2d_echo_all,Mitral A Wave Velocity,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+mitral_deceleration_time____brsmcf_cft70_2d_echo_7_subjects,Mitral Deceleration Time,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+mitral_deceleration_time____brsmcf_cft70_2d_echo_all,Mitral Deceleration Time,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+mitral_e_wave_velocity____brsmcf_cft70_2d_echo_7_subjects,Mitral E Wave Velocity,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+mitral_e_wave_velocity____brsmcf_cft70_2d_echo_all,Mitral E Wave Velocity,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+monocytes____brsmimmune_cft70_obsv_all,MONOCYTES,%,BRSMIMMUNE_CFT70_obsv_All,29,0,1,False,0,9,29
+nh3____nnx10ap86g_cft70_amino_acids,NH3,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+number_correct____ncc958sa02802_cft70_cardrotationitemscom,Number correct,,NCC958SA02802_CFT70_CardRotationItemsCompleted,18,18,2,False,0,20,18
+number_correct____ncc958sa02802_cft70_cardrotationnumberco,Number correct,,NCC958SA02802_CFT70_CardRotationNumberCorrect,18,18,2,False,0,20,18
+number_correct____ncc958sa02802_cft70_cuberotationnumberco,Number Correct,,NCC958SA02802_CFT70_CubeRotationNumberCorrect,18,18,2,False,0,20,18
+o_phospho_l_serine____nnx10ap86g_cft70_amino_acids,O-Phospho-L-Serine,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+overage_shortage__g__crf_cft70_waterintake_obsv_8936,Overage/Shortage,g,CRF_CFT70_WATERINTAKE_obsv_8936,1,1,12,False,0,37,1
+overage_shortage__g__crf_cft70_waterintake_summary_5160,Overage/Shortage,g,CRF_CFT70_WATERINTAKE_summary_5160,1,1,20,False,0,37,1
+overage_shortage__g__crf_cft70_waterintake_summary_8072,Overage/Shortage,g,CRF_CFT70_WATERINTAKE_summary_8072,1,1,20,False,0,37,1
+pbar__mmhg__mr080g_cft70_pre_all,pBAR,mmHG,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+pbar__mmhg__mr080g_cft70_screen_all,pBAR,mmHG,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+peak_vertical_force__bw__bedrest_ftt_cft70_data_jump_peakvertical,Peak Vertical Force,BW,BEDREST_FTT_CFT70_Data_Jump_PeakVerticalForce_obsv,35,35,9,False,0,3,35
+peg_board_completion_time__sec__ncc958sa02802_cft70_bimanualpegboardcomp,Peg Board  completion time,sec,NCC958SA02802_CFT70_BimanualPegboardCompletionTime,18,18,2,False,0,20,18
+pep__ng_ml__nnx10ap86g_cft70_immulite,PEP,ng/mL,NNX10AP86G_CFT70_IMMULITE,24,24,2,False,0,14,24
+percent_correct____ncc958sa02802_cft70_cuberotationpercentc,Percent Correct,,NCC958SA02802_CFT70_CubeRotationPercentCorrect,18,18,2,False,0,20,18
+percent_correct_steps____bedrest_ftt_cft70_linetest_pctcorrectste,Percent_Correct_Steps,,BEDREST_FTT_CFT70_LineTest_PctCorrectSteps_obsv,35,35,3,False,0,3,35
+physical_scale____nnx10ap86g_cft70_mfsi_sf_physical_scale,Physical Scale,,NNX10AP86G_CFT70_MFSI-SF_Physical_Scale,23,23,4,False,0,15,23
+plasma_volume__l__bedrest_ftt_cft70_plasmavolume,Plasma_Volume,L,BEDREST_FTT_CFT70_PlasmaVolume_obsv,35,33,2,False,0,3,35
+plasma_volume_index_l_m_2____bedrest_ftt_cft70_plasmavolumeindex,Plasma_Volume_Index_L_m_2,,BEDREST_FTT_CFT70_PlasmaVolumeIndex_obsv,35,32,2,False,0,3,35
+post_cohgb_analysis_1____brsmpv_cft70_plasma_volume_all_subjects,Post-COHgb Analysis 1,%,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+post_cohgb_analysis_1____brsmpv_cft70_plasma_volume_results,Post-COHgb Analysis 1,%,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+post_cohgb_analysis_2____brsmpv_cft70_plasma_volume_all_subjects,Post-COHgb Analysis 2,%,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+post_cohgb_analysis_2____brsmpv_cft70_plasma_volume_results,Post-COHgb Analysis 2,%,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+post_cohgb_analysis_3____brsmpv_cft70_plasma_volume_all_subjects,Post-COHgb Analysis 3,%,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+post_cohgb_analysis_3____brsmpv_cft70_plasma_volume_results,Post-COHgb Analysis 3,%,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+post_hct____brsmpv_cft70_plasma_volume_all_subjects,Post-Hct,%,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+post_hct____brsmpv_cft70_plasma_volume_results,Post-Hct,%,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+post_hgb__g_dl__brsmpv_cft70_plasma_volume_all_subjects,Post-Hgb,g/dL,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+post_hgb__g_dl__brsmpv_cft70_plasma_volume_results,Post-Hgb,g/dL,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+pre_cohgb_analysis_1____brsmpv_cft70_plasma_volume_all_subjects,Pre-COHgb Analysis 1,%,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+pre_cohgb_analysis_1____brsmpv_cft70_plasma_volume_results,Pre-COHgb Analysis 1,%,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+pre_cohgb_analysis_2____brsmpv_cft70_plasma_volume_all_subjects,Pre-COHgb Analysis 2,%,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+pre_cohgb_analysis_2____brsmpv_cft70_plasma_volume_results,Pre-COHgb Analysis 2,%,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+pre_cohgb_analysis_3____brsmpv_cft70_plasma_volume_all_subjects,Pre-COHgb Analysis 3,%,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+pre_cohgb_analysis_3____brsmpv_cft70_plasma_volume_results,Pre-COHgb Analysis 3,%,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+pre_hct____brsmpv_cft70_plasma_volume_all_subjects,Pre-Hct,%,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+pre_hct____brsmpv_cft70_plasma_volume_results,Pre-Hct,%,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+pre_hgb__g_dl__brsmpv_cft70_plasma_volume_all_subjects,Pre-Hgb,g/dL,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+pre_hgb__g_dl__brsmpv_cft70_plasma_volume_results,Pre-Hgb,g/dL,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+prolactin__ng_ml__nnx10ap86g_cft70_immulite,Prolactin,ng/mL,NNX10AP86G_CFT70_IMMULITE,24,0,1,False,0,14,24
+pulmonic_valve_acceleration_time____brsmcf_cft70_2d_echo_7_subjects,Pulmonic Valve Acceleration Time,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+pulmonic_valve_acceleration_time____brsmcf_cft70_2d_echo_all,Pulmonic Valve Acceleration Time,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+pulmonic_valve_ejection_time____brsmcf_cft70_2d_echo_7_subjects,Pulmonic Valve Ejection Time,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+pulmonic_valve_ejection_time____brsmcf_cft70_2d_echo_all,Pulmonic Valve Ejection Time,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+pulse__bpm__crf_cft70_vitals_5160,Pulse,bpm,CRF_CFT70_VITALS_5160,1,1,21,False,0,37,1
+pulse__bpm__crf_cft70_vitals_8072,Pulse,bpm,CRF_CFT70_VITALS_8072,1,1,21,False,0,37,1
+pulse__bpm__crf_cft70_vitals_8936,Pulse,bpm,CRF_CFT70_VITALS_8936,1,1,13,False,0,37,1
+pulse_pressure_mm_hg____bedrest_ftt_cft70_pulsepressure_fallrecp,Pulse_Pressure_mm_Hg,,BEDREST_FTT_CFT70_PulsePressure_FallRecPr_obsv,35,35,3,False,0,3,35
+pulse_pressure_mm_hg____bedrest_ftt_cft70_pulsepressure_fallrecs,Pulse_Pressure_mm_Hg,,BEDREST_FTT_CFT70_PulsePressure_FallRecSt_obsv,35,35,3,False,0,3,35
+pvi__l_m__brsmpv_cft70_plasma_volume_results,PVI,L/m²,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+pvtot__l__brsmpv_cft70_plasma_volume_all_subjects,PVtot,L,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+pvtot__l__brsmpv_cft70_plasma_volume_results,PVtot,L,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+quadriceps____mri_ultrasound_cft70_mri_quadriceps,Quadriceps,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Quadriceps,26,0,1,False,0,12,26
+quadriceps____mri_ultrasound_cft70_ultrasound_quadrice,Quadriceps,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_Ultrasound_Quadriceps,26,0,1,False,0,12,26
+r_fat_android____nnx10ap86g_cft70_idxa,R%Fat_Android,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_arms____nnx10ap86g_cft70_idxa,R%Fat_Arms,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_gynoid____nnx10ap86g_cft70_idxa,R%Fat_Gynoid,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_left_arm____nnx10ap86g_cft70_idxa,R%Fat_Left_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_left_leg____nnx10ap86g_cft70_idxa,R%Fat_Left_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_left_total____nnx10ap86g_cft70_idxa,R%Fat_Left_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_left_trunk____nnx10ap86g_cft70_idxa,R%Fat_Left_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_legs____nnx10ap86g_cft70_idxa,R%Fat_Legs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_right_arm____nnx10ap86g_cft70_idxa,R%Fat_Right_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_right_leg____nnx10ap86g_cft70_idxa,R%Fat_Right_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_right_total____nnx10ap86g_cft70_idxa,R%Fat_Right_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_right_trunk____nnx10ap86g_cft70_idxa,R%Fat_Right_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_total____nnx10ap86g_cft70_idxa,R%Fat_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_fat_trunk____nnx10ap86g_cft70_idxa,R%Fat_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+r_r_interval_msec_2____bedrest_ftt_cft70_rr_intv_highfreq_fallr,R_R_Interval_msec_2,,BEDREST_FTT_CFT70_RR_Intv_HighFreq_FallRecPr_obsv,35,35,3,False,0,3,35
+r_r_interval_msec_2____bedrest_ftt_cft70_rr_intv_highfreq_fallr__2,R_R_Interval_msec_2,,BEDREST_FTT_CFT70_RR_Intv_HighFreq_FallRecSt_obsv,35,35,3,False,0,3,35
+r_r_interval_msec____bedrest_ftt_cft70_rr_intv_fallrecpr,R_R_Interval_msec,,BEDREST_FTT_CFT70_ RR_Intv_FallRecPr_obsv,35,35,3,False,0,3,35
+r_r_interval_msec____bedrest_ftt_cft70_rr_intv_fallrecst,R_R_Interval_msec,,BEDREST_FTT_CFT70_RR_Intv_FallRecSt_obsv,35,35,3,False,0,3,35
+rate_n_sec____bedrest_ftt_cft70_kneeext_rateforcedev,Rate_N_sec,,BEDREST_FTT_CFT70_KneeExt_RateForceDev_obsv,35,35,3,False,0,3,35
+rate_n_sec____bedrest_ftt_cft70_legpress_rateforcedev,Rate_N_sec,,BEDREST_FTT_CFT70_LegPress_RateForceDev_obsv,35,35,3,False,0,3,35
+rate_n_sec____bedrest_ftt_cft70_upperbody_rateforcedev,Rate_N_sec,,BEDREST_FTT_CFT70_UpperBody_RateForceDev_obsv,35,35,3,False,0,3,35
+ratio_n__kg__bedrest_ftt_cft70_legpress_maxisoforceto,Ratio_N,kg,BEDREST_FTT_CFT70_LegPress_MaxIsoForceToBW_Ratio_obsv,35,35,3,False,0,3,35
+rbcvol____brsmpv_cft70_plasma_volume_all_subjects,RBCvol,,BRSMPV_CFT70_PLASMA_VOLUME_all_subjects,37,35,2,False,0,1,37
+rbcvol____brsmpv_cft70_plasma_volume_results,RBCvol,,BRSMPV_CFT70_PLASMA_VOLUME_Results,6,5,2,False,0,32,6
+rectus_femoris____mri_ultrasound_cft70_mri_rectus_femoris,Rectus Femoris,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Rectus_Femoris,26,0,1,False,0,12,26
+rectus_femoris____mri_ultrasound_cft70_ultrasound_rectus_f,Rectus Femoris,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_Ultrasound_Rectus_Femoris,26,0,1,False,0,12,26
+red_cell_volume__l__bedrest_ftt_cft70_redcellvolume,Red_Cell_Volume,L,BEDREST_FTT_CFT70_RedCellVolume_obsv,35,33,2,False,0,3,35
+rel_hum____mr080g_cft70_pre_all,REL HUM,%,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+rel_hum____mr080g_cft70_screen_all,REL HUM,%,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+rel_vo2pk____mr080g_cft70_pre_all,REL VO2PK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+rel_vo2pk____mr080g_cft70_screen_all,REL VO2PK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+rerpk____mr080g_cft70_pre_all,RERPK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+rerpk____mr080g_cft70_screen_all,RERPK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+resp_rate__rpm__crf_cft70_vitals_5160,Resp Rate,rpm,CRF_CFT70_VITALS_5160,1,1,21,False,0,37,1
+resp_rate__rpm__crf_cft70_vitals_8072,Resp Rate,rpm,CRF_CFT70_VITALS_8072,1,1,21,False,0,37,1
+resp_rate__rpm__crf_cft70_vitals_8936,Resp Rate,rpm,CRF_CFT70_VITALS_8936,1,1,13,False,0,37,1
+rms____bedrest_ftt_cft70_data_linetest_torsoacc,RMS,,BEDREST_FTT_CFT70_Data_LineTest_TorsoAccRRMS_trial_obsv,35,35,9,False,0,3,35
+rms____bedrest_ftt_cft70_data_linetest_torsoacc__2,RMS,,BEDREST_FTT_CFT70_Data_LineTest_TorsoAccRRMS_win_obsv,35,35,9,False,0,3,35
+rms____bedrest_ftt_cft70_data_linetest_torsopit,RMS,,BEDREST_FTT_CFT70_Data_LineTest_TorsoPitchRMS_trial_obsv,35,35,9,False,0,3,35
+rms____bedrest_ftt_cft70_data_linetest_torsopit__2,RMS,,BEDREST_FTT_CFT70_Data_LineTest_TorsoPitchRMS_win_obsv,35,35,9,False,0,3,35
+rms____bedrest_ftt_cft70_data_linetest_torsorol,RMS,,BEDREST_FTT_CFT70_Data_LineTest_TorsoRollRMS_trial_obsv,35,35,9,False,0,3,35
+rms____bedrest_ftt_cft70_data_linetest_torsorol__2,RMS,,BEDREST_FTT_CFT70_Data_LineTest_TorsoRollRMS_win_obsv,35,35,9,False,0,3,35
+rms____bedrest_ftt_cft70_data_linetest_torsoyaw,RMS,,BEDREST_FTT_CFT70_Data_LineTest_TorsoYawRMS_trial_obsv,35,35,9,False,0,3,35
+rms____bedrest_ftt_cft70_data_linetest_torsoyaw__2,RMS,,BEDREST_FTT_CFT70_Data_LineTest_TorsoYawRMS_win_obsv,35,35,9,False,0,3,35
+rms____bedrest_ftt_cft70_linetest_torsorollrms_,RMS,,BEDREST_FTT_CFT70_LineTest_TorsoRollRMS_trial1_obsv,35,35,3,False,0,3,35
+rms____bedrest_ftt_cft70_segresshdtryawrms,RMS,,BEDREST_FTT_CFT70_sEgressHdTrYawRMS_obsv,35,31,3,False,0,3,35
+rms____bedrest_ftt_cft70_uegresshdtryawrms,RMS,,BEDREST_FTT_CFT70_uEgressHdTrYawRMS_obsv,35,35,3,False,0,3,35
+rocktranslation____bedrest_ftt_cft70_hr_acrosstests_datatab,RockTranslation,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+rod_and_frame_frame_effect____ncc958sa02802_cft70_rodandframeframeeffe,Rod and Frame Frame Effect,,NCC958SA02802_CFT70_RodAndFrameFrameEffect,18,18,2,False,0,20,18
+rpepk____mr080g_cft70_pre_all,RPEPK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+rpepk____mr080g_cft70_screen_all,RPEPK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+sbg__nmol_l__nnx10ap86g_cft70_immulite,SBG,nmol/L,NNX10AP86G_CFT70_IMMULITE,24,23,2,False,0,14,24
+sbppk____mr080g_cft70_pre_all,SBPPK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+sbppk____mr080g_cft70_screen_all,SBPPK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+sbpseated____mr080g_cft70_pre_all,SBPseated,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+sbpseated____mr080g_cft70_screen_all,SBPseated,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+sbpsupine____mr080g_cft70_pre_all,SBPsupine,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+sbpsupine____mr080g_cft70_screen_all,SBPsupine,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+settling_time__sec__bedrest_ftt_cft70_data_jump_settlingtime,Settling Time,sec,BEDREST_FTT_CFT70_Data_Jump_SettlingTime_obsv,35,35,9,False,0,3,35
+settling_time_sec____bedrest_ftt_cft70_jump_settlingtime_tria,Settling_Time_sec,,BEDREST_FTT_CFT70_Jump_SettlingTime_Trial1_obsv,35,35,3,False,0,3,35
+soleus____mri_ultrasound_cft70_mri_soleus,Soleus,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Soleus,26,0,1,False,0,12,26
+sot_5e_eq_median_score____bedrest_ftt_cft70_data_eq_scores_sot5e_m,SOT_5E_EQ_Median_Score,,BEDREST_FTT_CFT70_Data_EQ_Scores_SOT5E_Median,36,36,3,False,0,2,36
+sot_5m_eq_median_score____bedrest_ftt_cft70_data_eq_scores_sot5m_m,SOT_5M_EQ_Median_Score,,BEDREST_FTT_CFT70_Data_EQ_Scores_SOT5M_Median,34,32,3,False,0,4,34
+step_time_std_dev_sec____bedrest_ftt_cft70_dva_steptime_stdev,Step_Time_Std_Dev_sec,,BEDREST_FTT_CFT70_DVA_StepTime_stdev_obsv,35,35,3,False,0,3,35
+sysbp__mmhg__crf_cft70_vitals_5160,SysBP,mmHg,CRF_CFT70_VITALS_5160,1,1,21,False,0,37,1
+sysbp__mmhg__crf_cft70_vitals_8072,SysBP,mmHg,CRF_CFT70_VITALS_8072,1,1,21,False,0,37,1
+sysbp__mmhg__crf_cft70_vitals_8936,SysBP,mmHg,CRF_CFT70_VITALS_8936,1,1,13,False,0,37,1
+systolic_bp__mmhg__bedrest_ftt_cft70_sbp_fallrecovery_diff,Systolic_BP,mmHg,BEDREST_FTT_CFT70_SBP_FallRecovery_Diff_obsv,35,35,3,False,0,3,35
+systolic_bp_mm_hg_2____bedrest_ftt_cft70_sbp_lowfrq_fallrecpr,Systolic_BP_mm_Hg_2,,BEDREST_FTT_CFT70_SBP_LowFrq_FallRecPr_obsv,35,34,3,False,0,3,35
+systolic_bp_mm_hg_2____bedrest_ftt_cft70_sbp_lowfrq_fallrecst,Systolic_BP_mm_Hg_2,,BEDREST_FTT_CFT70_SBP_LowFrq_FallRecSt_obsv,35,33,3,False,0,3,35
+systolic_bp_mm_hg____bedrest_ftt_cft70_sbp_fallrecoverypr,Systolic_BP_mm_Hg,,BEDREST_FTT_CFT70_SBP_FallRecoveryPr_obsv,35,35,3,False,0,3,35
+systolic_bp_mm_hg____bedrest_ftt_cft70_sbp_fallrecoveryst,Systolic_BP_mm_Hg,,BEDREST_FTT_CFT70_SBP_FallRecoverySt_obsv,35,35,3,False,0,3,35
+t_fat_android____nnx10ap86g_cft70_idxa,T%Fat_Android,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_arms____nnx10ap86g_cft70_idxa,T%Fat_Arms,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_gynoid____nnx10ap86g_cft70_idxa,T%Fat_Gynoid,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_left_arm____nnx10ap86g_cft70_idxa,T%Fat_Left_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_left_leg____nnx10ap86g_cft70_idxa,T%Fat_Left Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_left_total____nnx10ap86g_cft70_idxa,T%Fat_Left_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_left_trunk____nnx10ap86g_cft70_idxa,T%Fat_Left_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_legs____nnx10ap86g_cft70_idxa,T%Fat_Legs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_right_arm____nnx10ap86g_cft70_idxa,T%Fat_Right_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_right_leg____nnx10ap86g_cft70_idxa,T%Fat_Right_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_right_total____nnx10ap86g_cft70_idxa,T%Fat_Right_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_right_trunk____nnx10ap86g_cft70_idxa,T%Fat_Right_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_total____nnx10ap86g_cft70_idxa,T%Fat_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+t_fat_trunk____nnx10ap86g_cft70_idxa,T%Fat_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tap_reaction_time_avg____ncc958sa02802_cft70_tappingresponsetime,Tap reaction time Avg,,NCC958SA02802_CFT70_TappingResponseTime,18,17,2,False,0,20,18
+taurine____nnx10ap86g_cft70_amino_acids,Taurine,,NNX10AP86G_CFT70_Amino_Acids,24,23,2,False,0,14,24
+tdi_basal_septal_a____brsmcf_cft70_2d_echo_7_subjects,TDI Basal Septal A,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_basal_septal_a____brsmcf_cft70_2d_echo_all,TDI Basal Septal A,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_basal_septal_e____brsmcf_cft70_2d_echo_7_subjects,TDI Basal Septal E,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_basal_septal_e____brsmcf_cft70_2d_echo_all,TDI Basal Septal E,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_basal_septal_systole____brsmcf_cft70_2d_echo_7_subjects,TDI Basal Septal Systole,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_basal_septal_systole____brsmcf_cft70_2d_echo_all,TDI Basal Septal Systole,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_left_heart_rate____brsmcf_cft70_2d_echo_7_subjects,TDI Left Heart Rate,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_left_heart_rate____brsmcf_cft70_2d_echo_all,TDI Left Heart Rate,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_mitral_annular_a____brsmcf_cft70_2d_echo_7_subjects,TDI Mitral Annular A,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_mitral_annular_a____brsmcf_cft70_2d_echo_all,TDI Mitral Annular A,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_mitral_annular_e____brsmcf_cft70_2d_echo_7_subjects,TDI Mitral Annular E,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_mitral_annular_e____brsmcf_cft70_2d_echo_all,TDI Mitral Annular E,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_mitral_annular_systole____brsmcf_cft70_2d_echo_7_subjects,TDI Mitral Annular Systole,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_mitral_annular_systole____brsmcf_cft70_2d_echo_all,TDI Mitral Annular Systole,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_right_heart_rate____brsmcf_cft70_2d_echo_7_subjects,TDI Right Heart Rate,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_right_heart_rate____brsmcf_cft70_2d_echo_all,TDI Right Heart Rate,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_tricuspid_a_wave____brsmcf_cft70_2d_echo_7_subjects,TDI Tricuspid A Wave,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_tricuspid_a_wave____brsmcf_cft70_2d_echo_all,TDI Tricuspid A Wave,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_tricuspid_e_wave____brsmcf_cft70_2d_echo_7_subjects,TDI Tricuspid E Wave,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_tricuspid_e_wave____brsmcf_cft70_2d_echo_all,TDI Tricuspid E Wave,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tdi_tricuspid_systole____brsmcf_cft70_2d_echo_7_subjects,TDI Tricuspid Systole,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tdi_tricuspid_systole____brsmcf_cft70_2d_echo_all,TDI Tricuspid Systole,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+temp__0c__mr080g_cft70_pre_all,TEMP,0C,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+temp__0c__mr080g_cft70_screen_all,TEMP,0C,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+tension_anxiety____nnx10ap86g_cft70_poms_tension_anxiety,Tension-anxiety,,NNX10AP86G_CFT70_POMS_Tension-anxiety,24,24,4,False,0,14,24
+termination____mr080g_cft70_screen_all,TERMINATION,,MR080G_CFT70_Screen_ALL,4,0,1,False,0,34,4
+time__msec__bedrest_ftt_cft70_data_jump_takeofflaten,Time,msec,BEDREST_FTT_CFT70_Data_Jump_TakeOffLatency_obsv,35,35,9,False,0,3,35
+time__msec__bedrest_ftt_cft70_data_jump_timetopeakve,Time,msec,BEDREST_FTT_CFT70_Data_Jump_TimeToPeakVerticalForce_obsv,35,35,9,False,0,3,35
+time__sec__bedrest_ftt_cft70_data_linetest_trialtot,Time,sec,BEDREST_FTT_CFT70_Data_LineTest_TrialTotalTime_obsv,35,35,9,False,0,3,35
+time_sec____bedrest_ftt_cft70_actboardtime,Time_sec,,BEDREST_FTT_CFT70_ActBoardTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_ladderclimb40time,Time_sec,,BEDREST_FTT_CFT70_LadderClimb40Time_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_rocksfinishtime,Time_sec,,BEDREST_FTT_CFT70_RocksFinishTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_rocksremovetime,Time_sec,,BEDREST_FTT_CFT70_RocksRemoveTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_standfzsettlingtime,Time_sec,,BEDREST_FTT_CFT70_StandFzSettlingTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrcoursesplittime,Time_sec,,BEDREST_FTT_CFT70_SuEgrCourseSplitTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrcoursetime,Time_sec,,BEDREST_FTT_CFT70_SuEgrCourseTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrdownramptime,Time_sec,,BEDREST_FTT_CFT70_SuEgrDownRampTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegregresstime,Time_sec,,BEDREST_FTT_CFT70_SuEgrEgressTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrfinishtime,Time_sec,,BEDREST_FTT_CFT70_SuEgrFinishTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrfullramptime,Time_sec,,BEDREST_FTT_CFT70_SuEgrFullRampTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrportalsplittime,Time_sec,,BEDREST_FTT_CFT70_SuEgrPortalSplitTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrportaltime,Time_sec,,BEDREST_FTT_CFT70_SuEgrPortalTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrslalomtime,Time_sec,,BEDREST_FTT_CFT70_SuEgrSlalomTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegruprampsplittime,Time_sec,,BEDREST_FTT_CFT70_SuEgrUpRampSplitTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_suegrupramptime,Time_sec,,BEDREST_FTT_CFT70_SuEgrUpRampTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrcoursesplittime,Time_sec,,BEDREST_FTT_CFT70_ UpEgrCourseSplitTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrcoursetime,Time_sec,,BEDREST_FTT_CFT70_UpEgrCourseTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrdownramptime,Time_sec,,BEDREST_FTT_CFT70_UpEgrDownRampTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegregresstime,Time_sec,,BEDREST_FTT_CFT70_UpEgrEgressTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrfinishtime,Time_sec,,BEDREST_FTT_CFT70_UpEgrFinishTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrfullramptime,Time_sec,,BEDREST_FTT_CFT70_UpEgrFullRampTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrportalsplittime,Time_sec,,BEDREST_FTT_CFT70_UpEgrPortalSplitTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrportaltime,Time_sec,,BEDREST_FTT_CFT70_UpEgrPortalTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrslalomtime,Time_sec,,BEDREST_FTT_CFT70_UpEgrSlalomTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegruprampsplittime,Time_sec,,BEDREST_FTT_CFT70_UpEgrUpRampSplitTime_obsv,35,35,3,False,0,3,35
+time_sec____bedrest_ftt_cft70_upegrupramptime,Time_sec,,BEDREST_FTT_CFT70_UpEgrUpRampTime_obsv,35,35,3,False,0,3,35
+timetot____mr080g_cft70_pre_all,TIMETOT,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+timetot____mr080g_cft70_screen_all,TIMETOT,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+tissue____idxa_cft70_body_composition_legs,Tissue,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Legs_obsv,38,0,1,True,0,0,38
+tissue_android____nnx10ap86g_cft70_idxa,Tissue_Android,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_arms____nnx10ap86g_cft70_idxa,Tissue_Arms,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_gynoid____nnx10ap86g_cft70_idxa,Tissue_Gynoid,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_left_arm____nnx10ap86g_cft70_idxa,Tissue_Left_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_left_leg____nnx10ap86g_cft70_idxa,Tissue_Left_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_left_total____nnx10ap86g_cft70_idxa,Tissue_Left_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_left_trunk____nnx10ap86g_cft70_idxa,Tissue_Left_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_legs____nnx10ap86g_cft70_idxa,Tissue_Legs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_right_arm____nnx10ap86g_cft70_idxa,Tissue_Right_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_right_leg____nnx10ap86g_cft70_idxa,Tissue_Right_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_right_total____nnx10ap86g_cft70_idxa,Tissue_Right_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_right_trunk____nnx10ap86g_cft70_idxa,Tissue_Right_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_total____nnx10ap86g_cft70_idxa,Tissue_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tissue_trunk____nnx10ap86g_cft70_idxa,Tissue_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_android____nnx10ap86g_cft70_idxa,TM_Android,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_arms____nnx10ap86g_cft70_idxa,TM_Arms,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_gynoid____nnx10ap86g_cft70_idxa,TM_Gynoid,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_left_arm____nnx10ap86g_cft70_idxa,TM_Left_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_left_leg____nnx10ap86g_cft70_idxa,TM_Left_Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_left_total____nnx10ap86g_cft70_idxa,TM_Left_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_left_trunk____nnx10ap86g_cft70_idxa,TM_Left_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_legs____nnx10ap86g_cft70_idxa,TM_Legs,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_right_arm____nnx10ap86g_cft70_idxa,TM_Right_Arm,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_right_leg____nnx10ap86g_cft70_idxa,TM_Right Leg,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_right_total____nnx10ap86g_cft70_idxa,TM_Right_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_right_trunk____nnx10ap86g_cft70_idxa,TM_Right_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_total____nnx10ap86g_cft70_idxa,TM_Total,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+tm_trunk____nnx10ap86g_cft70_idxa,TM_Trunk,,NNX10AP86G_CFT70_iDXA_avgs,24,0,1,True,0,14,24
+torquegeneration_isometric____bedrest_ftt_cft70_hr_acrosstests_datatab,TorqueGeneration_Isometric,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+torquegeneration_isotonic____bedrest_ftt_cft70_hr_acrosstests_datatab,TorqueGeneration_Isotonic,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+total____idxa_cft70_body_composition_android,Total,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Android_obsv,38,0,1,True,0,0,38
+total____idxa_cft70_body_composition_arms,Total,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Arms_obsv,38,0,1,True,0,0,38
+total____idxa_cft70_body_composition_gynoid,Total,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Gynoid_obsv,38,0,1,True,0,0,38
+total____idxa_cft70_body_composition_legs,Total,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Legs_obsv,38,0,1,True,0,0,38
+total____idxa_cft70_body_composition_trunk,Total,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Trunk_obsv,38,0,1,True,0,0,38
+total_bmc____idxa_cft70_body_composition_total,Total BMC,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Total_obsv,38,0,1,True,0,0,38
+total_fat____idxa_cft70_body_composition_total,Total Fat,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Total_obsv,38,0,1,True,0,0,38
+total_fat_free____idxa_cft70_body_composition_total,Total Fat Free,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Total_obsv,38,0,1,True,0,0,38
+total_frequency_power____bedrest_ftt_cft70_dva_hpitch_frqanpsum,Total_Frequency_Power,,BEDREST_FTT_CFT70_DVA_Hpitch_FrqAnPsum_obsv,35,35,3,False,0,3,35
+total_frequency_power____bedrest_ftt_cft70_dva_tpitch_frqanpsum,Total_Frequency_Power,,BEDREST_FTT_CFT70_DVA_Tpitch_FrqAnPsum_obsv,35,35,3,False,0,3,35
+total_frequency_power____bedrest_ftt_cft70_dva_tposz_frqanpsum,Total_Frequency_Power,,BEDREST_FTT_CFT70_DVA_TposZ_FrqAnPsum_obsv,35,35,3,False,0,3,35
+total_lean____idxa_cft70_body_composition_total,Total Lean,,BEDREST_IRATS_iDXA_CFT70_Body_Composition_Total_obsv,38,0,1,True,0,0,38
+total_mood_disturbance__tmd__nnx10ap86g_cft70_poms_tmd,Total Mood Disturbance,TMD,NNX10AP86G_CFT70_POMS_TMD,24,24,4,False,0,14,24
+total_score____nnx10ap86g_cft70_mfsi_sf_total_scale,Total Score,,NNX10AP86G_CFT70_MFSI-SF_Total_Scale,23,23,4,False,0,15,23
+total_work_j____bedrest_ftt_cft70_legpress_totalwork,Total_Work_J,,BEDREST_FTT_CFT70_LegPress_TotalWork_obsv,35,35,3,False,0,3,35
+total_work_j____bedrest_ftt_cft70_upperbody_totalwork,Total_Work_J,,BEDREST_FTT_CFT70_UpperBody_TotalWork_obsv,35,35,3,False,0,3,35
+tricuspid_a_velocity____brsmcf_cft70_2d_echo_7_subjects,Tricuspid A Velocity,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tricuspid_a_velocity____brsmcf_cft70_2d_echo_all,Tricuspid A Velocity,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tricuspid_e_velocity____brsmcf_cft70_2d_echo_7_subjects,Tricuspid E Velocity,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tricuspid_e_velocity____brsmcf_cft70_2d_echo_all,Tricuspid E Velocity,,BRSMCF_CFT70_2D_Echo_All,37,0,1,False,0,1,37
+tricuspid_regurgitation____brsmcf_cft70_2d_echo_7_subjects,Tricuspid Regurgitation,,BRSMCF_CFT70_2D_Echo_7_Subjects,7,0,1,False,0,31,7
+tricuspid_regurgitation____brsmcf_cft70_2d_echo_all,Tricuspid Regurgitation,,BRSMCF_CFT70_2D_Echo_All,36,0,1,False,0,2,36
+turns____bedrest_ftt_cft70_torqgennmbrturns,Turns,,BEDREST_FTT_CFT70_TorqGenNmbrTurns_obsv,35,35,3,False,0,3,35
+twp____bedrest_ftt_cft70_linetest_twp,TWP,,BEDREST_FTT_CFT70_LineTest_TWP_obsv,35,35,3,False,0,3,35
+urea____nnx10ap86g_cft70_amino_acids,Urea,,NNX10AP86G_CFT70_Amino_Acids,24,24,2,False,0,14,24
+vastii_only____mri_ultrasound_cft70_mri_vastii_only,Vastii_Only,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Vastii_Only,26,0,1,False,0,12,26
+vastus_lateralis____mri_ultrasound_cft70_mri_vastus_laterali,Vastus Lateralis,,BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Vastus_Lateralis,26,0,1,False,0,12,26
+vca____brsmvsi_cft70_a_c_subjects,VCA,,BRSMVSI_CFT70_A_C_Subjects,6,0,1,False,0,32,6
+vca____brsmvsi_cft70_all_subjects,VCA,,BRSMVSI_CFT70_All_Subjects,23,0,1,False,0,15,23
+vco2pk____mr080g_cft70_pre_all,VCO2PK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+vco2pk____mr080g_cft70_screen_all,VCO2PK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+vepk____mr080g_cft70_pre_all,VEPK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+vepk____mr080g_cft70_screen_all,VEPK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+vigor____nnx10ap86g_cft70_poms_vigor,Vigor,,NNX10AP86G_CFT70_POMS_Vigor,24,24,4,False,0,14,24
+vigor_scale____nnx10ap86g_cft70_mfsi_sf_vigor_scale,Vigor Scale,,NNX10AP86G_CFT70_MFSI-SF_Vigor_Scale,23,23,4,False,0,15,23
+visualacuity_dynamic____bedrest_ftt_cft70_hr_acrosstests_datatab,VisualAcuity_Dynamic,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+visualacuity_static____bedrest_ftt_cft70_hr_acrosstests_datatab,VisualAcuity_Static,,BEDREST_FTT_CFT70_HR_AcrossTests_DataTable_obsv,36,36,3,False,0,2,36
+vo2max_vt____mr080g_cft70_pre_all,%VO2MAX @ VT,,MR080G_CFT70_PRE_ALL,35,0,1,False,0,3,35
+vo2max_vt____mr080g_cft70_screen_all,%VO2MAX @ VT,,MR080G_CFT70_Screen_ALL,13,0,1,False,0,25,13
+vo2pk____mr080g_cft70_pre_all,VO2PK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+vo2pk____mr080g_cft70_screen_all,VO2PK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+vt1____mr080g_cft70_pre_all,VT1,,MR080G_CFT70_PRE_ALL,35,0,1,False,0,3,35
+vt1____mr080g_cft70_screen_all,VT1,,MR080G_CFT70_Screen_ALL,13,0,1,False,0,25,13
+vt2____mr080g_cft70_pre_all,VT2,,MR080G_CFT70_PRE_ALL,35,0,1,False,0,3,35
+vt2____mr080g_cft70_screen_all,VT2,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+vt3____mr080g_cft70_pre_all,VT3,,MR080G_CFT70_PRE_ALL,35,0,1,False,0,3,35
+vt3____mr080g_cft70_screen_all,VT3,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+vt_final____mr080g_cft70_pre_all,VT FINAL,,MR080G_CFT70_PRE_ALL,35,0,1,False,0,3,35
+vt_final____mr080g_cft70_screen_all,VT FINAL,,MR080G_CFT70_Screen_ALL,13,0,1,False,0,25,13
+vtpk____mr080g_cft70_pre_all,VTPK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+vtpk____mr080g_cft70_screen_all,VTPK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+weight____brsmvj_cft70_vertical_jump_pre1_jumps_ob,Weight,,BRSMVJ_CFT70_Vertical_Jump_Pre1_jumps_obsv_ALL,37,37,3,False,0,1,37
+weight____brsmvj_cft70_vertical_jump_pre2_jumps_ob,Weight,,BRSMVJ_CFT70_Vertical_Jump_Pre2_jumps_obsv_ALL,38,38,3,False,0,0,38
+weight____mr080g_cft70_pre_all,WEIGHT,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+weight____mr080g_cft70_screen_all,WEIGHT,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+weight__kg__crf_cft70_vitals_5160,Weight,Kg,CRF_CFT70_VITALS_5160,1,1,21,False,0,37,1
+weight__kg__crf_cft70_vitals_8072,Weight,Kg,CRF_CFT70_VITALS_8072,1,1,21,False,0,37,1
+weight__kg__crf_cft70_vitals_8936,Weight,Kg,CRF_CFT70_VITALS_8936,1,1,13,False,0,37,1
+wkld_vo2pk____mr080g_cft70_pre_all,WKLD @ VO2PK,,MR080G_CFT70_PRE_ALL,38,0,1,False,0,0,38
+wkld_vo2pk____mr080g_cft70_screen_all,WKLD @ VO2PK,,MR080G_CFT70_Screen_ALL,14,0,1,False,0,24,14
+work_joules____bedrest_ftt_cft70_torqgenwork,Work_Joules,,BEDREST_FTT_CFT70_TorqGenWork_obsv,35,35,3,False,0,3,35

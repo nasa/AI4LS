@@ -1,0 +1,8 @@
+Component,Description,Data,Model,CV,Null,Output
+Prerequisite,Save per-subject LOOCV predictions for BMD,c11_totalhipBMD_change_features_all.csv (38x628),TabPFNRegressor n_estimators=32 seed=42,LOOCV (38 fits),N/A,tfm_loocv_predictions_bmd.csv
+Test 1: Arm-Stratified Null,"Permute target within each arm; preserves arm means, breaks individual link",Same as primary,Same,LOOCV,"1000 shuffles, within-arm permutation",arm_stratified_null_bmd.csv + result.json
+Test 2: Arm-Residualized Target,Target = y - arm_mean; standard permutation null,"Same features, residualized target",Same,LOOCV,"1000 shuffles, standard permutation",arm_residualized_null_bmd.csv + result.json
+Test 3: Reading C Check,"Spearman(prediction_error, body_comp_var) within each arm",LOOCV predictions + body-comp features,N/A (post-hoc analysis),N/A,Bonferroni across variables,reading_c_check_bmd.csv + result.json
+Fat A10G Rerun,Full 628-width harness on fat target,BMD feature table + fat target joined on subject,Same,LOOCV (38 fits),"1000 shuffles, standard permutation","fat_a10g_*.{csv,json}"
+Tandem A10G Rerun,Full 628-width harness on tandem target,BMD feature table + tandem target joined on subject,Same,LOOCV (35 fits),"1000 shuffles, standard permutation","tandem_a10g_*.{csv,json}"
+Conditional: Fat/Tandem Arm-Aware,"If fat/tandem rerun produces signal, run Tests 1-3 on that target",Same as fat/tandem rerun,Same,LOOCV,1000 shuffles,"{target}_arm_aware_*.{csv,json}"
