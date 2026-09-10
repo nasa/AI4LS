@@ -61,7 +61,7 @@ table = ax.table(
 
 # Formatting
 table.auto_set_font_size(False)
-table.set_fontsize(18)
+table.set_fontsize(12)
 table.scale(1, 2)
 
 for col in range(3):

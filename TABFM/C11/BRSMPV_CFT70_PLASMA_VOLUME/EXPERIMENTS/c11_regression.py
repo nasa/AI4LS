@@ -25,7 +25,8 @@ from sklearn.inspection import permutation_importance
 # set access
 from tabpfn_client import set_access_token
 
-set_access_token("tabpfn_sk_4i2HFotq_9wpdLTdfT5UndsQPCF7QWzfchuddvYiRtA")
+#set_access_token("tabpfn_sk_4i2HFotq_9wpdLTdfT5UndsQPCF7QWzfchuddvYiRtA")
+set_access_token("tabpfn_sk_DhTVVHrpvcWE5mp-6F7ZND1uZdGl_qgyLbC5CJPahq0")
 
 # Load data
 #X, y = load_breast_cancer(return_X_y=True)
@@ -44,7 +45,7 @@ y=np.array(list(df[colname]))
 
 X_array = np.array(X)
 
-X_train, X_test, y_train, y_test = train_test_split(X_array, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_array, y, test_size=0.3, random_state=42)
 
 
 # first try to train a RF
