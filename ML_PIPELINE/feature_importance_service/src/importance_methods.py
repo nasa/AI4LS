@@ -1,5 +1,6 @@
 from sklearn.feature_selection import SequentialFeatureSelector, RFE
 from sklearn.inspection import permutation_importance
+from sklearn.svm import SVC, SVR
 
 import pandas as pd
 from typing import List, Dict
@@ -63,10 +64,13 @@ class FeatureImportanceMethods:
             n_features_to_select: Number of features to select (default: half)
             step: Number of features to remove at each iteration
         """
+
+        logger.info(f"examining feature importance for model of type {type(model)}")
+        if isinstance(model, (SVC, SVR)):
+            logger.warning("SVC/SVR don't support RFE - skipping")
+            return []
+        
         try:
-            #if n_features_to_select is None:
-            #    n_features_to_select = max(1, len(X.columns) // 2)
-            
             logger.info(f"Running RFE: selecting {n_features_to_select} features")
             
             # Create RFE selector
@@ -133,9 +137,6 @@ class FeatureImportanceMethods:
             from sklearn.neural_network import MLPClassifier, MLPRegressor
             from sklearn.ensemble import RandomForestClassifier
         
-            if n_features_to_select is None:
-                n_features_to_select = max(1, len(X.columns) // 2)
-        
             if direction not in ['forward', 'backward']:
                 raise ValueError("direction must be 'forward' or 'backward'")
         
@@ -144,10 +145,8 @@ class FeatureImportanceMethods:
             # If model is MLPClassifier, use RandomForest for SFS instead
             # (MLPClassifier has convergence issues in cross-validation)
             if isinstance(model, (MLPClassifier, MLPRegressor)):
-                logger.info("Replacing MLPClassifier with RandomForestClassifier for feature selection (better convergence)")
-                estimator = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
-            else:
-                estimator = model
+                logger.warn("sequential feature selection doesn't support MLP - skipping")
+                return []
         
             # Create Sequential Feature Selector
             sfs = SequentialFeatureSelector(
@@ -236,7 +235,7 @@ class FeatureImportanceMethods:
                 results.append({
                     "feature_name": name,
                     "importance": float(perm_importance.importances_mean[i]),
-                    #"std": float(perm_importance.importances_std[i]),
+                    "std": float(perm_importance.importances_std[i]),
                     "rank": i + 1
                 })
             
