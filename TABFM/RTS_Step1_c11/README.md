@@ -19,6 +19,12 @@ This folder is the complete **Step 1** of a four-step program (full text in `doc
 
 This folder sits alongside `C11/` (J. Casaletto), which holds the per-dataset extraction scripts that built the raw material. This folder is the complete Step 1 analysis: build, modeling, bias battery, results, figures, and teaching assets.
 
+## The pipeline at a glance
+
+![Pipeline flowchart](figures/pipeline_flowchart.png)
+
+*From the raw NASA archive to a verified prediction: build the dataset, test the model against shuffled-outcome nulls, then rule out artifacts. Full walkthrough in `docs/PIPELINE.md`.*
+
 ## Quickstart
 
 ```bash
