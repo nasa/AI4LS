@@ -17,6 +17,7 @@ import requests
 import json
 import grpc
 import importlib.util
+from protobuf_to_dict_helper import convert_importance_response_to_dict  # ADD THIS LINE
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -132,7 +133,7 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
 
     X_filtered, selected_features = _filter_cvs(X, start=0.25, step=0.25, min_features=min_features)
 
-    print('before trans: ', X_filtered.head())
+    logger.info(f'before trans: {X_filtered.head()}')
     
     # Step 2: Apply transformations
     if trans_list:
@@ -159,7 +160,7 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
         X_transformed = X_filtered.copy()
     
 
-    print('after trans: ', X_transformed.head())
+    logger.info(f'after trans: {X_transformed.head()}')
 
     # Combine back with target
     df_filtered_transformed = X_transformed.copy()
@@ -172,7 +173,7 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
     logger.info(f"\nFiltered & Transformed dataset:")
     logger.info(f"  Samples: {len(df_filtered_transformed)}")
 
-    print('after adding back source_dataset: ', df_filtered_transformed.head())
+    logger.info(f'after adding back source_dataset: {df_filtered_transformed.head()}')
     
     return df_filtered_transformed, selected_features
 
@@ -209,9 +210,29 @@ def combine_and_run_pipeline(
     NEW: Uses GRPC multi-dataset service for combining
     """
     
-    print("=" * 80)
-    print("MULTI-DATASET PIPELINE (Filtered & Transformed)")
-    print("=" * 80)
+    
+    logger.info("=" * 80)
+    logger.info("MULTI-DATASET PIPELINE (Filtered & Transformed)")
+    logger.info("=" * 80)
+
+    import uuid
+    pipeline_id = str(uuid.uuid4())
+    logger.info(f"Starting pipeline {pipeline_id}")
+   
+    import uuid
+    from datetime import datetime
+    pipeline_id = str(uuid.uuid4())
+    logger.info(f"Starting pipeline {pipeline_id}")
+    
+    # Initialize tracking variables
+    dataset_map = {}
+    osd_ids_used = []
+    metrics = {}
+    model_id = None
+    feature_importance_response = None
+    ensemble_result = None
+    ensemble_metrics = {}
+    
     
     # Validate inputs
     if not tissue_name and not osd_ids:
@@ -238,19 +259,21 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 1-3: Get OSD IDs, Download, and Combine Datasets (via GRPC)
     # ============================================================================
-    print("\n" + "=" * 80)
-    print("STEP 1-3: RESOLVE, DOWNLOAD, AND COMBINE DATASETS")
-    print("=" * 80)
+    logger.info("\n" + "=" * 80)
+    logger.info("STEP 1-3: RESOLVE, DOWNLOAD, AND COMBINE DATASETS")
+    logger.info("=" * 80)
     
     # Initialize data client
     data_client = get_data_client()
     
     try:
         if tissue_name:
-            print(f"Looking up and combining datasets for tissue: {tissue_name}")
+            logger.info(f"Looking up and combining datasets for tissue: {tissue_name}")
+            # Track which OSD IDs are being used
+            osd_ids_used = TISSUE_REGISTRY.get(tissue_name.lower(), [])
+            
             # Use one-liner to get OSD IDs, download, and combine
-            combined_dataset_id, samples_per_source, condition_column = data_client.combine_by_tissue(
-                tissue_name=tissue_name,
+            combined_dataset_id, samples_per_source, condition_column = data_client.combine_by_tissue( tissue_name=tissue_name,
                 patterns=patterns,
                 factor_name=factor_name,
                 factor_values=factor_values,
@@ -258,16 +281,21 @@ def combine_and_run_pipeline(
                 cv_step=cv_step
             )
         else:
-            print(f"Using specified OSD IDs: {osd_ids}")
+            logger.info(f"Using specified OSD IDs: {osd_ids}")
+            # Parse OSD IDs from comma-separated string
+            #osd_ids_used = [id.strip() for id in osd_ids.split(',')]
+            osd_ids_used = osd_ids 
+            
             # Step-by-step for explicit OSD IDs
             dataset_map = data_client.download_multiple_datasets(
-                osd_ids=osd_ids,
+                osd_ids=osd_ids_used,
                 patterns=patterns,
                 factor_name=factor_name,
                 factor_values=factor_values,
                 min_features=min_features,
                 cv_step=cv_step
             )
+
             common_genes = data_client.find_common_genes(list(dataset_map.values()))
             combined_dataset_id, samples_per_source, condition_column = data_client.combine_datasets(
                 dataset_ids=list(dataset_map.values()),
@@ -281,17 +309,17 @@ def combine_and_run_pipeline(
         
         combined_df = pd.read_parquet(dataset_path)
         
-        print(f"\n✓ Combined dataset loaded: {combined_dataset_id}")
-        print(f"  Samples: {len(combined_df)}")
-        print(f"  Genes: {len([c for c in combined_df.columns if c not in ['source_dataset', condition_column or '']])}")
-        print(f"  Samples per source: {samples_per_source}")
-        print(f"  Condition column: {condition_column}")
+        logger.info(f"\n✓ Combined dataset loaded: {combined_dataset_id}")
+        logger.info(f"  Samples: {len(combined_df)}")
+        logger.info(f"  Genes: {len([c for c in combined_df.columns if c not in ['source_dataset', condition_column or '']])}")
+        logger.info(f"  Samples per source: {samples_per_source}")
+        logger.info(f"  Condition column: {condition_column}")
         
         # Extract common genes list
         common_genes = [c for c in combined_df.columns if c not in ['source_dataset', condition_column or '']]
         
     except Exception as e:
-        print(f"✗ Failed to combine datasets: {e}")
+        logger.info(f"✗ Failed to combine datasets: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -299,27 +327,26 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 4: Determine target column
     # ============================================================================
-    print("\n" + "=" * 80)
-    print("STEP 4: PREPARE DATA")
-    print("=" * 80)
+    logger.info("\n" + "=" * 80)
+    logger.info("STEP 4: PREPARE DATA")
+    logger.info("=" * 80)
     
     # If target_column not specified, use the condition_column from GRPC response
     if not target_column:
         target_column = condition_column
     
     if not target_column:
-        print("✗ Error: No target column found")
+        logger.info("✗ Error: No target column found")
         return None
     
-    print(f"Target column: {target_column}")
+    logger.info(f"Target column: {target_column}")
    
-    # JC 1 
     
     # Ensure target has string values
     df_clean = combined_df.copy()
     if df_clean[target_column].dtype in ['int64', 'float64']:
         if set(df_clean[target_column].unique()) <= {0, 1}:
-            print(f"Converting {target_column} from 0/1 to string values")
+            logger.info(f"Converting {target_column} from 0/1 to string values")
             df_clean[target_column] = df_clean[target_column].map({
                 0: factor_values[0],
                 1: factor_values[1]
@@ -328,9 +355,9 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 5: Filter and Transform
     # ============================================================================
-    print("\n" + "=" * 80)
-    print("STEP 5: FILTER AND TRANSFORM DATA")
-    print("=" * 80)
+    logger.info("\n" + "=" * 80)
+    logger.info("STEP 5: FILTER AND TRANSFORM DATA")
+    logger.info("=" * 80)
 
     try:
         logger.info(f"calling filter_and_transform with transformations: {trans_list}")
@@ -341,21 +368,20 @@ def combine_and_run_pipeline(
             min_features=min_features,
             trans_list=trans_list
         )
-        print('head of filtered/transformed df: ', df_filtered_transformed.head())
+        logger.info(f'head of filtered/transformed df: {df_filtered_transformed.head()}')
     except Exception as e:
-        print(f"✗ Failed to filter/transform data: {e}")
+        logger.info(f"✗ Failed to filter/transform data: {e}")
         import traceback
         traceback.print_exc()
         return None
   
      
-    # JC 2 
     # ============================================================================
     # STEP 6: Save filtered & transformed dataset
     # ============================================================================
-    print("\n" + "=" * 80)
-    print("STEP 6: SAVE FILTERED & TRANSFORMED DATASET")
-    print("=" * 80)
+    logger.info("\n" + "=" * 80)
+    logger.info("STEP 6: SAVE FILTERED & TRANSFORMED DATASET")
+    logger.info("=" * 80)
     
     try:
         # Create new dataset_id for filtered & transformed version
@@ -371,14 +397,14 @@ def combine_and_run_pipeline(
 
         
         df_for_upload.to_parquet(dataset_path)
-        print(f"✓ Filtered & transformed dataset saved: {filtered_dataset_id}")
-        print(f"  Samples: {len(df_for_upload)}")
-        print(f"  Features: {len([c for c in df_for_upload.columns if c != target_column])}")
+        logger.info(f"✓ Filtered & transformed dataset saved: {filtered_dataset_id}")
+        logger.info(f"  Samples: {len(df_for_upload)}")
+        logger.info(f"  Features: {len([c for c in df_for_upload.columns if c != target_column])}")
         
         columns = list(df_for_upload.columns)
         dataset_id = filtered_dataset_id  # Use filtered version for training
     except Exception as e:
-        print(f"✗ Failed to save dataset: {e}")
+        logger.info(f"✗ Failed to save dataset: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -386,11 +412,10 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 7: Train single model
     # ============================================================================
-    # JC 3
     
-    print("\n" + "=" * 80)
-    print("STEP 7: TRAIN SINGLE MODEL")
-    print("=" * 80)
+    logger.info("\n" + "=" * 80)
+    logger.info("STEP 7: TRAIN SINGLE MODEL")
+    logger.info("=" * 80)
     
     try:
         model_id, metrics = run_pipeline(
@@ -411,15 +436,15 @@ def combine_and_run_pipeline(
         )
         
         if not model_id:
-            print("\n✗ Single model training failed")
+            logger.info("\n✗ Single model training failed")
             return None
         
-        print(f"\n✓ Model trained: {model_id}")
+        logger.info(f"\n✓ Model trained: {model_id}")
         if metrics:
-            print(f"✓ Metrics: {metrics}")
+            logger.info(f"✓ Metrics: {metrics}")
         
     except Exception as e:
-        print(f"✗ Model training error: {e}")
+        logger.error(f"✗ Model training error: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -428,19 +453,18 @@ def combine_and_run_pipeline(
     # STEP 8: Feature Importance (single model)
     # ============================================================================
 
-    # JC 4
     
     if do_feature_importance:
-        print("\n" + "=" * 80)
-        print("STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)")
-        print("=" * 80)
+        logger.info("\n" + "=" * 80)
+        logger.info("STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)")
+        logger.info("=" * 80)
         
         try:
             try:
                 feature_importance_response = compute_feature_importance(
                     model_id=model_id,
                     dataset_id=dataset_id,
-                    methods=fi_methods
+                    fi_methods=fi_methods
                 )
             except Exception as e:
                 # If feature importance fails, log but continue
@@ -449,20 +473,20 @@ def combine_and_run_pipeline(
                 feature_importance_response = None
             
             if feature_importance_response:
-                print("✓ Feature importance computed successfully")
+                logger.info("✓ Feature importance computed successfully")
                 
                 # Show top features
                 if "built_in" in feature_importance_response.importances:
-                    print("\nTop 10 Features (Built-in Importance):")
+                    logger.info("\nTop 10 Features (Built-in Importance):")
                     scores = feature_importance_response.importances["built_in"].scores
                     for i, score in enumerate(sorted(scores, key=lambda x: x.importance, reverse=True)[:10]):
-                        print(f"  {i+1}. {score.feature_name}: {score.importance:.4f}")
+                        logger.info(f"  {i+1}. {score.feature_name}: {score.importance:.4f}")
             else:
-                print("✗ Feature importance computation failed")
+                logger.info("✗ Feature importance computation failed")
                 feature_importance_response = None
         
         except Exception as e:
-            print(f"✗ Feature importance error: {e}")
+            logger.info(f"✗ Feature importance error: {e}")
             import traceback
             traceback.print_exc()
             feature_importance_response = None
@@ -472,53 +496,54 @@ def combine_and_run_pipeline(
     # ============================================================================
     # STEP 9: Ensemble Training with Consensus Features
     # ============================================================================
-    # JC 5
     
     if do_ensemble:
-        print("\n" + "=" * 80)
-        print("STEP 9: ENSEMBLE TRAINING & CONSENSUS FEATURES")
-        print("=" * 80)
+        logger.info("\n" + "=" * 80)
+        logger.info("STEP 9: ENSEMBLE TRAINING & CONSENSUS FEATURES")
+        logger.info("=" * 80)
         
         try:
-            ensemble_result = run_ensemble_pipeline(
+
+            ensemble_result, ensemble_metrics = run_ensemble_pipeline(
                 algorithms=ensemble_algorithms,
                 dataset_id=dataset_id,
                 target_column=target_column,
                 factor_values=factor_values,
                 top_n=top_features,
-                consensus_threshold=consensus_threshold
+                consensus_threshold=consensus_threshold,
+                fi_methods=fi_methods
             )
             
             if ensemble_result:
-                print("✓ Ensemble training completed successfully")
+                logger.info("✓ Ensemble training completed successfully")
                 
                 # Show consensus features
-                print(f"\nConsensus Features ({consensus_threshold}+ models):")
-                print(f"  Total consensus features: {len(ensemble_result.get('consensus_features', []))}")
+                logger.info(f"\nConsensus Features ({consensus_threshold}+ models):")
+                logger.info(f"  Total consensus features: {len(ensemble_result.get('consensus_features', []))}")
                 
                 consensus_features = ensemble_result.get('consensus_features', [])
                 if consensus_features:
-                    print("\n  Top 10 Consensus Features:")
+                    logger.info("\n  Top 10 Consensus Features:")
                     for i, feature in enumerate(consensus_features[:10]):
                         models_count = feature.get('num_models', 0)
                         avg_rank = feature.get('avg_rank', 0)
                         avg_importance = feature.get('avg_importance', 0)
-                        print(f"    {i+1}. {feature.get('feature', 'N/A')}")
-                        print(f"       - Selected by {models_count}/{5} models")
-                        print(f"       - Average rank: {avg_rank:.1f}")
-                        print(f"       - Average importance: {avg_importance:.4f}")
+                        logger.info(f"    {i+1}. {feature.get('feature', 'N/A')}")
+                        logger.info(f"       - Selected by {models_count}/{5} models")
+                        logger.info(f"       - Average rank: {avg_rank:.1f}")
+                        logger.info(f"       - Average importance: {avg_importance:.4f}")
                 
                 # Show model performance comparison
-                print(f"\n  Individual Model Performance:")
+                logger.info(f"\n  Individual Model Performance:")
                 for model_info in ensemble_result.get('models', []):
                     acc = model_info.get('accuracy', 0)
                     algo = model_info.get('algorithm', 'N/A')
-                    print(f"    - {algo}: {acc:.4f}")
+                    logger.info(f"    - {algo}: {acc:.4f}")
             else:
-                print("✗ Ensemble training failed")
+                logger.info("✗ Ensemble training failed")
         
         except Exception as e:
-            print(f"✗ Ensemble error: {e}")
+            logger.error(f"✗ Ensemble error: {e}")
             import traceback
             traceback.print_exc()
     
@@ -526,12 +551,11 @@ def combine_and_run_pipeline(
     # STEP 10: KEGG Pathway Enrichment Analysis
     # ============================================================================
 
-    # JC 6
     
     if do_kegg_analysis and feature_importance_response:
-        print("\n" + "=" * 80)
-        print("STEP 10: KEGG PATHWAY ENRICHMENT")
-        print("=" * 80)
+        logger.info("\n" + "=" * 80)
+        logger.info("STEP 10: KEGG PATHWAY ENRICHMENT")
+        logger.info("=" * 80)
         
         try:
             kegg_response = run_kegg_analysis(
@@ -545,38 +569,76 @@ def combine_and_run_pipeline(
             )
             
             if kegg_response:
-                print(f"✓ KEGG analysis completed")
-                print(f"  Organism: {organism_name}")
-                print(f"  P-value cutoff: {pvalue_threshold}")
-                print(f"  Q-value cutoff: {qvalue_threshold}")
+                logger.info(f"✓ KEGG analysis completed")
+                logger.info(f"  Organism: {organism_name}")
+                logger.info(f"  P-value cutoff: {pvalue_threshold}")
+                logger.info(f"  Q-value cutoff: {qvalue_threshold}")
             else:
-                print("✗ KEGG analysis failed")
+                logger.error("✗ KEGG analysis failed")
         
         except Exception as e:
-            print(f"✗ KEGG analysis error: {e}")
+            logger.error(f"✗ KEGG analysis error: {e}")
             import traceback
             traceback.print_exc()
     
     # ============================================================================
     # Final summary
     # ============================================================================
-    print("\n" + "=" * 80)
-    print("✓ MULTI-DATASET PIPELINE COMPLETED SUCCESSFULLY")
-    print("=" * 80)
-    print(f"\nResults Summary:")
-    print(f"  Combined dataset ID: {combined_dataset_id}")
-    print(f"  Total samples: {len(combined_df)}")
-    print(f"  Raw common genes: {len(common_genes)}")
-    print(f"  Filtered & transformed genes: {len(selected_genes)}")
-    print(f"  Single model ID: {model_id}")
+    logger.info("\n" + "=" * 80)
+    logger.info("✓ MULTI-DATASET PIPELINE COMPLETED SUCCESSFULLY")
+    logger.info("=" * 80)
+    logger.info(f"\nResults Summary:")
+    logger.info(f"  Combined dataset ID: {combined_dataset_id}")
+    logger.info(f"  Total samples: {len(combined_df)}")
+    logger.info(f"  Raw common genes: {len(common_genes)}")
+    logger.info(f"  Filtered & transformed genes: {len(selected_genes)}")
+    logger.info(f"  Single model ID: {model_id}")
     if metrics:
-        print(f"  Single model metrics: {metrics}")
-    print(f"  Feature importance: {'✓' if feature_importance_response else '✗'}")
-    print(f"  Ensemble analysis: {'✓' if do_ensemble else '✗'}")
-    print(f"  KEGG enrichment: {'✓' if do_kegg_analysis else '✗'}")
+        logger.info(f"  Single model metrics: {metrics}")
+    logger.info(f"  Feature importance: {'✓' if feature_importance_response else '✗'}")
+    logger.info(f"  Ensemble analysis: {'✓' if do_ensemble else '✗'}")
+    logger.info(f"  KEGG enrichment: {'✓' if do_kegg_analysis else '✗'}")
+
+    #return model_id
+
+
+    #=============
+    # collecting results
+    #=============
+
+    # At the end of combine_and_run_pipeline() function:
+    from datetime import datetime
+
+    # ============================================================================
+    # GENERATE PIPELINE RESULTS FOR PDF REPORT
+    # ============================================================================
     
-    return model_id
-    #return None
+    pipeline_results = {
+        'pipeline_id': pipeline_id,
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'config': {
+            'osd_ids': osd_ids_used,
+            'target_column': target_column,
+            'algorithm': algorithm,
+            'test_size': test_size,
+            'min_features': min_features,
+            'transformations': trans_list
+        },
+        'training_results': {
+            'model_id': model_id,
+            'n_samples': len(combined_df),
+            'n_features': len(selected_genes),
+            'metrics': metrics or {}
+        },
+        'feature_importance': convert_importance_response_to_dict(feature_importance_response) if feature_importance_response else {},  # ← NEW
+        'ensemble_results': {
+            'metrics': ensemble_metrics
+        } #if do_ensemble and ensemble_metrics else {}
+    } 
+
+    return pipeline_results
+
+    
 
 
 def get_data_client():
@@ -612,23 +674,13 @@ def get_data_client():
 
 def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list, factor_name, factor_values, min_features, fi_methods, exclude_columns, cv_step):
     """Run full ML pipeline"""
-    print("\n" + "=" * 60)
-    print("STEP 7: Run ML Pipeline")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("STEP 7: Run ML Pipeline")
+    logger.info("=" * 60)
 
     # remove sample and target from features
     if target_column in columns:
         columns.remove(target_column)
-
-    '''transformations = []
-    if 'l' in trans_list:
-        transformations.append({"type": "log", "columns": columns, "params": {}})
-    if 'n' in trans_list:
-        transformations.append({"type": "normalize", "columns": columns, "params": {}})
-    if 's' in trans_list:
-        transformations.append({"type": "standardize", "columns": columns, "params": {}})
-    if 't' in trans_list:
-        transformations.append({"type": "tpm", "columns": columns, "params": {}})'''
 
     payload = {
         "dataset_id": dataset_id,
@@ -636,7 +688,6 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
             "target_column": target_column,
             "task_type": task_type,
             "feature_columns": [],
-            #"transformations": transformations,
             "algorithm": algorithm,
             "hyperparameters": {},
             "metrics": ["accuracy", "f1_score"],
@@ -651,14 +702,14 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
         }
     }
 
-    print("\nConfiguration:")
-    print(f"  Algorithm: {payload['config']['algorithm']}")
-    print(f"  Target: {payload['config']['target_column']}")
-    print(f"  Features: All except target")
-    print(f"  Test size: {payload['config']['test_size']}")
+    logger.info("\nConfiguration:")
+    logger.info(f"  Algorithm: {payload['config']['algorithm']}")
+    logger.info(f"  Target: {payload['config']['target_column']}")
+    logger.info(f"  Features: All except target")
+    logger.info(f"  Test size: {payload['config']['test_size']}")
 
-    print("\nStreaming progress:")
-    print("-" * 60)
+    logger.info("\nStreaming progress:")
+    logger.info("-" * 60)
 
     response = requests.post(
         f"{BASE_URL}/api/pipeline/run",
@@ -681,7 +732,7 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
             filled = int(bar_length * percent / 100)
             bar = '█' * filled + '░' * (bar_length - filled)
 
-            print(f"[{bar}] {percent:3d}% | {status:12s} | {message}")
+            logger.info(f"[{bar}] {percent:3d}% | {status:12s} | {message}")
 
             if progress.get('test_metrics'):
                 final_metrics = progress['test_metrics']
@@ -690,13 +741,13 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
                 model_id = progress['model_id']
 
             if progress.get('error'):
-                print(f"  ❌ Error: {progress['error']}")
+                logger.error(f"  ❌ Error: {progress['error']}")
                 return None, None
 
-    print("-" * 60)
+    logger.info("-" * 60)
     return model_id, final_metrics
 
-def compute_feature_importance(model_id, dataset_id, methods=['built_in']):
+def compute_feature_importance(model_id, dataset_id, fi_methods=['built_in']):
     """Compute feature importance for a trained model"""
     import grpc
     from pathlib import Path
@@ -712,54 +763,56 @@ def compute_feature_importance(model_id, dataset_id, methods=['built_in']):
     channel = grpc.insecure_channel('localhost:50053')
     stub = feature_importance_service_pb2_grpc.FeatureImportanceServiceStub(channel)
     
-    print("\n" + "=" * 60)
-    print("COMPUTING FEATURE IMPORTANCE")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("COMPUTING FEATURE IMPORTANCE")
+    logger.info("=" * 60)
     
-    print(f"Computing feature importance for model: {model_id}")
-    print(f"Methods: {methods}")
+    logger.info(f"Computing feature importance for model: {model_id}")
+    logger.info(f"Methods: {fi_methods}")
     
     # Set default parameters for each method
     params = {}
     
-    if 'permutation' in methods:
-        params['n_repeats'] = '10'
-        params['random_state'] = '42'
+    if 'permutation' in fi_methods:
+        params['n_repeats'] = 10
+        params['random_state'] = 42
+        params['n_jobs'] = -1
 
-    if 'recursive' in methods:
-        params['step'] = '1'
-        params['n_features_to_select'] = '100'
+    if 'recursive' in fi_methods:
+        params['n_features_to_select'] = 100
+        params['step'] = 1
+        
 
-    if 'sequential' in methods:
-        params['step'] = '1'
-        params['n_features_to_select'] = '100'
+    if 'sequential' in fi_methods:
+        params['n_features_to_select'] = 100
+        params['n_jobs'] = -1
     
     request = feature_importance_service_pb2.ImportanceRequest(
         model_id=model_id,
         dataset_id=dataset_id,
-        methods=methods,
+        methods=fi_methods,
         params=params
     ) 
     response = stub.ComputeImportance(request)
     
-    print(f"Success: {response.success}")
+    logger.info(f"Success: {response.success}")
     
     if response.success:
-        print(f"Computed importance using methods: {list(response.importances.keys())}")
+        logger.info(f"Computed importance using methods: {list(response.importances.keys())}")
         
         # Show summary for each method
         for method_name, importances in response.importances.items():
             num_features = len(importances.scores)
-            print(f"\n{method_name.upper()}:")
-            print(f"  Total features: {num_features}")
+            logger.info(f"\n{method_name.upper()}:")
+            logger.info(f"  Total features: {num_features}")
             
             if num_features > 0:
                 top_5 = list(importances.scores)[:5]
-                print(f"  Top 5 features:")
+                logger.info(f"  Top 5 features:")
                 for i, score in enumerate(top_5, 1):
-                    print(f"    {i}. {score.feature_name}: {score.importance:.6f}")
+                    logger.info(f"    {i}. {score.feature_name}: {score.importance:.6f}")
     else:
-        print(f"Error: {response.error_message}")
+        logger.error(f"Error: {response.error_message}")
     
     return response
 
@@ -780,33 +833,33 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     channel = grpc.insecure_channel('localhost:50054')
     stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(channel)
     
-    print("\n" + "=" * 60)
-    print("KEGG PATHWAY ENRICHMENT")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("KEGG PATHWAY ENRICHMENT")
+    logger.info("=" * 60)
     
     # Extract model_id to use as analysis_id
     model_id = feature_importance_response.model_id
-    print(f"Model ID: {model_id}")
+    logger.info(f"Model ID: {model_id}")
     
     # Get available methods
     if not hasattr(feature_importance_response, 'importances'):
-        print("ERROR: Response doesn't have importances")
+        logger.eror("ERROR: Response doesn't have importances")
         return None
     
     available_methods = list(feature_importance_response.importances.keys())
-    print(f"Available methods: {available_methods}")
+    logger.info(f"Available methods: {available_methods}")
     
     if len(available_methods) == 0:
-        print("ERROR: No feature importance methods computed")
+        logger.error("ERROR: No feature importance methods computed")
         return None
     
     # Use specified method or first available
     if method is None:
         method = available_methods[0]
-        print(f"No method specified, using: {method}")
+        logger.info(f"No method specified, using: {method}")
     elif method not in available_methods:
-        print(f"ERROR: Method '{method}' not found")
-        print(f"Using first available method: {available_methods[0]}")
+        logger.error(f"ERROR: Method '{method}' not found")
+        logger.error(f"Using first available method: {available_methods[0]}")
         method = available_methods[0]
     
     # Get the FeatureImportances object for this method
@@ -815,13 +868,13 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     # Extract scores (list of FeatureScore objects)
     scores = list(feature_importances.scores)
     
-    print(f"\nMethod: {method}")
-    print(f"Total features: {len(scores)}")
+    logger.info(f"\nMethod: {method}")
+    logger.info(f"Total features: {len(scores)}")
     
     # Filter by minimum importance if specified
     if min_importance > 0:
         filtered_scores = [s for s in scores if s.importance >= min_importance]
-        print(f"Features above importance threshold ({min_importance}): {len(filtered_scores)}")
+        logger.info(f"Features above importance threshold ({min_importance}): {len(filtered_scores)}")
     else:
         filtered_scores = scores
     
@@ -833,25 +886,25 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     gene_list = [s.feature_name for s in top_scores]
     
     if len(gene_list) == 0:
-        print("ERROR: No genes passed filters")
-        print(f"Try lowering min_importance (current: {min_importance})")
+        logger.warn("WARN: No genes passed filters")
+        logger.warn(f"Try lowering min_importance (current: {min_importance})")
         return None
     
-    print(f"Using top {len(gene_list)} genes for enrichment")
+    logger.info(f"Using top {len(gene_list)} genes for enrichment")
     if len(top_scores) > 0:
-        print(f"Importance range: {top_scores[0].importance:.6f} to {top_scores[-1].importance:.6f}")
+        logger.info(f"Importance range: {top_scores[0].importance:.6f} to {top_scores[-1].importance:.6f}")
     
-    print(f"\nTop 10 genes by importance:")
+    logger.info(f"\nTop 10 genes by importance:")
     for i, score in enumerate(top_scores[:10], 1):
-        print(f"  {i}. {score.feature_name}: {score.importance:.6f} (rank {score.rank})")
+        logger.info(f"  {i}. {score.feature_name}: {score.importance:.6f} (rank {score.rank})")
     
     # Run KEGG enrichment
-    print(f"\nRunning KEGG enrichment...")
-    print(f"  Analysis ID: {model_id}")
-    print(f"  Organism: {organism}")
-    print(f"  Number of genes: {len(gene_list)}")
-    print(f"  P-value cutoff: {pvalue_cutoff}")
-    print(f"  Q-value cutoff: {qvalue_cutoff}")
+    logger.info(f"\nRunning KEGG enrichment...")
+    logger.info(f"  Analysis ID: {model_id}")
+    logger.info(f"  Organism: {organism}")
+    logger.info(f"  Number of genes: {len(gene_list)}")
+    logger.info(f"  P-value cutoff: {pvalue_cutoff}")
+    logger.info(f"  Q-value cutoff: {qvalue_cutoff}")
     
     kegg_request = bioinformatics_service_pb2.KEGGRequest(
         analysis_id=model_id,
@@ -864,40 +917,40 @@ def run_kegg_analysis(feature_importance_response, organism="mmu", pvalue_cutoff
     kegg_response = stub.RunKEGGEnrichment(kegg_request)
     
     if kegg_response.success:
-        print(f"\n✓ KEGG Enrichment Complete!")
-        print(f"  Enriched pathways: {kegg_response.results.num_pathways}")
+        logger.info(f"\n✓ KEGG Enrichment Complete!")
+        logger.info(f"  Enriched pathways: {kegg_response.results.num_pathways}")
         
         if kegg_response.results.num_pathways > 0:
-            print(f"\nTop Enriched KEGG Pathways:")
+            logger.info(f"\nTop Enriched KEGG Pathways:")
             for i, pathway in enumerate(kegg_response.results.pathways[:15], 1):
-                print(f"\n{i}. {pathway.pathway_id}: {pathway.description}")
-                print(f"   P-value: {pathway.pvalue:.2e}, Adjusted p-value: {pathway.padj:.2e}")
-                print(f"   Genes in pathway: {pathway.gene_count}/{len(gene_list)}")
-                print(f"   Genes: {', '.join(pathway.genes[:5])}{'...' if len(pathway.genes) > 5 else ''}")
+                logger.info(f"\n{i}. {pathway.pathway_id}: {pathway.description}")
+                logger.info(f"   P-value: {pathway.pvalue:.2e}, Adjusted p-value: {pathway.padj:.2e}")
+                logger.info(f"   Genes in pathway: {pathway.gene_count}/{len(gene_list)}")
+                logger.info(f"   Genes: {', '.join(pathway.genes[:5])}{'...' if len(pathway.genes) > 5 else ''}")
             
-            print(f"\n📊 Visualization files:")
-            print(f"  {kegg_response.results.dotplot_path}")
-            print(f"  {kegg_response.results.barplot_path}")
+            logger.info(f"\n📊 Visualization files:")
+            logger.info(f"  {kegg_response.results.dotplot_path}")
+            logger.info(f"  {kegg_response.results.barplot_path}")
             if hasattr(kegg_response.results, 'conversion_path') and kegg_response.results.conversion_path:
-                print(f"  {kegg_response.results.conversion_path}")
+                logger.info(f"  {kegg_response.results.conversion_path}")
         else:
-            print("\n  ⚠️  No significantly enriched pathways found")
-            print("\n  Possible reasons:")
-            print("    - Gene IDs may not be in the correct format (need ENSEMBL or Gene Symbols)")
-            print("    - Not enough genes for statistical power")
-            print("    - Genes are not involved in well-characterized pathways")
-            print("\n  Suggestions:")
-            print(f"    - Relax p-value cutoff (current: {pvalue_cutoff})")
-            print(f"    - Relax q-value cutoff (current: {qvalue_cutoff})")
-            print(f"    - Include more genes (current: {len(gene_list)})")
+            logger.warn("\n  ⚠️  No significantly enriched pathways found")
+            logger.warn("\n  Possible reasons:")
+            logger.warn("    - Gene IDs may not be in the correct format (need ENSEMBL or Gene Symbols)")
+            logger.warn("    - Not enough genes for statistical power")
+            logger.warn("    - Genes are not involved in well-characterized pathways")
+            logger.warn("\n  Suggestions:")
+            logger.warn(f"    - Relax p-value cutoff (current: {pvalue_cutoff})")
+            logger.warn(f"    - Relax q-value cutoff (current: {qvalue_cutoff})")
+            logger.warn(f"    - Include more genes (current: {len(gene_list)})")
     else:
-        print(f"\n✗ KEGG enrichment failed: {kegg_response.error_message}")
+        logger.error(f"\n✗ KEGG enrichment failed: {kegg_response.error_message}")
     
     return kegg_response
 
 
 def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values, 
-                          top_n=100, consensus_threshold=3):
+                          top_n=100, consensus_threshold=3, fi_methods=None):
     """Run ensemble training and compute consensus features"""
 
     # Lazy import to avoid path conflicts
@@ -918,10 +971,10 @@ def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values,
     ensemble_response = ml_stub.TrainEnsemble(ensemble_request)
     
     if not ensemble_response.success:
-        print(f"✗ Ensemble training failed: {ensemble_response.error_message}")
+        logger.error(f"✗ Ensemble training failed: {ensemble_response.error_message}")
         return None
     
-    print(f"✓ Trained {ensemble_response.num_models} models")
+    logger.info(f"✓ Trained {ensemble_response.num_models} models")
     
     # 2. Compute feature importance for each model
     fi_channel = grpc.insecure_channel('localhost:50053')
@@ -930,12 +983,12 @@ def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values,
     feature_importance_results = []
     
     for model_result in ensemble_response.models:
-        print(f"Computing importance for {model_result.algorithm} ({model_result.model_id})...")
+        logger.info(f"Computing importance for {model_result.algorithm} ({model_result.model_id})...")
         
         fi_request = feature_importance_service_pb2.ImportanceRequest(
             model_id=model_result.model_id,
             dataset_id=dataset_id,
-            methods=["permutation", "sequential"]
+            methods=fi_methods
         )
         
         fi_response = fi_stub.ComputeImportance(fi_request)
@@ -977,8 +1030,8 @@ def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values,
                     'algorithm': model_result.algorithm,
                     'features': features
                 })
-            if "built-in" in fi_response.importances:
-                builtin_results = fi_response.importances["built-in"]
+            if "built_in" in fi_response.importances:
+                builtin_results = fi_response.importances["built_in"]
         
                 # Access the scores from FeatureImportances
                 features = [
@@ -995,10 +1048,26 @@ def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values,
                     'algorithm': model_result.algorithm,
                     'features': features
                 })
-            else:
-                print(f"Warning: No permutation results for {model_result.model_id}")
+            if "sequential" in fi_response.importances:
+                sequential_results = fi_response.importances["sequential"]
+        
+                # Access the scores from FeatureImportances
+                features = [
+                    {
+                        'feature': score.feature_name,
+                        'importance': score.importance,
+                        'rank': score.rank
+                    }
+                    for score in sequential_results.scores
+                ]
+        
+                feature_importance_results.append({
+                    'model_id': model_result.model_id,
+                    'algorithm': model_result.algorithm,
+                    'features': features
+                })
         else:
-            print(f"Failed to compute importance for {model_result.model_id}: {fi_response.error_message}")     
+            logger.error(f"Failed to compute importance for {model_result.model_id}: {fi_response.error_message}")     
     
     # 3. Compute consensus features
     ml_service_path = Path(__file__).parent / "ml_service"
@@ -1012,19 +1081,40 @@ def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values,
         consensus_threshold=consensus_threshold
     )
     
-    print(f"\n✓ Consensus Analysis:")
-    print(f"  Total models: {consensus_result['total_models']}")
-    print(f"  Consensus features: {consensus_result['num_consensus']}")
-    print(f"  Perfect consensus: {consensus_result['summary']['perfect_consensus']}")
-    print(f"  High consensus: {consensus_result['summary']['high_consensus']}")
+    logger.info(f"\n✓ Consensus Analysis:")
+    logger.info(f"  Total models: {consensus_result['total_models']}")
+    logger.info(f"  Consensus features: {consensus_result['num_consensus']}")
+    logger.info(f"  Perfect consensus: {consensus_result['summary']['perfect_consensus']}")
+    logger.info(f"  High consensus: {consensus_result['summary']['high_consensus']}")
     
-    print(f"\nTop 10 Consensus Features:")
+
+    logger.info(f"\nTop 10 Consensus Features:")
     for i, feature in enumerate(consensus_result['consensus_features'][:10], 1):
-        print(f"  {i}. {feature['feature']}")
-        print(f"     - Selected by {feature['num_models']}/{consensus_result['total_models']} models")
-        print(f"     - Avg rank: {feature['avg_rank']:.1f} (best: {feature['best_rank']})")
+        logger.info(f"  {i}. {feature['feature']}")
+        logger.info(f"     - Selected by {feature['num_models']}/{consensus_result['total_models']} models")
+        logger.info(f"     - Avg rank: {feature['avg_rank']:.1f} (best: {feature['best_rank']})")
     
-    return consensus_result
+    # Extract ensemble metrics from the response
+    ensemble_metrics = {
+        'num_models': len(ensemble_response.models),
+        'num_consensus_features': consensus_result['num_consensus'],
+        'perfect_consensus': consensus_result['summary']['perfect_consensus'],
+        'high_consensus': consensus_result['summary']['high_consensus'],
+    }
+    
+    # Also collect individual model metrics
+    model_metrics = []
+    logger.info(f'ensemble_response: {ensemble_response}')
+    for model in ensemble_response.models:
+        model_metrics.append({
+            'algorithm': model.algorithm,
+            'accuracy': model.accuracy if hasattr(model, 'accuracy') else 0.0,
+            'model_id': model.model_id
+        })
+    
+    ensemble_metrics['models'] = model_metrics
+    
+    return consensus_result, ensemble_metrics
 
 def main():
     parser = argparse.ArgumentParser(
@@ -1061,10 +1151,11 @@ def main():
     parser.add_argument('--no_feature_importance', action='store_true', help='Skip feature importance')
     
     # Ensemble options
-    parser.add_argument('--no_ensemble', action='store_true', help='Skip ensemble training')
+    #parser.add_argument('--no_ensemble', action='store_true', help='Skip ensemble training')
+    parser.add_argument('--no_ensemble', default=False, help='Skip ensemble training')
     parser.add_argument('--consensus_threshold', type=int, default=3, help='consensus threshold')
     parser.add_argument('--top_features', type=int, default=100, help='top N features per model')
-    parser.add_argument('--ensemble_algorithms', type=str, default='random_forest', help='neural_network, logistic_regression, svm, random_forest, gradient_boosting')
+    parser.add_argument('--ensemble_algorithms', type=str, default='random_forest, logistic_regression, svm, xg_boost', help='neural_network, logistic_regression, svm, random_forest, gradient_boosting')
     
     # KEGG options
     parser.add_argument('--no_kegg', action='store_true', help='Skip KEGG enrichment')
@@ -1080,6 +1171,9 @@ def main():
     patterns = [p.strip() for p in args.patterns.split(',')]
     trans_list = [t.strip() for t in args.trans_list.split(',')]
     fi_methods = [f.strip() for f in args.fi_methods.split(',')]
+
+    logger.info(f'trans_list from parsing args: {trans_list}')
+    logger.info(f'fi_methods from parsing args: {fi_methods}')
     
     # Parse OSD IDs
     osd_ids = None
@@ -1119,6 +1213,34 @@ def main():
     )
     
     if result:
+
+        # debug
+        import json
+        import sys
+
+        # Debug: Check pipeline_results structure
+        logger.info("\n=== Pipeline Results Structure ===")
+        logger.info(f"Pipeline ID: {result.get('pipeline_id')}")
+        logger.info(f"Config: {result.get('config')}")
+        logger.info(f"Training Results: {result.get('training_results')}")
+        logger.info(f"Feature Importance type: {type(result.get('feature_importance'))}")
+        logger.info(f"Feature Importance: {result.get('feature_importance')}")
+        logger.info(f"Ensemble Results: {result.get('ensemble_results')}")
+
+        # Generate PDF
+        from utils.pipeline_report_generator import generate_pdf_report
+        pipeline_id = result['pipeline_id']
+        pdf_path = generate_pdf_report(result, "reports/" + str(pipeline_id) + "_report.pdf")
+        logger.info(f"✓ Pipeline completed - PDF: {pdf_path}")
+        
+        # ALSO save results to JSON for run_pipeline_background.py to read
+        import json
+        with open('pipeline_results.json', 'w') as f:
+            json.dump(result, f, indent=2, default=str)
+        logger.info(f"✓ Results saved to pipeline_results.json")
+
+        json.dump(result, sys.stdout)
+
         sys.exit(0)
     else:
         sys.exit(1)

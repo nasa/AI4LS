@@ -304,14 +304,17 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                         hyperparams = {
                             'n_estimators': 50
                         }
-                    elif algorithm == 'mlp':
-                        hyperparams = {
-                            'max_iter': 100,
-                            'early_stopping': True,
-                            'n_iter_no_change': 10,
-                            'random_state': 42,
-                            'hidden_layer_sizes': (100,50)
-                          
+                    elif algorithm == "neural_network":
+                        defaults = {
+                            'hidden_layer_sizes': (100, 50),      # 2 hidden layers
+                            'max_iter': 100,                     # ← Was 200, now 1000
+                            'early_stopping': True,               # Stop if no improvement
+                            'validation_fraction': 0.1,           # Use 10% for validation
+                            'n_iter_no_change': 10,               # Stop after 20 iterations of no improvement
+                            'learning_rate_init': 0.001,          # Better learning rate
+                            'solver': 'adam',                     # Better optimizer
+                            'alpha': 0.0001,                      # L2 regularization
+                            'batch_size': 32,                     # Mini-batch size
                         }
                     else:
                         hyperparams = {}

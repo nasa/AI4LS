@@ -40,6 +40,7 @@ from email.mime.multipart import MIMEMultipart
 import json
 import os
 import getpass
+from email_notifier_with_report import EmailNotifierWithReport
 
 logging.basicConfig(
     level=logging.INFO,
@@ -212,6 +213,7 @@ class PipelineRunner:
         logger.info("="*60)
         logger.info(f"Arguments: {args}")
         
+        import json
         try:
             # Build command
             cmd = [sys.executable, self.pipeline_script]
@@ -233,7 +235,13 @@ class PipelineRunner:
             
             # Run pipeline
             result = subprocess.run(cmd, capture_output=True, text=True)
-            
+
+            # extract output
+            print('result.stdout: ', result.stdout)
+            returned_object = json.loads(result.stdout) 
+            print("returned object: ", returned_object)
+            print("pipeline id from result: ", returned_object['pipeline_id'])
+
             logger.info("Pipeline execution completed")
             logger.info(f"Return code: {result.returncode}")
             
@@ -242,17 +250,37 @@ class PipelineRunner:
             if result.stderr:
                 logger.error(f"STDERR:\n{result.stderr}")
             
-            # Send notification
-            if email_notifier and recipient_email:
-                if result.returncode == 0:
-                    email_notifier.send_success(recipient_email, args)
-                else:
-                    email_notifier.send_failure(
-                        recipient_email, 
-                        args, 
-                        result.stderr or "Unknown error",
-                        log_tail=self._get_log_tail()
-                    )
+
+            if result.returncode == 0:
+
+                # READ the JSON file that new_multi_pipeline.py created
+                try:
+                    with open('pipeline_results.json', 'r') as f:
+                        pipeline_results = json.load(f)
+                except:
+                    pipeline_results = None
+
+                pipeline_id = returned_object['pipeline_id'] 
+                print('pipeline_id in run script: ', pipeline_id)
+               
+                # Send notification
+                if email_notifier and recipient_email:
+                    if result.returncode == 0:
+                            output_path= "reports/"  + str(pipeline_id) + "_report.pdf"
+                            # Send with PDF attachment
+                            email_notifier.send_success_with_report(
+                                recipient_email, 
+                                args,
+                                pdf_path=output_path
+                            )
+            else:
+                # Send failure email
+                if email_notifier and recipient_email:
+                    email_notifier.send_failure_with_report(
+                        recipient_email,
+                        args,
+                        result.stderr or "Unknown error"
+                    ) 
             
             elapsed = (datetime.now() - self.start_time).total_seconds()
             logger.info(f"✓ Pipeline completed in {elapsed:.1f} seconds")
@@ -263,10 +291,11 @@ class PipelineRunner:
             logger.error(f"✗ Pipeline failed: {e}", exc_info=True)
             
             if email_notifier and recipient_email:
-                email_notifier.send_failure(
+                email_notifier.send_failure_with_report(
                     recipient_email,
                     args,
-                    str(e),
+                    result.stderr or "Unknown error",
+                    pdf_path=None,  # PDF won't exist if pipeline failed
                     log_tail=self._get_log_tail()
                 )
             
@@ -344,6 +373,7 @@ Examples:
     parser.add_argument('-mf', '--min_features', type=int, default=1000, help='Minimum features')
     parser.add_argument('--no_ensemble', action='store_true', help='Skip ensemble')
     parser.add_argument('--ensemble_algorithms', type=str, help='list of algorithms from : neural_network, logistic_regression, svm, random_forest, gradient_boosting')
+    parser.add_argument('--fi_methods', type=str, help='list of feature importance methods: permutation, sequential, recursive, built-in')
     parser.add_argument('--no_kegg', action='store_true', help='Skip KEGG analysis')
     parser.add_argument('--no_feature_importance', action='store_true', help='Skip feature importance')
     
@@ -404,6 +434,8 @@ Examples:
         pipeline_args['--no_ensemble'] = True
     elif args.ensemble_algorithms:
         pipeline_args['--ensemble_algorithms'] = args.ensemble_algorithms
+    elif args.fi_methods:
+        pipeline_args['--fi_methods'] = args.fi_methods
     if args.no_kegg:
         pipeline_args['--no_kegg'] = True
     if args.no_feature_importance:
@@ -415,8 +447,15 @@ Examples:
     
     # Create notifier and runner
     try:
-        email_notifier = EmailNotifier(
+        '''email_notifier = EmailNotifier(
             sender_email, 
+            sender_password,
+            smtp_server=smtp_server,
+            smtp_port=smtp_port,
+            use_tls=use_tls
+        )'''
+        email_notifier = EmailNotifierWithReport(
+            sender_email,
             sender_password,
             smtp_server=smtp_server,
             smtp_port=smtp_port,

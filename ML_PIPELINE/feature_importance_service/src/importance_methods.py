@@ -49,7 +49,7 @@ class FeatureImportanceMethods:
         model, 
         X: pd.DataFrame, 
         y: pd.Series,
-        n_features_to_select: int = None,
+        n_features_to_select: int = 20,
         step: int = 1
         
     ) -> List[Dict]:
@@ -64,20 +64,20 @@ class FeatureImportanceMethods:
             step: Number of features to remove at each iteration
         """
         try:
-            if n_features_to_select is None:
-                n_features_to_select = max(1, len(X.columns) // 2)
+            #if n_features_to_select is None:
+            #    n_features_to_select = max(1, len(X.columns) // 2)
             
             logger.info(f"Running RFE: selecting {n_features_to_select} features")
             
             # Create RFE selector
             rfe = RFE(
                 estimator=model,
-                n_features_to_select=n_features_to_select,
+                n_features_to_select=20,
                 step=step
             )
             
             # Fit RFE
-            rfe.fit(X, y)
+            rfe.fit(X, y).transform()
             
             results = []
             for i, (name, selected, ranking) in enumerate(
@@ -90,8 +90,8 @@ class FeatureImportanceMethods:
                 results.append({
                     "feature_name": name,
                     "importance": float(importance),
-                    "rank": int(ranking)
-                    #"selected": bool(selected)
+                    "rank": int(ranking),
+                    "selected": bool(selected)
                 })
             
             # Sort by rank (lower rank = more important)
@@ -108,7 +108,7 @@ class FeatureImportanceMethods:
         model,
         X: pd.DataFrame,
         y: pd.Series,
-        n_features_to_select: int = None,
+        n_features_to_select: int = 20,
         direction: str = 'forward',
         cv: int = 5
     ) -> List[Dict]:
@@ -130,60 +130,68 @@ class FeatureImportanceMethods:
             List of dicts with feature name, importance score, rank, and selection order
         """
         try:
+            from sklearn.neural_network import MLPClassifier, MLPRegressor
+            from sklearn.ensemble import RandomForestClassifier
+        
             if n_features_to_select is None:
                 n_features_to_select = max(1, len(X.columns) // 2)
-            
+        
             if direction not in ['forward', 'backward']:
                 raise ValueError("direction must be 'forward' or 'backward'")
-            
+        
             logger.info(f"Running SFS ({direction}): selecting {n_features_to_select} features")
-            
+        
+            # If model is MLPClassifier, use RandomForest for SFS instead
+            # (MLPClassifier has convergence issues in cross-validation)
+            if isinstance(model, (MLPClassifier, MLPRegressor)):
+                logger.info("Replacing MLPClassifier with RandomForestClassifier for feature selection (better convergence)")
+                estimator = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+            else:
+                estimator = model
+        
             # Create Sequential Feature Selector
             sfs = SequentialFeatureSelector(
-                estimator=model,
+                estimator=estimator,
                 n_features_to_select=n_features_to_select,
                 direction=direction,
                 cv=cv,
                 n_jobs=-1,  # Use all CPU cores
                 scoring=None  # Use estimator's default scoring
             )
-            
+        
             # Fit SFS
             sfs.fit(X, y)
-            
+        
             results = []
-            
+        
             # Get feature names that were selected
             selected_features = X.columns[sfs.get_support()].tolist()
-            
+        
             # Assign ranks based on selection order
-            # Features selected earlier (in forward) or later (in backward) are more important
             for i, name in enumerate(X.columns):
                 is_selected = name in selected_features
-                
+            
                 if is_selected:
-                    # Selected features ranked by order
                     rank = selected_features.index(name) + 1
-                    importance = 1.0 / rank  # Earlier selection = higher importance
+                    importance = 1.0 / rank
                 else:
-                    # Non-selected features ranked after selected ones
                     rank = len(selected_features) + 1
                     importance = 0.0
-                
+            
                 results.append({
                     "feature_name": name,
                     "importance": float(importance),
-                    "rank": int(rank)
-                    #"selected": bool(is_selected)
+                    "rank": int(rank),
+                    "selected": bool(is_selected)
                 })
-            
+        
             # Sort by rank
             results.sort(key=lambda x: x['rank'])
-            
+        
             logger.info(f"SFS completed: selected {len(selected_features)} features")
-            
+        
             return results
-            
+        
         except Exception as e:
             logger.error(f"Error computing Sequential Feature Selection: {e}", exc_info=True)
             return []
@@ -212,6 +220,7 @@ class FeatureImportanceMethods:
         try:
             logger.info(f"Running permutation importance with {n_repeats} repeats")
             
+            
             # Compute permutation importance
             perm_importance = permutation_importance(
                 model, 
@@ -219,7 +228,7 @@ class FeatureImportanceMethods:
                 y,
                 n_repeats=n_repeats,
                 random_state=random_state,
-                n_jobs=-1  # Use all CPU cores
+                n_jobs=-1,
             )
             
             results = []
