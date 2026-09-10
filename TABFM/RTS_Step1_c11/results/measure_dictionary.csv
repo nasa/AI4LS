@@ -1,0 +1,17 @@
+canonical,campaign,source,value_col,roi_col,roi_val,unit,phase_col,phase_map,aggregate,notes
+total_hip_bmd,C11,BEDREST_iRATS/BEDREST_IRATS_iDXA_CFT70/BEDREST_IRATS_iDXA_CFT70_Body_Composition_Hips_obsv.csv,Value,ROI,Femoral Left Total Hip|Femoral Right Total Hip,g/cm2,Test,"PRE:Pre|IN:Test 1,Test 2,Test 3,Test 4|POST:Post",mean_L_R,iDXA; mean of L/R Total Hip ROI
+total_hip_bmd,C3,MR035G/MR035G_Campaign_3_DXA_Hip/*_L_Hip.csv,Total Hip BMD,,,g/cm2,TEST_PHASE,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,left_only,"C3A/C3B LACK column (unrecoverable); use L hip, skip 1Y/6MO recovery files"
+spine_bmd_l14,C11,BEDREST_iRATS/BEDREST_IRATS_iDXA_CFT70/BEDREST_IRATS_iDXA_CFT70_Body_Composition_Spine_obsv.csv,iDXA BMD (g/cm2),ROI,L1-4,g/cm2,Test,"PRE:Pre|IN:Test 1,Test 2,Test 3,Test 4|POST:Post",none,iDXA L1-4 ROI directly
+spine_bmd_l14,C3,MR035G/MR035G_Campaign_3_DXA_Spine/*.csv,TOT_BMD,,,g/cm2,TEST_PHASE,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,none,C3 TOT_BMD = L1-4 total
+vo2peak_rel,C11,MR080G/MR080G_CFT70/MR080G_CFT70_PRE_ALL.csv,REL VO2PK,,,ml/kg/min,TEST,PRE:PRE|POST:POST1,none,"PRE_ALL + POST1_ALL (separate files, handled in extractor)"
+vo2peak_rel,C3,MR080G/MR080G_Campaign_3_Aerobic_Capacity_Summary/*_Peak_*.csv,VO2 ml/kg/min|VO2 (ml/kg/min)|RVO2|RVO2 (ml/kg/min),,,ml/kg/min,Test_Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,max,4 column conventions; Peak files only; subject from filename; max over stages
+plasma_volume,C11,BRSMPV/BRSMPV_CFT70_PLASMA_VOLUME/BRSMPV_CFT70_PLASMA_VOLUME_all_subjects.csv,PVtot (L),,,L,Test_Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,mean_sessions,MUST use all_subjects.csv (Results.csv has only 6 subj); canonical over FTT
+plasma_volume,C3,BRSMPV/BRSMPV_Campaign_3_Plasma_Volume/*.csv,Plasma_Volume_L,,,L,Test_Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,none,per-subject files
+lv_mass,C11,BRSMCF/BRSMCF_CFT70/BRSMCF_CFT70_3D_Echo_All.csv,LV mass,,,g,Test_Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,none,3D echo
+jump_max_power,C11,BRSMVJ/BRSMVJ_CFT70_Vertical_Jump/BRSMVJ_CFT70_Vertical_Jump_Summary_obsv_ALL.csv,MaxPower_W,,,W,Visit,"PRE:PRE1,PRE2|POST:POST1,POST2",max,vertical jump
+mri_quadriceps,C11,BEDREST_iRATS/BEDREST_IRATS_MRI_ULTRASOUND_CFT70/BEDREST_IRATS_MRI_ULTRASOUND_CFT70_MRI_Quadriceps.csv,Quadriceps,,,cm3,Test_Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,none,MRI volume
+ogtt_glucose,C11,NNX10AP86G/NNX10AP86G_CFT70/NNX10AP86G_CFT70_OGTT.csv,Glucose (mg/dL),,,mg/dL,Test Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,auc,OGTT; AUC over OGTT Time
+ftt_egress_time,C11,BEDREST_FTT/BEDREST_FTT_CFT70/BEDREST_FTT_CFT70_UpEgrEgressTime_obsv.csv,Time_sec,,,s,Test_Phase,PRE:PRE_TEST|POST:POST_TEST,none,functional egress
+pth,C1,MR016G/MR016G_Campaign_1_Nutritional_Status_Assessment/MR016G_Campaign_1_Nutritional_Status_Assessment_Bone_Marker_Panel.csv,intact PTH pg/mL,,,pg/mL,Test_Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,none,C1 only
+osteocalcin,C1,MR016G/MR016G_Campaign_1_Nutritional_Status_Assessment/MR016G_Campaign_1_Nutritional_Status_Assessment_Bone_Marker_Panel.csv,Osteocalcin ng/mL,,,ng/mL,Test_Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,none,C1 only
+vitd_25oh,C1,MR016G/MR016G_Campaign_1_Nutritional_Status_Assessment/MR016G_Campaign_1_Nutritional_Status_Assessment_Bone_Marker_Panel.csv,25 OH Vitamin D nmol/L,,,ng/mL,Test_Phase,PRE:PRE_TEST|IN:IN_TEST|POST:POST_TEST,none,C1 only

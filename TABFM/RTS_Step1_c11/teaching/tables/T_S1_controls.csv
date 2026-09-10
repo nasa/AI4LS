@@ -1,0 +1,3 @@
+Control,Environment,CV_method,n,n_features,Spearman,Pearson,MAE_improvement_vs_floor,beats_floor,n_shuffle
+Positive (planted signal),Colab T4,5-fold,38,226,0.7899113688587373,0.7866117321901422,0.39755832488220233,True,0
+Negative (pure noise),Colab T4,5-fold,38,226,0.10143341722289091,0.06825646182783103,-0.023188627369282733,False,0

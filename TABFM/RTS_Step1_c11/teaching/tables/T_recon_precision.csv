@@ -1,0 +1,5 @@
+DXA CV,Single-meas precision (g/cm^2),Change-noise SD (g/cm^2),LSC individual (g/cm^2),Detectable group mean n=11 (g/cm^2),CONTROL mean / detectable,Change-noise var / observed var
+3% (paper stated),0.0326,0.0461,0.0904,0.0272,48%,714%
+1.5% (typical research),0.0163,0.0231,0.0452,0.0136,97%,179%
+1% (best-case modern),0.0109,0.0154,0.0301,0.0091,145%,80%
+~1.1% (implied by data),0.0122,0.0172,0.0337,0.0102,129%,100%

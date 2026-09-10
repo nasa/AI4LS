@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1288.8pt" height="424.860937pt" viewBox="0 0 1288.8 424.860937" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2022-01-01T05:00:00+00:00</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.5, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 424.860937 
+L 1288.8 424.860937 
+L 1288.8 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 7.2 105.250028 
+L 134.64 105.250028 
+L 134.64 65.953059 
+L 7.2 65.953059 
+z
+" style="fill: #ece9e2; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="70.92" y="87.670294" transform="rotate(-0 70.92 87.670294)">Component</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 134.64 105.250028 
+L 415.008 105.250028 
+L 415.008 65.953059 
+L 134.64 65.953059 
+z
+" style="fill: #ece9e2; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="274.824" y="87.670294" transform="rotate(-0 274.824 87.670294)">Description</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 415.008 105.250028 
+L 644.4 105.250028 
+L 644.4 65.953059 
+L 415.008 65.953059 
+z
+" style="fill: #ece9e2; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="529.704" y="87.670294" transform="rotate(-0 529.704 87.670294)">Data</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 644.4 105.250028 
+L 797.328 105.250028 
+L 797.328 65.953059 
+L 644.4 65.953059 
+z
+" style="fill: #ece9e2; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="720.864" y="87.670294" transform="rotate(-0 720.864 87.670294)">Model</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 797.328 105.250028 
+L 924.768 105.250028 
+L 924.768 65.953059 
+L 797.328 65.953059 
+z
+" style="fill: #ece9e2; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="861.048" y="87.670294" transform="rotate(-0 861.048 87.670294)">CV</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 924.768 105.250028 
+L 1128.672 105.250028 
+L 1128.672 65.953059 
+L 924.768 65.953059 
+z
+" style="fill: #ece9e2; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="1026.72" y="87.670294" transform="rotate(-0 1026.72 87.670294)">Null</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 1128.672 105.250028 
+L 1281.6 105.250028 
+L 1281.6 65.953059 
+L 1128.672 65.953059 
+z
+" style="fill: #ece9e2; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="1205.136" y="87.670294" transform="rotate(-0 1205.136 87.670294)">Output</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 7.2 144.546998 
+L 134.64 144.546998 
+L 134.64 105.250028 
+L 7.2 105.250028 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="19.944" y="130.696013" transform="rotate(-0 19.944 130.696013)">Prerequisite</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 134.64 144.546998 
+L 415.008 144.546998 
+L 415.008 105.250028 
+L 134.64 105.250028 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 130.696013)">Save per-subject LOOCV</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 139.313013)">predictions for BMD</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 415.008 144.546998 
+L 644.4 144.546998 
+L 644.4 105.250028 
+L 415.008 105.250028 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(437.9472 130.696013)">c11_totalhipBMD_change_features_</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(437.9472 139.313013)">all.csv (38x628)</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 644.4 144.546998 
+L 797.328 144.546998 
+L 797.328 105.250028 
+L 644.4 105.250028 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(659.6928 130.696013)">TabPFNRegressor n_estimators=32</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(659.6928 139.313013)">seed=42</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 797.328 144.546998 
+L 924.768 144.546998 
+L 924.768 105.250028 
+L 797.328 105.250028 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="810.072" y="130.696013" transform="rotate(-0 810.072 130.696013)">LOOCV (38 fits)</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 924.768 144.546998 
+L 1128.672 144.546998 
+L 1128.672 105.250028 
+L 924.768 105.250028 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="945.1584" y="130.696013" transform="rotate(-0 945.1584 130.696013)">nan</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 1128.672 144.546998 
+L 1281.6 144.546998 
+L 1281.6 105.250028 
+L 1128.672 105.250028 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="1143.9648" y="130.696013" transform="rotate(-0 1143.9648 130.696013)">tfm_loocv_predictions_bmd.csv</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 7.2 183.843968 
+L 134.64 183.843968 
+L 134.64 144.546998 
+L 7.2 144.546998 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="19.944" y="169.992983" transform="rotate(-0 19.944 169.992983)">Test 1: Arm-Stratified Null</text>
+    </g>
+    <g id="patch_17">
+     <path d="M 134.64 183.843968 
+L 415.008 183.843968 
+L 415.008 144.546998 
+L 134.64 144.546998 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 169.992983)">Permute target within each arm;</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 178.609983)">preserves arm means, breaks</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 187.226983)">individual link</text>
+    </g>
+    <g id="patch_18">
+     <path d="M 415.008 183.843968 
+L 644.4 183.843968 
+L 644.4 144.546998 
+L 415.008 144.546998 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_17">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="437.9472" y="169.992983" transform="rotate(-0 437.9472 169.992983)">Same as primary</text>
+    </g>
+    <g id="patch_19">
+     <path d="M 644.4 183.843968 
+L 797.328 183.843968 
+L 797.328 144.546998 
+L 644.4 144.546998 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_18">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="659.6928" y="169.992983" transform="rotate(-0 659.6928 169.992983)">Same</text>
+    </g>
+    <g id="patch_20">
+     <path d="M 797.328 183.843968 
+L 924.768 183.843968 
+L 924.768 144.546998 
+L 797.328 144.546998 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_19">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="810.072" y="169.992983" transform="rotate(-0 810.072 169.992983)">LOOCV</text>
+    </g>
+    <g id="patch_21">
+     <path d="M 924.768 183.843968 
+L 1128.672 183.843968 
+L 1128.672 144.546998 
+L 924.768 144.546998 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_20">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(945.1584 169.992983)">1000 shuffles, within-arm</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(945.1584 178.609983)">permutation</text>
+    </g>
+    <g id="patch_22">
+     <path d="M 1128.672 183.843968 
+L 1281.6 183.843968 
+L 1281.6 144.546998 
+L 1128.672 144.546998 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_21">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(1143.9648 169.992983)">arm_stratified_null_bmd.csv +</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(1143.9648 178.609983)">result.json</text>
+    </g>
+    <g id="patch_23">
+     <path d="M 7.2 223.140937 
+L 134.64 223.140937 
+L 134.64 183.843968 
+L 7.2 183.843968 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_22">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="19.944" y="209.289953" transform="rotate(-0 19.944 209.289953)">Test 2: Arm-Residualized Target</text>
+    </g>
+    <g id="patch_24">
+     <path d="M 134.64 223.140937 
+L 415.008 223.140937 
+L 415.008 183.843968 
+L 134.64 183.843968 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_23">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 209.289953)">Target = y - arm_mean; standard</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 217.906953)">permutation null</text>
+    </g>
+    <g id="patch_25">
+     <path d="M 415.008 223.140937 
+L 644.4 223.140937 
+L 644.4 183.843968 
+L 415.008 183.843968 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_24">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="437.9472" y="209.289953" transform="rotate(-0 437.9472 209.289953)">Same features, residualized target</text>
+    </g>
+    <g id="patch_26">
+     <path d="M 644.4 223.140937 
+L 797.328 223.140937 
+L 797.328 183.843968 
+L 644.4 183.843968 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_25">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="659.6928" y="209.289953" transform="rotate(-0 659.6928 209.289953)">Same</text>
+    </g>
+    <g id="patch_27">
+     <path d="M 797.328 223.140937 
+L 924.768 223.140937 
+L 924.768 183.843968 
+L 797.328 183.843968 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_26">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="810.072" y="209.289953" transform="rotate(-0 810.072 209.289953)">LOOCV</text>
+    </g>
+    <g id="patch_28">
+     <path d="M 924.768 223.140937 
+L 1128.672 223.140937 
+L 1128.672 183.843968 
+L 924.768 183.843968 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_27">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="945.1584" y="209.289953" transform="rotate(-0 945.1584 209.289953)">1000 shuffles, standard permutation</text>
+    </g>
+    <g id="patch_29">
+     <path d="M 1128.672 223.140937 
+L 1281.6 223.140937 
+L 1281.6 183.843968 
+L 1128.672 183.843968 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_28">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(1143.9648 209.289953)">arm_residualized_null_bmd.csv +</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(1143.9648 217.906953)">result.json</text>
+    </g>
+    <g id="patch_30">
+     <path d="M 7.2 262.437907 
+L 134.64 262.437907 
+L 134.64 223.140937 
+L 7.2 223.140937 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_29">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="19.944" y="248.586922" transform="rotate(-0 19.944 248.586922)">Test 3: Reading C Check</text>
+    </g>
+    <g id="patch_31">
+     <path d="M 134.64 262.437907 
+L 415.008 262.437907 
+L 415.008 223.140937 
+L 134.64 223.140937 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_30">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 248.586922)">Spearman(prediction_error,</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 257.203922)">body_comp_var) within each arm</text>
+    </g>
+    <g id="patch_32">
+     <path d="M 415.008 262.437907 
+L 644.4 262.437907 
+L 644.4 223.140937 
+L 415.008 223.140937 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_31">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(437.9472 248.586922)">LOOCV predictions + body-comp</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(437.9472 257.203922)">features</text>
+    </g>
+    <g id="patch_33">
+     <path d="M 644.4 262.437907 
+L 797.328 262.437907 
+L 797.328 223.140937 
+L 644.4 223.140937 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_32">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="659.6928" y="248.586922" transform="rotate(-0 659.6928 248.586922)">N/A (post-hoc analysis)</text>
+    </g>
+    <g id="patch_34">
+     <path d="M 797.328 262.437907 
+L 924.768 262.437907 
+L 924.768 223.140937 
+L 797.328 223.140937 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_33">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="810.072" y="248.586922" transform="rotate(-0 810.072 248.586922)">nan</text>
+    </g>
+    <g id="patch_35">
+     <path d="M 924.768 262.437907 
+L 1128.672 262.437907 
+L 1128.672 223.140937 
+L 924.768 223.140937 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_34">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="945.1584" y="248.586922" transform="rotate(-0 945.1584 248.586922)">Bonferroni across variables</text>
+    </g>
+    <g id="patch_36">
+     <path d="M 1128.672 262.437907 
+L 1281.6 262.437907 
+L 1281.6 223.140937 
+L 1128.672 223.140937 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_35">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(1143.9648 248.586922)">reading_c_check_bmd.csv +</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(1143.9648 257.203922)">result.json</text>
+    </g>
+    <g id="patch_37">
+     <path d="M 7.2 301.734877 
+L 134.64 301.734877 
+L 134.64 262.437907 
+L 7.2 262.437907 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_36">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="19.944" y="287.883892" transform="rotate(-0 19.944 287.883892)">Fat A10G Rerun</text>
+    </g>
+    <g id="patch_38">
+     <path d="M 134.64 301.734877 
+L 415.008 301.734877 
+L 415.008 262.437907 
+L 134.64 262.437907 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_37">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 287.883892)">Full 628-width harness on fat</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 296.500892)">target</text>
+    </g>
+    <g id="patch_39">
+     <path d="M 415.008 301.734877 
+L 644.4 301.734877 
+L 644.4 262.437907 
+L 415.008 262.437907 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_38">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(437.9472 287.883892)">BMD feature table + fat target</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(437.9472 296.500892)">joined on subject</text>
+    </g>
+    <g id="patch_40">
+     <path d="M 644.4 301.734877 
+L 797.328 301.734877 
+L 797.328 262.437907 
+L 644.4 262.437907 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_39">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="659.6928" y="287.883892" transform="rotate(-0 659.6928 287.883892)">Same</text>
+    </g>
+    <g id="patch_41">
+     <path d="M 797.328 301.734877 
+L 924.768 301.734877 
+L 924.768 262.437907 
+L 797.328 262.437907 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_40">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="810.072" y="287.883892" transform="rotate(-0 810.072 287.883892)">LOOCV (38 fits)</text>
+    </g>
+    <g id="patch_42">
+     <path d="M 924.768 301.734877 
+L 1128.672 301.734877 
+L 1128.672 262.437907 
+L 924.768 262.437907 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_41">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="945.1584" y="287.883892" transform="rotate(-0 945.1584 287.883892)">1000 shuffles, standard permutation</text>
+    </g>
+    <g id="patch_43">
+     <path d="M 1128.672 301.734877 
+L 1281.6 301.734877 
+L 1281.6 262.437907 
+L 1128.672 262.437907 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_42">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="1143.9648" y="287.883892" transform="rotate(-0 1143.9648 287.883892)">fat_a10g_*.{csv,json}</text>
+    </g>
+    <g id="patch_44">
+     <path d="M 7.2 341.031847 
+L 134.64 341.031847 
+L 134.64 301.734877 
+L 7.2 301.734877 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_43">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="19.944" y="327.180862" transform="rotate(-0 19.944 327.180862)">Tandem A10G Rerun</text>
+    </g>
+    <g id="patch_45">
+     <path d="M 134.64 341.031847 
+L 415.008 341.031847 
+L 415.008 301.734877 
+L 134.64 301.734877 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_44">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 327.180862)">Full 628-width harness on tandem</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 335.797862)">target</text>
+    </g>
+    <g id="patch_46">
+     <path d="M 415.008 341.031847 
+L 644.4 341.031847 
+L 644.4 301.734877 
+L 415.008 301.734877 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_45">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(437.9472 327.180862)">BMD feature table + tandem</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(437.9472 335.797862)">target joined on subject</text>
+    </g>
+    <g id="patch_47">
+     <path d="M 644.4 341.031847 
+L 797.328 341.031847 
+L 797.328 301.734877 
+L 644.4 301.734877 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_46">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="659.6928" y="327.180862" transform="rotate(-0 659.6928 327.180862)">Same</text>
+    </g>
+    <g id="patch_48">
+     <path d="M 797.328 341.031847 
+L 924.768 341.031847 
+L 924.768 301.734877 
+L 797.328 301.734877 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_47">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="810.072" y="327.180862" transform="rotate(-0 810.072 327.180862)">LOOCV (35 fits)</text>
+    </g>
+    <g id="patch_49">
+     <path d="M 924.768 341.031847 
+L 1128.672 341.031847 
+L 1128.672 301.734877 
+L 924.768 301.734877 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_48">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="945.1584" y="327.180862" transform="rotate(-0 945.1584 327.180862)">1000 shuffles, standard permutation</text>
+    </g>
+    <g id="patch_50">
+     <path d="M 1128.672 341.031847 
+L 1281.6 341.031847 
+L 1281.6 301.734877 
+L 1128.672 301.734877 
+z
+" style="fill: #faf9f3; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_49">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="1143.9648" y="327.180862" transform="rotate(-0 1143.9648 327.180862)">tandem_a10g_*.{csv,json}</text>
+    </g>
+    <g id="patch_51">
+     <path d="M 7.2 380.328816 
+L 134.64 380.328816 
+L 134.64 341.031847 
+L 7.2 341.031847 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_50">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="19.944" y="366.477831" transform="rotate(-0 19.944 366.477831)">Conditional: Fat/Tandem Arm-Aware</text>
+    </g>
+    <g id="patch_52">
+     <path d="M 134.64 380.328816 
+L 415.008 380.328816 
+L 415.008 341.031847 
+L 134.64 341.031847 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_51">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 366.477831)">If fat/tandem rerun produces</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 375.094831)">signal, run Tests 1-3 on that</text>
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(162.6768 383.711831)">target</text>
+    </g>
+    <g id="patch_53">
+     <path d="M 415.008 380.328816 
+L 644.4 380.328816 
+L 644.4 341.031847 
+L 415.008 341.031847 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_52">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="437.9472" y="366.477831" transform="rotate(-0 437.9472 366.477831)">Same as fat/tandem rerun</text>
+    </g>
+    <g id="patch_54">
+     <path d="M 644.4 380.328816 
+L 797.328 380.328816 
+L 797.328 341.031847 
+L 644.4 341.031847 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_53">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="659.6928" y="366.477831" transform="rotate(-0 659.6928 366.477831)">Same</text>
+    </g>
+    <g id="patch_55">
+     <path d="M 797.328 380.328816 
+L 924.768 380.328816 
+L 924.768 341.031847 
+L 797.328 341.031847 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_54">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="810.072" y="366.477831" transform="rotate(-0 810.072 366.477831)">LOOCV</text>
+    </g>
+    <g id="patch_56">
+     <path d="M 924.768 380.328816 
+L 1128.672 380.328816 
+L 1128.672 341.031847 
+L 924.768 341.031847 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_55">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="945.1584" y="366.477831" transform="rotate(-0 945.1584 366.477831)">1000 shuffles</text>
+    </g>
+    <g id="patch_57">
+     <path d="M 1128.672 380.328816 
+L 1281.6 380.328816 
+L 1281.6 341.031847 
+L 1128.672 341.031847 
+z
+" style="fill: #ffffff; stroke: #000000; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_56">
+     <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="1143.9648" y="366.477831" transform="rotate(-0 1143.9648 366.477831)">{target}_arm_aware_*.{csv,json}</text>
+    </g>
+   </g>
+   <g id="text_57">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="7.2" y="16.620937" transform="rotate(-0 7.2 16.620937)">Table T_S5_test_spec: Arm-Aware Test Battery — Launchable Specification</text>
+   </g>
+  </g>
+ </g>
+</svg>

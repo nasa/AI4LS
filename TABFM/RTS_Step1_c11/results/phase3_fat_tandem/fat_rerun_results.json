@@ -1,0 +1,26 @@
+{
+  "observed_spearman": -0.011489222015537806,
+  "n_shuffles": 500,
+  "empirical_p": 0.17165668662674652,
+  "null_mean": -0.3161063573695153,
+  "null_sd": 0.28209908350368496,
+  "n_subjects": 38,
+  "n_features": 628,
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "fat_rerun",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_fat_rebuilt_628features.csv",
+    "input_table_md5": "140c8d2f4f8c24b803c4a964153c8d53",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-20T11:48:04Z"
+  }
+}

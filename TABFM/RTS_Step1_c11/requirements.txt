@@ -1,0 +1,11 @@
+# Python 3.11.13
+# Install: pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu130
+# Version record: tabpfn 8.2.0 is the documented install on the battery machine
+# (run log, 2026-08-16) and is recorded in exploratory-run metadata. Battery result
+# JSONs record the version field as null. A later reproduction session ran 8.3.0 and
+# matched the headline result. Pin 8.2.0 to reproduce the original runs.
+tabpfn==8.2.0
+torch==2.13.0
+numpy
+pandas
+scipy

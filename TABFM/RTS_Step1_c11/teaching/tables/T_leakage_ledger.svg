@@ -1,0 +1,980 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="955.804687pt" height="517.841625pt" viewBox="0 0 955.804687 517.841625" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2022-01-01T05:00:00+00:00</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.5, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 517.841625 
+L 955.804687 517.841625 
+L 955.804687 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 160.92 56.406548 
+L 254.664 56.406548 
+L 254.664 39.809145 
+L 160.92 39.809145 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="207.792" y="50.43519" transform="rotate(-0 207.792 50.43519)">Setup</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 254.664 56.406548 
+L 426.528 56.406548 
+L 426.528 39.809145 
+L 254.664 39.809145 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="340.596" y="50.43519" transform="rotate(-0 340.596 50.43519)">Table</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 426.528 56.406548 
+L 567.144 56.406548 
+L 567.144 39.809145 
+L 426.528 39.809145 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="496.836" y="50.43519" transform="rotate(-0 496.836 50.43519)">MD5 (first 16)</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 567.144 56.406548 
+L 660.888 56.406548 
+L 660.888 39.809145 
+L 567.144 39.809145 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="614.016" y="50.43519" transform="rotate(-0 614.016 50.43519)">Shape</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 660.888 56.406548 
+L 785.88 56.406548 
+L 785.88 39.809145 
+L 660.888 39.809145 
+z
+" style="fill: #333333; stroke: #666666; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle; fill: #ffffff" x="723.384" y="50.43519" transform="rotate(-0 723.384 50.43519)">Verdict</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 160.92 73.00395 
+L 254.664 73.00395 
+L 254.664 56.406548 
+L 160.92 56.406548 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="67.032593" transform="rotate(-0 170.2944 67.032593)">1-BMD</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 254.664 73.00395 
+L 426.528 73.00395 
+L 426.528 56.406548 
+L 254.664 56.406548 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="67.032593" transform="rotate(-0 271.8504 67.032593)">BMD features [primary]</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 426.528 73.00395 
+L 567.144 73.00395 
+L 567.144 56.406548 
+L 426.528 56.406548 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="67.032593" transform="rotate(-0 440.5896 67.032593)">ffd3c4fec75ab2d6...</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 567.144 73.00395 
+L 660.888 73.00395 
+L 660.888 56.406548 
+L 567.144 56.406548 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="67.032593" transform="rotate(-0 576.5184 67.032593)">38 x 630 (index_col=0 → 38 x 629)</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 660.888 73.00395 
+L 785.88 73.00395 
+L 785.88 56.406548 
+L 660.888 56.406548 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="67.032593" transform="rotate(-0 673.3872 67.032593)">CLEAN</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 160.92 89.601353 
+L 254.664 89.601353 
+L 254.664 73.00395 
+L 160.92 73.00395 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="83.629995" transform="rotate(-0 170.2944 83.629995)">2-Colab</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 254.664 89.601353 
+L 426.528 89.601353 
+L 426.528 73.00395 
+L 254.664 73.00395 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="83.629995" transform="rotate(-0 271.8504 83.629995)">Fat pct-change [v1, USED]</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 426.528 89.601353 
+L 567.144 89.601353 
+L 567.144 73.00395 
+L 426.528 73.00395 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="83.629995" transform="rotate(-0 440.5896 83.629995)">3ef0d1e9337ff13f...</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 567.144 89.601353 
+L 660.888 89.601353 
+L 660.888 73.00395 
+L 567.144 73.00395 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="83.629995" transform="rotate(-0 576.5184 83.629995)">38 x 456</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 660.888 89.601353 
+L 785.88 89.601353 
+L 785.88 73.00395 
+L 660.888 73.00395 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="83.629995" transform="rotate(-0 673.3872 83.629995)">CLEAN</text>
+    </g>
+    <g id="patch_17">
+     <path d="M 160.92 106.198755 
+L 254.664 106.198755 
+L 254.664 89.601353 
+L 160.92 89.601353 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="100.227398" transform="rotate(-0 170.2944 100.227398)">2-Colab</text>
+    </g>
+    <g id="patch_18">
+     <path d="M 254.664 106.198755 
+L 426.528 106.198755 
+L 426.528 89.601353 
+L 254.664 89.601353 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_17">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="100.227398" transform="rotate(-0 271.8504 100.227398)">Fat pct-change [v2, NOT used]</text>
+    </g>
+    <g id="patch_19">
+     <path d="M 426.528 106.198755 
+L 567.144 106.198755 
+L 567.144 89.601353 
+L 426.528 89.601353 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_18">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="100.227398" transform="rotate(-0 440.5896 100.227398)">5f4465c9180fc1df...</text>
+    </g>
+    <g id="patch_20">
+     <path d="M 567.144 106.198755 
+L 660.888 106.198755 
+L 660.888 89.601353 
+L 567.144 89.601353 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_19">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="100.227398" transform="rotate(-0 576.5184 100.227398)">38 x 447</text>
+    </g>
+    <g id="patch_21">
+     <path d="M 660.888 106.198755 
+L 785.88 106.198755 
+L 785.88 89.601353 
+L 660.888 89.601353 
+z
+" style="fill: #ffebee; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_20">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #b71c1c" x="673.3872" y="100.227398" transform="rotate(-0 673.3872 100.227398)">VERSION MISMATCH</text>
+    </g>
+    <g id="patch_22">
+     <path d="M 160.92 122.796158 
+L 254.664 122.796158 
+L 254.664 106.198755 
+L 160.92 106.198755 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_21">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="116.8248" transform="rotate(-0 170.2944 116.8248)">2-Colab</text>
+    </g>
+    <g id="patch_23">
+     <path d="M 254.664 122.796158 
+L 426.528 122.796158 
+L 426.528 106.198755 
+L 254.664 106.198755 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_22">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="116.8248" transform="rotate(-0 271.8504 116.8248)">Tandem walk (twp)</text>
+    </g>
+    <g id="patch_24">
+     <path d="M 426.528 122.796158 
+L 567.144 122.796158 
+L 567.144 106.198755 
+L 426.528 106.198755 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_23">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="116.8248" transform="rotate(-0 440.5896 116.8248)">c582444131fc277b...</text>
+    </g>
+    <g id="patch_25">
+     <path d="M 567.144 122.796158 
+L 660.888 122.796158 
+L 660.888 106.198755 
+L 567.144 106.198755 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_24">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="116.8248" transform="rotate(-0 576.5184 116.8248)">35 x 537</text>
+    </g>
+    <g id="patch_26">
+     <path d="M 660.888 122.796158 
+L 785.88 122.796158 
+L 785.88 106.198755 
+L 660.888 106.198755 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_25">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="116.8248" transform="rotate(-0 673.3872 116.8248)">CLEAN</text>
+    </g>
+    <g id="patch_27">
+     <path d="M 160.92 139.393561 
+L 254.664 139.393561 
+L 254.664 122.796158 
+L 160.92 122.796158 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_26">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="133.422203" transform="rotate(-0 170.2944 133.422203)">2-Colab</text>
+    </g>
+    <g id="patch_28">
+     <path d="M 254.664 139.393561 
+L 426.528 139.393561 
+L 426.528 122.796158 
+L 254.664 122.796158 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_27">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="133.422203" transform="rotate(-0 271.8504 133.422203)">Positive control</text>
+    </g>
+    <g id="patch_29">
+     <path d="M 426.528 139.393561 
+L 567.144 139.393561 
+L 567.144 122.796158 
+L 426.528 122.796158 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_28">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="133.422203" transform="rotate(-0 440.5896 133.422203)">N/A</text>
+    </g>
+    <g id="patch_30">
+     <path d="M 567.144 139.393561 
+L 660.888 139.393561 
+L 660.888 122.796158 
+L 567.144 122.796158 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_29">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="133.422203" transform="rotate(-0 576.5184 133.422203)">nan</text>
+    </g>
+    <g id="patch_31">
+     <path d="M 660.888 139.393561 
+L 785.88 139.393561 
+L 785.88 122.796158 
+L 660.888 122.796158 
+z
+" style="fill: #fff3e0; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_30">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #e65100" x="673.3872" y="133.422203" transform="rotate(-0 673.3872 133.422203)">CANNOT VERIFY</text>
+    </g>
+    <g id="patch_32">
+     <path d="M 160.92 155.990963 
+L 254.664 155.990963 
+L 254.664 139.393561 
+L 160.92 139.393561 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_31">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="150.019606" transform="rotate(-0 170.2944 150.019606)">2-Colab</text>
+    </g>
+    <g id="patch_33">
+     <path d="M 254.664 155.990963 
+L 426.528 155.990963 
+L 426.528 139.393561 
+L 254.664 139.393561 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_32">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="150.019606" transform="rotate(-0 271.8504 150.019606)">Negative control</text>
+    </g>
+    <g id="patch_34">
+     <path d="M 426.528 155.990963 
+L 567.144 155.990963 
+L 567.144 139.393561 
+L 426.528 139.393561 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_33">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="150.019606" transform="rotate(-0 440.5896 150.019606)">N/A</text>
+    </g>
+    <g id="patch_35">
+     <path d="M 567.144 155.990963 
+L 660.888 155.990963 
+L 660.888 139.393561 
+L 567.144 139.393561 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_34">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="150.019606" transform="rotate(-0 576.5184 150.019606)">nan</text>
+    </g>
+    <g id="patch_36">
+     <path d="M 660.888 155.990963 
+L 785.88 155.990963 
+L 785.88 139.393561 
+L 660.888 139.393561 
+z
+" style="fill: #fff3e0; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_35">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #e65100" x="673.3872" y="150.019606" transform="rotate(-0 673.3872 150.019606)">CANNOT VERIFY</text>
+    </g>
+    <g id="patch_37">
+     <path d="M 160.92 172.588366 
+L 254.664 172.588366 
+L 254.664 155.990963 
+L 160.92 155.990963 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_36">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="166.617008" transform="rotate(-0 170.2944 166.617008)">3-9Endpoint</text>
+    </g>
+    <g id="patch_38">
+     <path d="M 254.664 172.588366 
+L 426.528 172.588366 
+L 426.528 155.990963 
+L 254.664 155.990963 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_37">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="166.617008" transform="rotate(-0 271.8504 166.617008)">ftt_egress_time</text>
+    </g>
+    <g id="patch_39">
+     <path d="M 426.528 172.588366 
+L 567.144 172.588366 
+L 567.144 155.990963 
+L 426.528 155.990963 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_38">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="166.617008" transform="rotate(-0 440.5896 166.617008)">036cbf078eaeb1ea...</text>
+    </g>
+    <g id="patch_40">
+     <path d="M 567.144 172.588366 
+L 660.888 172.588366 
+L 660.888 155.990963 
+L 567.144 155.990963 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_39">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="166.617008" transform="rotate(-0 576.5184 166.617008)">35 x 13</text>
+    </g>
+    <g id="patch_41">
+     <path d="M 660.888 172.588366 
+L 785.88 172.588366 
+L 785.88 155.990963 
+L 660.888 155.990963 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_40">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="166.617008" transform="rotate(-0 673.3872 166.617008)">CLEAN</text>
+    </g>
+    <g id="patch_42">
+     <path d="M 160.92 189.185768 
+L 254.664 189.185768 
+L 254.664 172.588366 
+L 160.92 172.588366 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_41">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="183.214411" transform="rotate(-0 170.2944 183.214411)">3-9Endpoint</text>
+    </g>
+    <g id="patch_43">
+     <path d="M 254.664 189.185768 
+L 426.528 189.185768 
+L 426.528 172.588366 
+L 254.664 172.588366 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_42">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="183.214411" transform="rotate(-0 271.8504 183.214411)">jump_max_power</text>
+    </g>
+    <g id="patch_44">
+     <path d="M 426.528 189.185768 
+L 567.144 189.185768 
+L 567.144 172.588366 
+L 426.528 172.588366 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_43">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="183.214411" transform="rotate(-0 440.5896 183.214411)">82bd235c6e632d14...</text>
+    </g>
+    <g id="patch_45">
+     <path d="M 567.144 189.185768 
+L 660.888 189.185768 
+L 660.888 172.588366 
+L 567.144 172.588366 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_44">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="183.214411" transform="rotate(-0 576.5184 183.214411)">36 x 13</text>
+    </g>
+    <g id="patch_46">
+     <path d="M 660.888 189.185768 
+L 785.88 189.185768 
+L 785.88 172.588366 
+L 660.888 172.588366 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_45">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="183.214411" transform="rotate(-0 673.3872 183.214411)">CLEAN</text>
+    </g>
+    <g id="patch_47">
+     <path d="M 160.92 205.783171 
+L 254.664 205.783171 
+L 254.664 189.185768 
+L 160.92 189.185768 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_46">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="199.811813" transform="rotate(-0 170.2944 199.811813)">3-9Endpoint</text>
+    </g>
+    <g id="patch_48">
+     <path d="M 254.664 205.783171 
+L 426.528 205.783171 
+L 426.528 189.185768 
+L 254.664 189.185768 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_47">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="199.811813" transform="rotate(-0 271.8504 199.811813)">lv_mass</text>
+    </g>
+    <g id="patch_49">
+     <path d="M 426.528 205.783171 
+L 567.144 205.783171 
+L 567.144 189.185768 
+L 426.528 189.185768 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_48">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="199.811813" transform="rotate(-0 440.5896 199.811813)">3d7227f1b0507a87...</text>
+    </g>
+    <g id="patch_50">
+     <path d="M 567.144 205.783171 
+L 660.888 205.783171 
+L 660.888 189.185768 
+L 567.144 189.185768 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_49">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="199.811813" transform="rotate(-0 576.5184 199.811813)">36 x 13</text>
+    </g>
+    <g id="patch_51">
+     <path d="M 660.888 205.783171 
+L 785.88 205.783171 
+L 785.88 189.185768 
+L 660.888 189.185768 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_50">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="199.811813" transform="rotate(-0 673.3872 199.811813)">CLEAN</text>
+    </g>
+    <g id="patch_52">
+     <path d="M 160.92 222.380574 
+L 254.664 222.380574 
+L 254.664 205.783171 
+L 160.92 205.783171 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_51">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="216.409216" transform="rotate(-0 170.2944 216.409216)">3-9Endpoint</text>
+    </g>
+    <g id="patch_53">
+     <path d="M 254.664 222.380574 
+L 426.528 222.380574 
+L 426.528 205.783171 
+L 254.664 205.783171 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_52">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="216.409216" transform="rotate(-0 271.8504 216.409216)">mri_quadriceps</text>
+    </g>
+    <g id="patch_54">
+     <path d="M 426.528 222.380574 
+L 567.144 222.380574 
+L 567.144 205.783171 
+L 426.528 205.783171 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_53">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="216.409216" transform="rotate(-0 440.5896 216.409216)">be28d7da124fad01...</text>
+    </g>
+    <g id="patch_55">
+     <path d="M 567.144 222.380574 
+L 660.888 222.380574 
+L 660.888 205.783171 
+L 567.144 205.783171 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_54">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="216.409216" transform="rotate(-0 576.5184 216.409216)">26 x 13</text>
+    </g>
+    <g id="patch_56">
+     <path d="M 660.888 222.380574 
+L 785.88 222.380574 
+L 785.88 205.783171 
+L 660.888 205.783171 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_55">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="216.409216" transform="rotate(-0 673.3872 216.409216)">CLEAN</text>
+    </g>
+    <g id="patch_57">
+     <path d="M 160.92 238.977976 
+L 254.664 238.977976 
+L 254.664 222.380574 
+L 160.92 222.380574 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_56">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="233.006619" transform="rotate(-0 170.2944 233.006619)">3-9Endpoint</text>
+    </g>
+    <g id="patch_58">
+     <path d="M 254.664 238.977976 
+L 426.528 238.977976 
+L 426.528 222.380574 
+L 254.664 222.380574 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_57">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="233.006619" transform="rotate(-0 271.8504 233.006619)">ogtt_glucose</text>
+    </g>
+    <g id="patch_59">
+     <path d="M 426.528 238.977976 
+L 567.144 238.977976 
+L 567.144 222.380574 
+L 426.528 222.380574 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_58">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="233.006619" transform="rotate(-0 440.5896 233.006619)">beb72ed6400f4929...</text>
+    </g>
+    <g id="patch_60">
+     <path d="M 567.144 238.977976 
+L 660.888 238.977976 
+L 660.888 222.380574 
+L 567.144 222.380574 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_59">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="233.006619" transform="rotate(-0 576.5184 233.006619)">24 x 13</text>
+    </g>
+    <g id="patch_61">
+     <path d="M 660.888 238.977976 
+L 785.88 238.977976 
+L 785.88 222.380574 
+L 660.888 222.380574 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_60">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="233.006619" transform="rotate(-0 673.3872 233.006619)">CLEAN</text>
+    </g>
+    <g id="patch_62">
+     <path d="M 160.92 255.575379 
+L 254.664 255.575379 
+L 254.664 238.977976 
+L 160.92 238.977976 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_61">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="249.604021" transform="rotate(-0 170.2944 249.604021)">3-9Endpoint</text>
+    </g>
+    <g id="patch_63">
+     <path d="M 254.664 255.575379 
+L 426.528 255.575379 
+L 426.528 238.977976 
+L 254.664 238.977976 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_62">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="249.604021" transform="rotate(-0 271.8504 249.604021)">plasma_volume</text>
+    </g>
+    <g id="patch_64">
+     <path d="M 426.528 255.575379 
+L 567.144 255.575379 
+L 567.144 238.977976 
+L 426.528 238.977976 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_63">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="249.604021" transform="rotate(-0 440.5896 249.604021)">f35eedf9a5391304...</text>
+    </g>
+    <g id="patch_65">
+     <path d="M 567.144 255.575379 
+L 660.888 255.575379 
+L 660.888 238.977976 
+L 567.144 238.977976 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_64">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="249.604021" transform="rotate(-0 576.5184 249.604021)">55 x 13</text>
+    </g>
+    <g id="patch_66">
+     <path d="M 660.888 255.575379 
+L 785.88 255.575379 
+L 785.88 238.977976 
+L 660.888 238.977976 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_65">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="249.604021" transform="rotate(-0 673.3872 249.604021)">CLEAN</text>
+    </g>
+    <g id="patch_67">
+     <path d="M 160.92 272.172781 
+L 254.664 272.172781 
+L 254.664 255.575379 
+L 160.92 255.575379 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_66">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="266.201424" transform="rotate(-0 170.2944 266.201424)">3-9Endpoint</text>
+    </g>
+    <g id="patch_68">
+     <path d="M 254.664 272.172781 
+L 426.528 272.172781 
+L 426.528 255.575379 
+L 254.664 255.575379 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_67">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="266.201424" transform="rotate(-0 271.8504 266.201424)">spine_bmd_l14</text>
+    </g>
+    <g id="patch_69">
+     <path d="M 426.528 272.172781 
+L 567.144 272.172781 
+L 567.144 255.575379 
+L 426.528 255.575379 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_68">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="266.201424" transform="rotate(-0 440.5896 266.201424)">ea7144c672cdbd1b...</text>
+    </g>
+    <g id="patch_70">
+     <path d="M 567.144 272.172781 
+L 660.888 272.172781 
+L 660.888 255.575379 
+L 567.144 255.575379 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_69">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="266.201424" transform="rotate(-0 576.5184 266.201424)">63 x 13</text>
+    </g>
+    <g id="patch_71">
+     <path d="M 660.888 272.172781 
+L 785.88 272.172781 
+L 785.88 255.575379 
+L 660.888 255.575379 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_70">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="266.201424" transform="rotate(-0 673.3872 266.201424)">CLEAN</text>
+    </g>
+    <g id="patch_72">
+     <path d="M 160.92 288.770184 
+L 254.664 288.770184 
+L 254.664 272.172781 
+L 160.92 272.172781 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_71">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="282.798826" transform="rotate(-0 170.2944 282.798826)">3-9Endpoint</text>
+    </g>
+    <g id="patch_73">
+     <path d="M 254.664 288.770184 
+L 426.528 288.770184 
+L 426.528 272.172781 
+L 254.664 272.172781 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_72">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="282.798826" transform="rotate(-0 271.8504 282.798826)">total_hip_bmd</text>
+    </g>
+    <g id="patch_74">
+     <path d="M 426.528 288.770184 
+L 567.144 288.770184 
+L 567.144 272.172781 
+L 426.528 272.172781 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_73">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="282.798826" transform="rotate(-0 440.5896 282.798826)">92977004c7973512...</text>
+    </g>
+    <g id="patch_75">
+     <path d="M 567.144 288.770184 
+L 660.888 288.770184 
+L 660.888 272.172781 
+L 567.144 272.172781 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_74">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="282.798826" transform="rotate(-0 576.5184 282.798826)">54 x 13</text>
+    </g>
+    <g id="patch_76">
+     <path d="M 660.888 288.770184 
+L 785.88 288.770184 
+L 785.88 272.172781 
+L 660.888 272.172781 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_75">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="282.798826" transform="rotate(-0 673.3872 282.798826)">CLEAN</text>
+    </g>
+    <g id="patch_77">
+     <path d="M 160.92 305.367587 
+L 254.664 305.367587 
+L 254.664 288.770184 
+L 160.92 288.770184 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_76">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="299.396229" transform="rotate(-0 170.2944 299.396229)">3-9Endpoint</text>
+    </g>
+    <g id="patch_78">
+     <path d="M 254.664 305.367587 
+L 426.528 305.367587 
+L 426.528 288.770184 
+L 254.664 288.770184 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_77">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="299.396229" transform="rotate(-0 271.8504 299.396229)">vo2peak_rel</text>
+    </g>
+    <g id="patch_79">
+     <path d="M 426.528 305.367587 
+L 567.144 305.367587 
+L 567.144 288.770184 
+L 426.528 288.770184 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_78">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="299.396229" transform="rotate(-0 440.5896 299.396229)">617fe46ad7cbd9d1...</text>
+    </g>
+    <g id="patch_80">
+     <path d="M 567.144 305.367587 
+L 660.888 305.367587 
+L 660.888 288.770184 
+L 567.144 288.770184 
+z
+" style="fill: #f8f8f8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_79">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="299.396229" transform="rotate(-0 576.5184 299.396229)">51 x 13</text>
+    </g>
+    <g id="patch_81">
+     <path d="M 660.888 305.367587 
+L 785.88 305.367587 
+L 785.88 288.770184 
+L 660.888 288.770184 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_80">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="299.396229" transform="rotate(-0 673.3872 299.396229)">CLEAN</text>
+    </g>
+    <g id="patch_82">
+     <path d="M 160.92 321.964989 
+L 254.664 321.964989 
+L 254.664 305.367587 
+L 160.92 305.367587 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_81">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="170.2944" y="315.993632" transform="rotate(-0 170.2944 315.993632)">3-9Endpoint</text>
+    </g>
+    <g id="patch_83">
+     <path d="M 254.664 321.964989 
+L 426.528 321.964989 
+L 426.528 305.367587 
+L 254.664 305.367587 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_82">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="271.8504" y="315.993632" transform="rotate(-0 271.8504 315.993632)">BMD features [rich path]</text>
+    </g>
+    <g id="patch_84">
+     <path d="M 426.528 321.964989 
+L 567.144 321.964989 
+L 567.144 305.367587 
+L 426.528 305.367587 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_83">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="440.5896" y="315.993632" transform="rotate(-0 440.5896 315.993632)">ffd3c4fec75ab2d6...</text>
+    </g>
+    <g id="patch_85">
+     <path d="M 567.144 321.964989 
+L 660.888 321.964989 
+L 660.888 305.367587 
+L 567.144 305.367587 
+z
+" style="fill: #ffffff; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_84">
+     <text style="font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="576.5184" y="315.993632" transform="rotate(-0 576.5184 315.993632)">38 x 630 (index_col=0 → 38 x 629)</text>
+    </g>
+    <g id="patch_86">
+     <path d="M 660.888 321.964989 
+L 785.88 321.964989 
+L 785.88 305.367587 
+L 660.888 305.367587 
+z
+" style="fill: #e8f5e9; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_85">
+     <text style="font-weight: 700; font-size: 9px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start; fill: #1b5e20" x="673.3872" y="315.993632" transform="rotate(-0 673.3872 315.993632)">CLEAN</text>
+    </g>
+   </g>
+   <g id="text_86">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: start" x="82.8" y="17.345625" transform="rotate(-0 82.8 17.345625)">Leakage Audit Ledger — Subject ID Never Entered Any Model as a Feature</text>
+   </g>
+  </g>
+  <g id="text_87">
+   <text style="font-style: italic; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; fill: #555555" transform="translate(7.2 484.850063)">What this shows: Every feature table across all three setups (BMD primary, Colab fat/tandem/controls, 9-endpoint sparse+rich) audited for subject-ID leakage. 13 CLEAN, 2 CANNOT VERIFY (pos/neg control table CSVs not in archive), 1 VERSION MISMATCH (fat v2, not used for the</text>
+   <text style="font-style: italic; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; fill: #555555" transform="translate(7.2 492.9285)">run).</text>
+   <text style="font-style: italic; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; fill: #555555" transform="translate(7.2 501.006938)">What it does not show: Whether the pos/neg control feature tables had sneaky ID columns — their CSVs are absent from the archive. Mitigating evidence: identical feature counts (226/228) and identical 38-subject roster as the fat table, plus verified script logic.</text>
+   <text style="font-style: italic; font-size: 7.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; fill: #555555" transform="translate(7.2 509.085375)">Source: leakage_audit_ledger.csv (this task). MD5s computed from extracted zip members.</text>
+  </g>
+ </g>
+</svg>

@@ -1,0 +1,26 @@
+{
+  "observed_spearman": -0.6801120448179272,
+  "n_shuffles": 500,
+  "empirical_p": 0.9740518962075848,
+  "null_mean": -0.22803977591036415,
+  "null_sd": 0.2787587116492605,
+  "n_subjects": 35,
+  "n_features": 628,
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "tandem_rerun",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_tandem_rebuilt_628features.csv",
+    "input_table_md5": "509b8128730518519398b073aefd648a",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-21T01:38:41Z"
+  }
+}

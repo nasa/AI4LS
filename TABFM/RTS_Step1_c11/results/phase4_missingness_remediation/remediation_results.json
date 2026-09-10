@@ -1,0 +1,266 @@
+{
+  "metadata": {
+    "seed": 42,
+    "n_estimators": 32,
+    "device": "cuda",
+    "tabpfn_version": "8.3.0",
+    "torch_version": "2.13.0+cu130",
+    "n_subjects": 38,
+    "n_features_full": 628,
+    "n_features_core": 271,
+    "mask_full_indicators": 571,
+    "mask_core_indicators": 214,
+    "stage": "observed_only_no_nulls"
+  },
+  "B_mask_full": {
+    "c1": {
+      "accuracy": 0.9473684210526315,
+      "balanced_accuracy": 0.9649122807017544,
+      "labels": [
+        "CONTROL",
+        "EXERCISE",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          11,
+          0,
+          0
+        ],
+        [
+          1,
+          17,
+          1
+        ],
+        [
+          0,
+          0,
+          8
+        ]
+      ]
+    },
+    "CONTROL_vs_EXERCISE": {
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "labels": [
+        "CONTROL",
+        "EXERCISE"
+      ],
+      "confusion_matrix": [
+        [
+          11,
+          0
+        ],
+        [
+          0,
+          19
+        ]
+      ]
+    },
+    "CONTROL_vs_FLY": {
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "labels": [
+        "CONTROL",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          11,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ]
+    },
+    "EXERCISE_vs_FLY": {
+      "accuracy": 0.9259259259259259,
+      "balanced_accuracy": 0.9473684210526316,
+      "labels": [
+        "EXERCISE",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          17,
+          2
+        ],
+        [
+          0,
+          8
+        ]
+      ]
+    }
+  },
+  "Bcore_mask_core": {
+    "c1": {
+      "accuracy": 0.5,
+      "balanced_accuracy": 0.4312200956937799,
+      "labels": [
+        "CONTROL",
+        "EXERCISE",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          2,
+          9,
+          0
+        ],
+        [
+          0,
+          14,
+          5
+        ],
+        [
+          0,
+          5,
+          3
+        ]
+      ]
+    },
+    "CONTROL_vs_EXERCISE": {
+      "accuracy": 0.6333333333333333,
+      "balanced_accuracy": 0.5,
+      "labels": [
+        "CONTROL",
+        "EXERCISE"
+      ],
+      "confusion_matrix": [
+        [
+          0,
+          11
+        ],
+        [
+          0,
+          19
+        ]
+      ]
+    },
+    "CONTROL_vs_FLY": {
+      "accuracy": 0.5789473684210527,
+      "balanced_accuracy": 0.5681818181818181,
+      "labels": [
+        "CONTROL",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          7,
+          4
+        ],
+        [
+          4,
+          4
+        ]
+      ]
+    },
+    "EXERCISE_vs_FLY": {
+      "accuracy": 0.6296296296296297,
+      "balanced_accuracy": 0.555921052631579,
+      "labels": [
+        "EXERCISE",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          14,
+          5
+        ],
+        [
+          5,
+          3
+        ]
+      ]
+    }
+  },
+  "A_common_core": {
+    "c1": {
+      "accuracy": 0.39473684210526316,
+      "balanced_accuracy": 0.2759170653907496,
+      "labels": [
+        "CONTROL",
+        "EXERCISE",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          1,
+          10,
+          0
+        ],
+        [
+          2,
+          14,
+          3
+        ],
+        [
+          0,
+          8,
+          0
+        ]
+      ]
+    },
+    "CONTROL_vs_EXERCISE": {
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.5645933014354066,
+      "labels": [
+        "CONTROL",
+        "EXERCISE"
+      ],
+      "confusion_matrix": [
+        [
+          2,
+          9
+        ],
+        [
+          1,
+          18
+        ]
+      ]
+    },
+    "CONTROL_vs_FLY": {
+      "accuracy": 0.7894736842105263,
+      "balanced_accuracy": 0.7840909090909092,
+      "labels": [
+        "CONTROL",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          9,
+          2
+        ],
+        [
+          2,
+          6
+        ]
+      ]
+    },
+    "EXERCISE_vs_FLY": {
+      "accuracy": 0.6296296296296297,
+      "balanced_accuracy": 0.5197368421052632,
+      "labels": [
+        "EXERCISE",
+        "FLY"
+      ],
+      "confusion_matrix": [
+        [
+          15,
+          4
+        ],
+        [
+          6,
+          2
+        ]
+      ]
+    }
+  },
+  "R1_fold_safe_test2": {
+    "fold_safe_rho": 0.6646216785258114,
+    "original_rho": 0.5585976594733492,
+    "delta": 0.10602401905246228
+  }
+}

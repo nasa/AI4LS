@@ -1,0 +1,66 @@
+{
+  "n_testable": 16,
+  "n_untestable": 8,
+  "n_significant": 0,
+  "bonferroni_threshold": 0.00625,
+  "n_tests": 16,
+  "untestable_list": [
+    {
+      "arm": "FLY",
+      "variable": "total_lean____idxa_cft70_body_composition_total",
+      "status": "UNTESTABLE: n_valid < 10"
+    },
+    {
+      "arm": "FLY",
+      "variable": "weight____mr080g_cft70_pre_all",
+      "status": "UNTESTABLE: n_valid < 10"
+    },
+    {
+      "arm": "FLY",
+      "variable": "height____mr080g_cft70_pre_all",
+      "status": "UNTESTABLE: n_valid < 10"
+    },
+    {
+      "arm": "FLY",
+      "variable": "BMI_COMPUTED",
+      "status": "UNTESTABLE: n_valid < 10"
+    },
+    {
+      "arm": "FLY",
+      "variable": "fat____idxa_cft70_body_composition_trunk",
+      "status": "UNTESTABLE: n_valid < 10"
+    },
+    {
+      "arm": "FLY",
+      "variable": "lean____idxa_cft70_body_composition_legs",
+      "status": "UNTESTABLE: n_valid < 10"
+    },
+    {
+      "arm": "FLY",
+      "variable": "fat____idxa_cft70_body_composition_legs",
+      "status": "UNTESTABLE: n_valid < 10"
+    },
+    {
+      "arm": "FLY",
+      "variable": "total_fat____idxa_cft70_body_composition_total",
+      "status": "UNTESTABLE: n_valid < 10"
+    }
+  ],
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "test3",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_totalhipBMD_change_features_all.csv",
+    "input_table_md5": "ffd3c4fec75ab2d627985e03c162dddb",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-20T08:08:44Z"
+  }
+}

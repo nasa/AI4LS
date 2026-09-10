@@ -1,0 +1,61 @@
+{
+  "pair": "EXERCISE_vs_FLY",
+  "arm_a": "EXERCISE",
+  "arm_b": "FLY",
+  "n": 27,
+  "observed_accuracy": 0.9259259259259259,
+  "observed_balanced_accuracy": 0.9473684210526316,
+  "observed_metrics": {
+    "accuracy": 0.9259259259259259,
+    "balanced_accuracy": 0.9473684210526316,
+    "confusion_matrix": [
+      [
+        17,
+        2
+      ],
+      [
+        0,
+        8
+      ]
+    ],
+    "classes": [
+      "EXERCISE",
+      "FLY"
+    ],
+    "per_class": {
+      "EXERCISE": {
+        "precision": 1.0,
+        "recall": 0.8947368421052632,
+        "f1": 0.9444444444444444,
+        "support": 19
+      },
+      "FLY": {
+        "precision": 0.8,
+        "recall": 1.0,
+        "f1": 0.8888888888888888,
+        "support": 8
+      }
+    }
+  },
+  "n_shuffles": 200,
+  "empirical_p": 0.004975124378109453,
+  "null_mean": 0.6787037037037037,
+  "null_sd": 0.04156365868048786,
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "c2_EXERCISE_vs_FLY",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_totalhipBMD_change_features_all.csv",
+    "input_table_md5": "ffd3c4fec75ab2d627985e03c162dddb",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-20T08:14:01Z"
+  }
+}

@@ -1,0 +1,5 @@
+A survives?,C alive?,Verdict,Aim 2 action,HMTA/DAG action
+Yes (both p<0.05),No,A CONFIRMED,Proceed with BMD as target. Reproduce known finding using TFM feature importance.,"Feature group importance (fitness #1, bone #10) becomes candidate mechanism. Build DAG from top features."
+Yes (both p<0.05),Yes,A + C CONTAMINATION,Proceed cautiously. Investigate which body-comp variables drive C signal before Aim 2.,Feature importance may conflate biology with noise. Do not build DAG until C source identified.
+No (B survives),No,B CONFIRMED,"Do NOT proceed with BMD as-is. Options: arm-residualized target, within-arm modeling, or non-arm-graded target.","Feature importance is arm-detection, not biology. DAG would encode treatment assignment, not bone physiology."
+No (B survives),Yes,B + C,BMD not viable for Aim 2. Signal is arm-confounded and noise-contaminated. Return to Aim 1 boundary map.,HMTA premature. Cannot generate biological hypotheses from arm-detection + noise-ranking.

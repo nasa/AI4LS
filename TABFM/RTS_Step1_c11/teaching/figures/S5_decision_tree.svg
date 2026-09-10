@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1000.8pt" height="679.030687pt" viewBox="0 0 1000.8 679.030687" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2022-01-01T05:00:00+00:00</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.5, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 679.030687 
+L 1000.8 679.030687 
+L 1000.8 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 324.257143 117.751625 
+L 676.542857 117.751625 
+Q 687.111429 117.751625 687.111429 108.817625 
+L 687.111429 55.213625 
+Q 687.111429 46.279625 676.542857 46.279625 
+L 324.257143 46.279625 
+Q 313.688571 46.279625 313.688571 55.213625 
+L 313.688571 108.817625 
+Q 313.688571 117.751625 324.257143 117.751625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #fff3e0; stroke: #ff9400; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 28.337143 254.739625 
+L 310.165714 254.739625 
+Q 320.734286 254.739625 320.734286 245.805625 
+L 320.734286 156.465625 
+Q 320.734286 147.531625 310.165714 147.531625 
+L 28.337143 147.531625 
+Q 17.768571 147.531625 17.768571 156.465625 
+L 17.768571 245.805625 
+Q 17.768571 254.739625 28.337143 254.739625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #e8f5e9; stroke: #1b5e20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 359.485714 254.739625 
+L 641.314286 254.739625 
+Q 651.882857 254.739625 651.882857 245.805625 
+L 651.882857 156.465625 
+Q 651.882857 147.531625 641.314286 147.531625 
+L 359.485714 147.531625 
+Q 348.917143 147.531625 348.917143 156.465625 
+L 348.917143 245.805625 
+Q 348.917143 254.739625 359.485714 254.739625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #e3f2fd; stroke: #0d47a1; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 690.634286 254.739625 
+L 972.462857 254.739625 
+Q 983.031429 254.739625 983.031429 245.805625 
+L 983.031429 156.465625 
+Q 983.031429 147.531625 972.462857 147.531625 
+L 690.634286 147.531625 
+Q 680.065714 147.531625 680.065714 156.465625 
+L 680.065714 245.805625 
+Q 680.065714 254.739625 690.634286 254.739625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #fce4ec; stroke: #880e4f; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 28.337143 403.639625 
+L 310.165714 403.639625 
+Q 320.734286 403.639625 320.734286 394.705625 
+L 320.734286 287.497625 
+Q 320.734286 278.563625 310.165714 278.563625 
+L 28.337143 278.563625 
+Q 17.768571 278.563625 17.768571 287.497625 
+L 17.768571 394.705625 
+Q 17.768571 403.639625 28.337143 403.639625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #e8f5e9; stroke: #1b5e20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 359.485714 403.639625 
+L 641.314286 403.639625 
+Q 651.882857 403.639625 651.882857 394.705625 
+L 651.882857 287.497625 
+Q 651.882857 278.563625 641.314286 278.563625 
+L 359.485714 278.563625 
+Q 348.917143 278.563625 348.917143 287.497625 
+L 348.917143 394.705625 
+Q 348.917143 403.639625 359.485714 403.639625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #e3f2fd; stroke: #0d47a1; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 690.634286 403.639625 
+L 972.462857 403.639625 
+Q 983.031429 403.639625 983.031429 394.705625 
+L 983.031429 287.497625 
+Q 983.031429 278.563625 972.462857 278.563625 
+L 690.634286 278.563625 
+Q 680.065714 278.563625 680.065714 287.497625 
+L 680.065714 394.705625 
+Q 680.065714 403.639625 690.634286 403.639625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #fce4ec; stroke: #880e4f; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 28.337143 552.539625 
+L 310.165714 552.539625 
+Q 320.734286 552.539625 320.734286 543.605625 
+L 320.734286 436.397625 
+Q 320.734286 427.463625 310.165714 427.463625 
+L 28.337143 427.463625 
+Q 17.768571 427.463625 17.768571 436.397625 
+L 17.768571 543.605625 
+Q 17.768571 552.539625 28.337143 552.539625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #c8e6c9; stroke: #1b5e20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 359.485714 552.539625 
+L 641.314286 552.539625 
+Q 651.882857 552.539625 651.882857 543.605625 
+L 651.882857 436.397625 
+Q 651.882857 427.463625 641.314286 427.463625 
+L 359.485714 427.463625 
+Q 348.917143 427.463625 348.917143 436.397625 
+L 348.917143 543.605625 
+Q 348.917143 552.539625 359.485714 552.539625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #bbdefb; stroke: #0d47a1; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 690.634286 552.539625 
+L 972.462857 552.539625 
+Q 983.031429 552.539625 983.031429 543.605625 
+L 983.031429 436.397625 
+Q 983.031429 427.463625 972.462857 427.463625 
+L 690.634286 427.463625 
+Q 680.065714 427.463625 680.065714 436.397625 
+L 680.065714 543.605625 
+Q 680.065714 552.539625 690.634286 552.539625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #f8bbd0; stroke: #880e4f; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 289.028571 635.923625 
+L 711.771429 635.923625 
+Q 722.34 635.923625 722.34 626.989625 
+L 722.34 573.385625 
+Q 722.34 564.451625 711.771429 564.451625 
+L 289.028571 564.451625 
+Q 278.46 564.451625 278.46 573.385625 
+L 278.46 626.989625 
+Q 278.46 635.923625 289.028571 635.923625 
+z
+" clip-path="url(#pa1c3cce152)" style="fill: #ffebee; stroke: #b71c1c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(418.972656 79.215937)">LOOCV Spearman +0.376, p=0.007</text>
+    <text style="font-weight: 700; font-size: 10px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(427.344531 89.987187)">(1000-shuffle permutation null)</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(107.589241 189.600328)">Reading A: Individual Physiology</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(110.191702 198.755891)">The model found real biological</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(101.21889 207.911453)">structure predicting who loses bone.</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(100.526936 217.067016)">Signal is within-arm, not across-arm.</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(446.073711 189.600328)">Reading B: Arm Membership</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(431.42582 198.755891)">The model detected arm assignment</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(439.929141 207.911453)">from fitness features and used it</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(439.456992 217.067016)">to predict the arm-graded target.</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(781.468298 189.600328)">Reading C: Noise Ranking</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(767.534939 198.755891)">The model found structure in DXA</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(766.118493 207.911453)">measurement noise that correlates</text>
+    <text style="font-size: 8.5px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(772.021345 217.067016)">with body composition features.</text>
+   </g>
+   <g id="patch_13">
+    <path d="M 392.756761 109.231317 
+Q 281.98118 132.641979 172.84641 155.705883 
+" style="fill: none; stroke: #333333; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 177.173505 156.835594 
+L 172.84641 155.705883 
+L 176.346436 152.922033 
+" style="fill: none; stroke: #333333; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 500.4 110.815561 
+Q 500.4 132.641719 500.4 152.790826 
+" style="fill: none; stroke: #333333; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 502.4 148.790826 
+L 500.4 152.790826 
+L 498.4 148.790826 
+" style="fill: none; stroke: #333333; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 608.043239 109.231317 
+Q 718.81882 132.641979 827.95359 155.705883 
+" style="fill: none; stroke: #333333; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 824.453564 152.922033 
+L 827.95359 155.705883 
+L 823.626495 156.835594 
+" style="fill: none; stroke: #333333; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(124.129554 325.936375)">Test 1: Arm-Stratified Null</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(108.571429 334.553375)">Permute target WITHIN each arm.</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(112.348929 343.170375)">Preserves arm structure, breaks</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(119.227679 351.787375)">individual target-feature link.</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(117.233929 360.404375)">If still significant → not just B.</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(455.496875 325.936375)">Test 2: Arm-Adjusted Null</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(441.0525 334.553375)">Rank-transform target within arm,</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(441.858125 343.170375)">then permute. Removes ALL arm</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(463.28 351.787375)">structure from target.</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(455.718125 360.404375)">If still significant → not B.</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(787.308571 325.936375)">Test 3: Reading C Check</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(784.867946 334.553375)">Within each arm, correlate</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(783.309821 343.170375)">prediction errors with body-</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(791.976696 351.787375)">composition variables.</text>
+    <text style="font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(786.869196 360.404375)">If correlated → C is alive.</text>
+   </g>
+   <g id="patch_16">
+    <path d="M 169.251429 247.803197 
+Q 169.251429 266.649813 169.251429 283.819378 
+" style="fill: none; stroke: #1b5e20; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 171.251429 279.819378 
+L 169.251429 283.819378 
+L 167.251429 279.819378 
+" style="fill: none; stroke: #1b5e20; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 500.4 247.803197 
+Q 500.4 266.649813 500.4 283.819378 
+" style="fill: none; stroke: #0d47a1; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 502.4 279.819378 
+L 500.4 283.819378 
+L 498.4 279.819378 
+" style="fill: none; stroke: #0d47a1; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 831.548571 247.803197 
+Q 831.548571 266.649813 831.548571 283.819378 
+" style="fill: none; stroke: #880e4f; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 833.548571 279.819378 
+L 831.548571 283.819378 
+L 829.548571 279.819378 
+" style="fill: none; stroke: #880e4f; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_8">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(147.836429 474.818875)">A survives:</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(135.349554 483.435875)">p_stratified &lt; 0.05</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(126.017679 492.052875)">AND p_adjusted &lt; 0.05</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(126.795179 500.669875)">AND C check negative</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(131.615804 509.321875)">→ Proceed to Aim 2</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(478.835 474.801375)">B survives:</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(466.63875 483.418375)">p_stratified ≥ 0.05</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(459.973125 492.035375)">OR p_adjusted ≥ 0.05</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(446.176875 500.652375)">→ Signal is arm-confounded</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(440.761875 509.304375)">→ Arm-aware modeling needed</text>
+   </g>
+   <g id="text_10">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(817.321071 474.760125)">C alive:</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(799.982946 483.377125)">C check positive</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(794.407321 491.994125)">(|rho| &gt; 0.4, p &lt; 0.10</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(788.679821 500.728625)">in any arm with n ≥ 10)</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(787.982946 509.345625)">→ Signal may be noise</text>
+   </g>
+   <g id="patch_19">
+    <path d="M 169.251429 396.703197 
+Q 169.251429 415.549813 169.251429 432.719378 
+" style="fill: none; stroke: #1b5e20; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 171.251429 428.719378 
+L 169.251429 432.719378 
+L 167.251429 428.719378 
+" style="fill: none; stroke: #1b5e20; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 500.4 396.703197 
+Q 500.4 415.549813 500.4 432.719378 
+" style="fill: none; stroke: #0d47a1; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 502.4 428.719378 
+L 500.4 432.719378 
+L 498.4 428.719378 
+" style="fill: none; stroke: #0d47a1; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="patch_21">
+    <path d="M 831.548571 396.703197 
+Q 831.548571 415.549813 831.548571 432.719378 
+" style="fill: none; stroke: #880e4f; stroke-width: 1.5; stroke-linecap: round"/>
+    <path d="M 833.548571 428.719378 
+L 831.548571 432.719378 
+L 829.548571 428.719378 
+" style="fill: none; stroke: #880e4f; stroke-width: 1.5; stroke-linecap: round"/>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(410.405 593.621875)">Standard permutation null is BLIND to B and C:</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(428.841875 602.238875)">it shuffles the target, not the features.</text>
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'" transform="translate(431.493125 610.890875)">Noise structure lives in the features.</text>
+   </g>
+   <g id="text_12">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; text-anchor: middle" x="500.4" y="17.345625" transform="rotate(-0 500.4 17.345625)">Three Readings of the p=0.007 Result — and the Tests That Separate Them</text>
+   </g>
+  </g>
+  <g id="text_13">
+   <text style="font-style: italic; font-size: 7px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; fill: #555555" transform="translate(46.8 655.298437)">What this shows: The decision tree for the arm-aware test battery. Three readings of the same p=0.007 result, three tests that separate them, three outcomes with stated numeric thresholds. Decision rules are fixed BEFORE running.</text>
+   <text style="font-style: italic; font-size: 7px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; fill: #555555" transform="translate(46.8 662.838312)">What it does not show: Results of the tests — they have not been run yet. This is the spec, not the outcome.</text>
+   <text style="font-style: italic; font-size: 7px; font-family: 'Liberation Sans', 'Arimo', 'DejaVu Sans'; fill: #555555" transform="translate(46.8 670.378187)">Source: Schematic constructed this task from project artifacts and open-items list.</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pa1c3cce152">
+   <rect x="7.2" y="37.345625" width="986.4" height="595.6"/>
+  </clipPath>
+ </defs>
+</svg>

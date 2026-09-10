@@ -1,0 +1,72 @@
+{
+  "observed_accuracy": 0.6052631578947368,
+  "observed_balanced_accuracy": 0.5964912280701754,
+  "observed_metrics": {
+    "accuracy": 0.6052631578947368,
+    "balanced_accuracy": 0.5964912280701754,
+    "confusion_matrix": [
+      [
+        0,
+        9,
+        2
+      ],
+      [
+        1,
+        15,
+        3
+      ],
+      [
+        0,
+        0,
+        8
+      ]
+    ],
+    "classes": [
+      "CONTROL",
+      "EXERCISE",
+      "FLY"
+    ],
+    "per_class": {
+      "CONTROL": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 11
+      },
+      "EXERCISE": {
+        "precision": 0.625,
+        "recall": 0.7894736842105263,
+        "f1": 0.6976744186046512,
+        "support": 19
+      },
+      "FLY": {
+        "precision": 0.6153846153846154,
+        "recall": 1.0,
+        "f1": 0.7619047619047619,
+        "support": 8
+      }
+    }
+  },
+  "n_shuffles": 200,
+  "empirical_p": 0.01990049751243781,
+  "null_mean": 0.48078947368421054,
+  "null_sd": 0.033977954397543586,
+  "base_rate": 19.0,
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "c1",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_totalhipBMD_change_features_all.csv",
+    "input_table_md5": "ffd3c4fec75ab2d627985e03c162dddb",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-20T08:08:42Z"
+  }
+}

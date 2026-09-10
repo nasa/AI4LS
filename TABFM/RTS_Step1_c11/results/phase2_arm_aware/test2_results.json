@@ -1,0 +1,27 @@
+{
+  "observed_spearman": 0.5585976594733492,
+  "n_shuffles": 500,
+  "empirical_p": 0.001996007984031936,
+  "null_mean": -0.27073264194947894,
+  "null_sd": 0.2607440409900884,
+  "null_p95": 0.16973449988572184,
+  "y_resid_mean": 9.586629735661303e-19,
+  "y_resid_sd": 0.01624452671128135,
+  "metadata": {
+    "prereg_version": "v2-final",
+    "component": "test2",
+    "model_seed": 42,
+    "n_estimators": 32,
+    "permutation_seed_policy": "seed[i] = i, model_seed = 42, recorded per row",
+    "input_table": "c11_totalhipBMD_change_features_all.csv",
+    "input_table_md5": "ffd3c4fec75ab2d627985e03c162dddb",
+    "environment": {
+      "python": "3.11.13",
+      "torch": "2.13.0+cu130",
+      "cuda_available": true,
+      "gpu": "NVIDIA A10",
+      "tabpfn": null
+    },
+    "timestamp_utc": "2026-08-20T08:10:36Z"
+  }
+}
