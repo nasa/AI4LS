@@ -26,7 +26,7 @@ The canonical definition for every measure (source file, value column, ROI, unit
 628 features, all **pre-bed-rest (baseline)**, one row per subject. Selection pipeline:
 
 1. Raw archive: 4,809 files across 140 datasets, campaigns C1/C3/C11 (verified inventory: `results/archive_dataset_inventory.csv`). Count disclosure: the LSDA catalog listed 4,834 files; the 25-file difference is not itemizable from preserved artifacts (downloader inventory JSON not preserved; regenerable by re-running the downloader's inventory step). Both numbers are disclosed; neither is silently replaced.
-2. C11 source files flattened into a master table (43 subjects × 7,545 columns, 32.1% of cells filled — `build/C11_data_dictionary.md`, file pending re-upload)
+2. C11 source files flattened into a master table (43 subjects × 7,545 columns, 32.1% of cells filled — `build/C11_data_dictionary.md`)
 3. Coverage filter: features present in ≥80% of subjects (`min_coverage = 0.8`)
 4. PRE-only filter: baseline timepoints only (leakage guard against post data)
 5. Leakage-family exclusion: the hip iDXA source file (6 columns) removed

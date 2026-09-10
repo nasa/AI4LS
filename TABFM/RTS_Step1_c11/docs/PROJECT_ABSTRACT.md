@@ -1,6 +1,6 @@
 # Project abstract (verbatim)
 
-**Status:** canonical conference abstract, reproduced verbatim from the authors' submission. Two of its early figures are superseded by verified values used everywhere else in this repository: the abstract's "4,834 data files" is the LSDA catalog-listed expectation, while the verified on-disk inventory is 4,809 files (discrepancy disclosed in `DATA_PROVENANCE.md`); the abstract's "32% filled" is the rounded value, the computed value is 32.1% (`build/C11_data_dictionary.md`, file pending re-upload).
+**Status:** canonical conference abstract, reproduced verbatim from the authors' submission. Two of its early figures are superseded by verified values used everywhere else in this repository: the abstract's "4,834 data files" is the LSDA catalog-listed expectation, while the verified on-disk inventory is 4,809 files (discrepancy disclosed in `DATA_PROVENANCE.md`); the abstract's "32% filled" is the rounded value, the computed value is 32.1% (`build/C11_data_dictionary.md`).
 
 ---
 

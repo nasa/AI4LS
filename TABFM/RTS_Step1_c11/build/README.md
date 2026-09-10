@@ -25,4 +25,4 @@
 
 ## Reports
 
-`reports/` holds the build-time evidence: the archive profile, the header and arm audits, the raw-layer verification report, the curated-master README, and the C11 master report. `C11_data_dictionary.md` (the 32.1% fill source) belongs alongside them and is pending re-upload.
+`reports/` holds the build-time evidence: the archive profile, the header and arm audits, the raw-layer verification report, the curated-master README, and the C11 master report. `C11_data_dictionary.md` (the 32.1% fill source) ships in this folder.
