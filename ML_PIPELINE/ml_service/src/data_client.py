@@ -9,6 +9,8 @@ so we import from data_service_pb2, not a separate multi_dataset_service_pb2
 import grpc
 import logging
 from typing import List, Dict, Tuple
+from generated import data_service_pb2, data_service_pb2_grpc  # ← ADD THIS
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,8 +48,15 @@ class DataServiceClient:
             logger.error("  python regenerate_data_service_proto.py")
             raise
         
-        self.channel = grpc.insecure_channel(self.service_url)
+        self.channel = grpc.insecure_channel(self.service_url,
+                                             options=[
+                                             ('grpc.max_send_message_length', 100 * 1024 * 1024),
+                                             ('grpc.max_receive_message_length', 100 * 1024 * 1024),
+                                         ]
+                                     )
+        self.stub = self.data_service_pb2_grpc.DataServiceStub(self.channel)  # ← ADD THIS
         self.multi_stub = self.data_service_pb2_grpc.MultiDatasetServiceStub(self.channel)
+
     
     # ============================================================================
     # MULTI-DATASET SERVICE METHODS
@@ -256,7 +265,7 @@ class DataServiceClient:
         """Close the channel"""
         self.channel.close()
 
-    def get_dataset(self, dataset_id):
+    '''def get_dataset(self, dataset_id):
         """Load a dataset from disk"""
         try:
             from pathlib import Path
@@ -272,6 +281,39 @@ class DataServiceClient:
 
             return df
 
+        except Exception as e:
+            logger.error(f"Error loading dataset {dataset_id}: {e}")
+            raise'''
+
+    def get_dataset(self, dataset_id):
+        """Fetch a dataset from the data service via streaming"""
+        try:
+            import pandas as pd
+            import io
+        
+            # Request dataset from data service
+            request = data_service_pb2.GetDatasetRequest(dataset_id=dataset_id)
+        
+            # Collect all chunks
+            chunks = []
+            for chunk in self.stub.GetDataset(request):
+                chunks.append(chunk.data)
+                if chunk.is_final:
+                    break
+        
+            if not chunks:
+                raise FileNotFoundError(f"Dataset not found: {dataset_id}")
+        
+            # Combine chunks into single bytes object
+            combined_data = b''.join(chunks)
+            
+            # Deserialize back to DataFrame
+            # Assuming it was serialized as parquet
+            df = pd.read_parquet(io.BytesIO(combined_data))
+        
+            logger.info(f"✓ Loaded dataset {dataset_id}: {df.shape[0]} samples × {df.shape[1]} features")
+            return df
+        
         except Exception as e:
             logger.error(f"Error loading dataset {dataset_id}: {e}")
             raise

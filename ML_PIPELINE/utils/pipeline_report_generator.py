@@ -170,7 +170,7 @@ class PipelineReportGenerator:
         # Model metrics
         metrics = results.get('metrics', {})
         if metrics:
-            story.append(Paragraph("<b>Model Metrics:</b>", self.styles['Normal']))
+            story.append(Paragraph("<b>Train/Test Metrics:</b>", self.styles['Normal']))
             
             metrics_data = [['Metric', 'Value']]
             for metric_name, value in metrics.items():
@@ -189,95 +189,113 @@ class PipelineReportGenerator:
             story.append(table)
             story.append(Spacer(1, 0.2*inch))
         
+        # LOOCV metrics
+        loocv_metrics = results.get('loocv_metrics', {})
+        if loocv_metrics:
+            story.append(Paragraph("<b>Leave-One-Out Cross-Validation Metrics:</b>", self.styles['Normal']))
+            story.append(Paragraph("(Evaluated on full dataset)", self.styles['Normal']))
+            
+            loocv_data = [['Metric', 'Value']]
+            for metric_name, value in loocv_metrics.items():
+                if metric_name == 'n_folds':
+                    loocv_data.append([metric_name, str(value)])
+                elif isinstance(value, float):
+                    loocv_data.append([metric_name, f'{value:.4f}'])
+                else:
+                    loocv_data.append([metric_name, str(value)])
+            
+            table = Table(loocv_data, colWidths=[2*inch, 2*inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ff7f0e')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.lightyellow),
+                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+            ]))
+            
+            story.append(table)
+            story.append(Spacer(1, 0.2*inch))
+        
         # Other information
         model_id = results.get('model_id', 'N/A')
         n_samples = results.get('n_samples', 'N/A')
         n_features = results.get('n_features', 'N/A')
         
         story.append(Paragraph(f"<b>Model ID:</b> {model_id}", self.styles['Normal']))
-        story.append(Paragraph(f"<b>Training Samples:</b> {n_samples}", self.styles['Normal']))
+        story.append(Paragraph(f"<b>Total Samples:</b> {n_samples}", self.styles['Normal']))
         story.append(Paragraph(f"<b>Features Used:</b> {n_features}", self.styles['Normal']))
         
         return story
-
+    
     def _create_feature_importance_section(self, fi_data):
         """Create feature importance section"""
         story = []
-    
+        
         story.append(Paragraph("Feature Importance Analysis", self.styles['SectionHeading']))
-    
+        
+        # Handle different data structures
         if not fi_data:
             story.append(Paragraph("No feature importance data available", self.styles['Normal']))
             return story
-    
-        # Extract importances from converted dict
-        importances = fi_data.get('importances', {})
-    
-        if not importances:
-            story.append(Paragraph("No importances computed", self.styles['Normal']))
-            return story
-    
-        # Iterate through each method
-        for method_name, method_data in importances.items():
-            story.append(Paragraph(f"<b>{method_name.title()}</b>", self.styles['Normal']))
         
-            features = method_data.get('features', [])
+        # If it's a list
+        if isinstance(fi_data, list):
+            for item in fi_data:
+                if isinstance(item, dict):
+                    method = item.get('method', 'Unknown Method')
+                    features = item.get('features', [])
+                    story.extend(self._render_features_table(method, features))
         
-            if not features:
-                story.append(Paragraph("No features found", self.styles['Normal']))
-                story.append(Spacer(1, 0.15*inch))
-                continue
+        # If it's a dict
+        elif isinstance(fi_data, dict):
+            for method, features in fi_data.items():
+                story.extend(self._render_features_table(method, features))
         
-            # Top 10 features
-            top_features = features[:10]
+        # If it's neither, just skip
+        else:
+            story.append(Paragraph(f"Unexpected data format: {type(fi_data)}", self.styles['Normal']))
         
-            fi_table_data = [['Rank', 'Feature', 'Importance']]
-            for feature in top_features:
-                rank = feature.get('rank', '?')
-                name = feature.get('feature_name', '?')
-                importance = feature.get('importance', 0)
-                fi_table_data.append([str(rank), name, f'{importance:.4f}'])
-        
-            table = Table(fi_table_data, colWidths=[0.5*inch, 3*inch, 1.5*inch])
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ff7f0e')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
-                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ]))
-        
-            story.append(table)
-            story.append(Spacer(1, 0.15*inch))
-    
         return story
     
-    '''def _create_feature_importance_section(self, fi_data):
-        """Create feature importance section"""
+    def _render_features_table(self, method, features):
+        """Helper to render a features table"""
         story = []
         
-        story.append(Paragraph("Feature Importance Analysis", self.styles['SectionHeading']))
+        story.append(Paragraph(f"<b>{method.title()}</b>", self.styles['Normal']))
         
-        # Show top features for each method
-        for method, features in fi_data.items():
-            story.append(Paragraph(f"<b>{method.title()}</b>", self.styles['Normal']))
-            
-            if not features:
-                story.append(Paragraph("No features found", self.styles['Normal']))
+        if not features:
+            story.append(Paragraph("No features found", self.styles['Normal']))
+            story.append(Spacer(1, 0.15*inch))
+            return story
+        
+        # Handle features being a list or dict
+        if isinstance(features, dict):
+            features = features.get('scores', [])
+        
+        # Top 10 features
+        top_features = features[:10] if isinstance(features, list) else []
+        
+        if not top_features:
+            story.append(Paragraph("No features found", self.styles['Normal']))
+            story.append(Spacer(1, 0.15*inch))
+            return story
+        
+        fi_table_data = [['Rank', 'Feature', 'Importance']]
+        
+        for feature in top_features:
+            if isinstance(feature, dict):
+                rank = feature.get('rank', '?')
+                name = feature.get('feature_name', feature.get('feature', '?'))
+                importance = feature.get('importance', 0)
+            else:
+                # Skip if not a dict
                 continue
             
-            # Top 10 features
-            top_features = features[:10]
-            fi_table_data = [['Rank', 'Feature', 'Importance']]
-            
-            for feature in top_features:
-                rank = feature.get('rank', '?')
-                name = feature.get('feature_name', '?')
-                importance = feature.get('importance', 0)
-                fi_table_data.append([str(rank), name, f'{importance:.4f}'])
-            
+            fi_table_data.append([str(rank), name, f'{importance:.4f}'])
+        
+        # Only create table if we have data
+        if len(fi_table_data) > 1:
             table = Table(fi_table_data, colWidths=[0.5*inch, 3*inch, 1.5*inch])
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ff7f0e')),
@@ -290,9 +308,9 @@ class PipelineReportGenerator:
             ]))
             
             story.append(table)
-            story.append(Spacer(1, 0.15*inch))
         
-        return story'''
+        story.append(Spacer(1, 0.15*inch))
+        return story
     
     def _create_ensemble_section(self, ensemble_data):
         """Create ensemble results section"""
@@ -300,27 +318,75 @@ class PipelineReportGenerator:
         
         story.append(Paragraph("Ensemble Results", self.styles['SectionHeading']))
         
+        if not ensemble_data:
+            story.append(Paragraph("No ensemble data available", self.styles['Normal']))
+            return story
+        
         # Ensemble metrics
         metrics = ensemble_data.get('metrics', {})
-        if metrics:
-            story.append(Paragraph("<b>Ensemble Metrics:</b>", self.styles['Normal']))
+        
+        if metrics and isinstance(metrics, dict):
+            story.append(Paragraph("<b>Overall Ensemble Metrics:</b>", self.styles['Normal']))
             
             metrics_data = [['Metric', 'Value']]
             for metric_name, value in metrics.items():
-                metrics_data.append([metric_name, f'{value:.4f}' if isinstance(value, float) else str(value)])
+                # Skip list values (like 'models') - handle separately below
+                if isinstance(value, list):
+                    continue
+                    
+                formatted_value = f'{value:.4f}' if isinstance(value, float) else str(value)
+                metrics_data.append([metric_name, formatted_value])
             
-            table = Table(metrics_data, colWidths=[2*inch, 2*inch])
-            table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2ca02c')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
-                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-            ]))
-            
-            story.append(table)
-            story.append(Spacer(1, 0.2*inch))
+            # Only create table if we have metrics
+            if len(metrics_data) > 1:
+                table = Table(metrics_data, colWidths=[2.5*inch, 1.5*inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2ca02c')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+                    ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                ]))
+                
+                story.append(table)
+                story.append(Spacer(1, 0.2*inch))
+        
+        # Display individual model metrics if available
+        if metrics and isinstance(metrics.get('models'), list):
+            models_list = metrics['models']
+            if models_list:
+                story.append(Paragraph("<b>Individual Model Performance:</b>", self.styles['Normal']))
+                
+                models_data = [['Algorithm', 'Accuracy', 'Model ID']]
+                for model in models_list:
+                    if isinstance(model, dict):
+                        algo = model.get('algorithm', 'N/A')
+                        acc = model.get('accuracy', 0)
+                        model_id = model.get('model_id', 'N/A')
+                        
+                        # Truncate long model IDs
+                        if len(model_id) > 16:
+                            model_id = model_id[:13] + "..."
+                        
+                        models_data.append([algo, f'{acc:.4f}', model_id])
+                
+                if len(models_data) > 1:
+                    table = Table(models_data, colWidths=[1.5*inch, 1*inch, 1.5*inch])
+                    table.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f77b4')),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                        ('ALIGN', (1, 0), (1, -1), 'CENTER'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
+                        ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                        ('FONTSIZE', (0, 0), (-1, -1), 9),
+                    ]))
+                    
+                    story.append(table)
+                    story.append(Spacer(1, 0.2*inch))
         
         return story
 

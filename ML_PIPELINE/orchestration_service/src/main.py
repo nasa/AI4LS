@@ -9,6 +9,7 @@ import uuid
 import json
 from contextlib import asynccontextmanager
 from typing import List, Optional
+import grpc
 
 from src.config import Settings, get_settings
 from src.models import (
@@ -24,6 +25,8 @@ from src.models import (
 )
 from src.clients.data_client import DataServiceClient
 from src.clients.ml_client import MLServiceClient
+
+from src.generated import data_service_pb2, data_service_pb2_grpc
 
 logging.basicConfig(
     level=logging.INFO,
@@ -133,42 +136,6 @@ async def health_check():
 
 
 # ── Dataset endpoints ─────────────────────────────────────────────────────────
-
-'''@app.post("/api/datasets/upload", response_model=ValidationResponse)
-@app.post("/api/datasets/validate", response_model=ValidationResponse)  # kept for backwards compatibility
-async def upload_dataset(
-    file: UploadFile = File(...),
-    settings: Settings = Depends(get_settings)
-):
-    """Upload a dataset to the data service for storage"""
-    content = await file.read()
-    if len(content) > settings.max_upload_size:
-        raise HTTPException(
-            status_code=413,
-            detail=f"File too large. Maximum size: {settings.max_upload_size / 1024 / 1024}MB"
-        )
-    
-    format_type = "csv" if file.filename.endswith(".csv") else "json"
-    #exclude_columns = List[str] 
-    #exclude_columns = list() 
-    
-    try:
-        result = data_client.upload_dataset(content, format_type, exclude_columns)
-
-        response = ValidationResponse(
-            is_valid=result["is_valid"],
-            dataset_id=result["dataset_id"],
-            errors=result["errors"],
-            warnings=result["warnings"],
-            dataset_info=result["dataset_info"]
-                
-        )
-        
-        return response
-        
-    except Exception as e:
-        logger.error(f"Validation error: {e}")
-        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")'''
 
 @app.post("/api/datasets/upload", response_model=ValidationResponse)
 @app.post("/api/datasets/validate", response_model=ValidationResponse)  # kept for backwards compatibility
@@ -341,6 +308,61 @@ async def run_pipeline(request: PipelineRequest):
 
     from fastapi import HTTPException
 
+    # Validate that either dataset_id or osd_ids is provided
+    if not request.dataset_id and not request.osd_ids:
+        raise HTTPException(
+            status_code=400,
+            detail="Either 'dataset_id' or 'osd_ids' must be provided"
+        )
+    
+    # If osd_ids provided, download and combine datasets first
+    dataset_id = request.dataset_id
+    if request.osd_ids and not request.dataset_id:
+        logger.info(f"Pipeline {pipeline_id}: Downloading and combining OSD datasets...")
+        try:
+            # Initialize data client
+            data_channel = grpc.insecure_channel('data_service:50051')
+            #data_stub = data_service_pb2_grpc.DataServiceStub(data_channel)
+            data_stub = data_service_pb2_grpc.MultiDatasetServiceStub(data_channel)
+            
+            # Download and combine
+            osd_ids_list = [id.strip() for id in request.osd_ids.split(',')]
+            
+            download_request = data_service_pb2.DownloadMultipleDatasetsRequest(
+                osd_ids=osd_ids_list,
+                patterns=['unnormalized'],
+                factor_name=request.config.factor_name or 'Factor Value[Spaceflight]',
+                factor_values=request.config.factor_values or ['Ground Control', 'Space Flight'],
+                min_features=request.config.min_features or 1000,
+                cv_step=0.25
+            )
+            
+            download_response = data_stub.DownloadMultipleDatasets(download_request)
+            if not download_response.success:
+                raise HTTPException(status_code=400, detail=f"Failed to download: {download_response.error_message}")
+        
+            # Step 2: Combine datasets
+            logger.info(f"Combining {len(download_response.dataset_ids)} datasets...")
+        
+            combine_request = data_service_pb2.CombineDatasetsRequest(
+                dataset_ids=list(download_response.dataset_ids.values()),
+                common_genes=[],  # Let service compute
+                output_name=f"combined_{pipeline_id[:8]}"
+            )
+        
+            combine_response = data_stub.CombineDatasets(combine_request)
+        
+            if not combine_response.success:
+                raise HTTPException(status_code=400, detail=f"Failed to combine: {combine_response.error_message}")
+        
+            dataset_id = combine_response.combined_dataset_id
+            transformed_id = dataset_id  # ← ADD THIS
+            logger.info(f"✓ Datasets combined: {dataset_id}")
+            
+        except Exception as e:
+            logger.error(f"Error downloading datasets: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+
     VALID_ALGORITHMS = [
         'random_forest',
         'gradient_boosting',
@@ -355,12 +377,18 @@ async def run_pipeline(request: PipelineRequest):
         raise HTTPException(
             status_code=400,
             detail=f"Invalid algorithm: '{request.config.algorithm.value}'. "
-                   f"Valid options are: {', '.join(VALID_ALGORITHMS)}"
-        )
+                   f"Valid options are: {', '.join(VALID_ALGORITHMS)}")
+    # Before the generator function
+    if request.osd_ids and not request.dataset_id:
+        # ... combine datasets code ...
+        dataset_id = combine_response.combined_dataset_id
+        transformed_id = dataset_id
+    else:
+        transformed_id = request.dataset_id 
     
     async def generate_progress():
         try:
-            transformed_id = request.dataset_id
+            #transformed_id = request.dataset_id
             factor_name = request.config.factor_name
             factor_values = request.config.factor_values
             min_features = request.config.min_features
@@ -398,8 +426,9 @@ async def run_pipeline(request: PipelineRequest):
                         "error": transform_result["error_message"]
                     }) + "\n"
                     return
-                
-                transformed_id = transform_result["transformed_dataset_id"]
+               
+                # JC 
+                #transformed_id = transform_result["transformed_dataset_id"]
                 logger.info(f"Pipeline {pipeline_id}: Transformations complete")
                 
                 yield json.dumps({

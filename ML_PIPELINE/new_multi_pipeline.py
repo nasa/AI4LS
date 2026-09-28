@@ -6,6 +6,7 @@ Complete analysis: filter → transform → ensemble training with consensus fea
 UPDATED: Uses GRPC multi-dataset service instead of utils combiner
 """
 
+from scipy.stats import zscore
 import sys
 import argparse
 from pathlib import Path
@@ -151,10 +152,15 @@ def filter_and_transform_data(df, target_column, cv_step=0.25, min_features=1000
             # Add pseudocount to avoid log(0)
             X_transformed = np.log2(X_transformed + 1)
         
-        if 's' in trans_list or 'std' in trans_list:
-            logger.info("  Applying scaling...")
+        if 'n' in trans_list or 'norm' in trans_list:
+            logger.info("  Applying normalization transformation...")
             # Min-max scaling
             X_transformed = (X_transformed - X_transformed.min()) / (X_transformed.max() - X_transformed.min() + 1e-8)
+
+        if 's' in trans_list or 'std' in trans_list:
+            logger.info("  Applying standardization transformation...")
+            # z-score scaling
+            X_transformed = X_transformed.apply(zscore) 
     else:
         logger.info("No transformations specified")
         X_transformed = X_filtered.copy()
@@ -186,7 +192,6 @@ def combine_and_run_pipeline(
     factor_values=None,
     patterns=None,
     task_type="classification",
-    algorithm="random_forest",
     test_size=0.2,
     trans_list=None,
     cv_step=0.25,
@@ -228,6 +233,7 @@ def combine_and_run_pipeline(
     dataset_map = {}
     osd_ids_used = []
     metrics = {}
+    loocv_metrics = {}
     model_id = None
     feature_importance_response = None
     ensemble_result = None
@@ -251,10 +257,6 @@ def combine_and_run_pipeline(
     if fi_methods is None:
         fi_methods = ["sequential"]
     
-    # Filter out RFE for neural network algorithms (they don't have feature_importances_)
-    if algorithm in ["neural_network", "mlp", "nn"]:
-        fi_methods = [m for m in fi_methods if m != "rfe"]
-        logger.info(f"Removed RFE from feature importance methods for {algorithm} algorithm")
     
     # ============================================================================
     # STEP 1-3: Get OSD IDs, Download, and Combine Datasets (via GRPC)
@@ -342,15 +344,23 @@ def combine_and_run_pipeline(
     logger.info(f"Target column: {target_column}")
    
     
-    # Ensure target has string values
     df_clean = combined_df.copy()
-    if df_clean[target_column].dtype in ['int64', 'float64']:
+
+    # Ensure target has values {0, 1} for binary and {0, 1, 2, ...} for multi-class
+    if df_clean[target_column].dtype in ['O', 'str']:
+        logger.info(f"Converting {target_column} from string values to 0/1/...")
+        df_clean[target_column] = df_clean[target_column].map({
+            factor_values[0]: 0,
+            factor_values[1]: 1
+        })
+    # ensure target has string values
+    '''if df_clean[target_column].dtype in ['int64', 'float64']:
         if set(df_clean[target_column].unique()) <= {0, 1}:
             logger.info(f"Converting {target_column} from 0/1 to string values")
             df_clean[target_column] = df_clean[target_column].map({
                 0: factor_values[0],
                 1: factor_values[1]
-            })
+            })'''
     
     # ============================================================================
     # STEP 5: Filter and Transform
@@ -409,89 +419,6 @@ def combine_and_run_pipeline(
         traceback.print_exc()
         return None
 
-    # ============================================================================
-    # STEP 7: Train single model
-    # ============================================================================
-    
-    logger.info("\n" + "=" * 80)
-    logger.info("STEP 7: TRAIN SINGLE MODEL")
-    logger.info("=" * 80)
-    
-    try:
-        model_id, metrics = run_pipeline(
-            dataset_id=dataset_id,
-            target_column=target_column,
-            sample_column=None,
-            columns=columns,
-            task_type=task_type,
-            algorithm=algorithm,
-            test_size=test_size,
-            trans_list=[],  # Already transformed
-            factor_name=factor_name,
-            factor_values=factor_values,
-            min_features=len(selected_genes),
-            fi_methods=fi_methods,
-            exclude_columns=["source_dataset"],
-            cv_step=0.0  # Already filtered
-        )
-        
-        if not model_id:
-            logger.info("\n✗ Single model training failed")
-            return None
-        
-        logger.info(f"\n✓ Model trained: {model_id}")
-        if metrics:
-            logger.info(f"✓ Metrics: {metrics}")
-        
-    except Exception as e:
-        logger.error(f"✗ Model training error: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
-    
-    # ============================================================================
-    # STEP 8: Feature Importance (single model)
-    # ============================================================================
-
-    
-    if do_feature_importance:
-        logger.info("\n" + "=" * 80)
-        logger.info("STEP 8: COMPUTE FEATURE IMPORTANCE (Single Model)")
-        logger.info("=" * 80)
-        
-        try:
-            try:
-                feature_importance_response = compute_feature_importance(
-                    model_id=model_id,
-                    dataset_id=dataset_id,
-                    fi_methods=fi_methods
-                )
-            except Exception as e:
-                # If feature importance fails, log but continue
-                logger.warning(f"Feature importance computation failed: {e}")
-                logger.warning("Continuing without feature importance...")
-                feature_importance_response = None
-            
-            if feature_importance_response:
-                logger.info("✓ Feature importance computed successfully")
-                
-                # Show top features
-                if "built_in" in feature_importance_response.importances:
-                    logger.info("\nTop 10 Features (Built-in Importance):")
-                    scores = feature_importance_response.importances["built_in"].scores
-                    for i, score in enumerate(sorted(scores, key=lambda x: x.importance, reverse=True)[:10]):
-                        logger.info(f"  {i+1}. {score.feature_name}: {score.importance:.4f}")
-            else:
-                logger.info("✗ Feature importance computation failed")
-                feature_importance_response = None
-        
-        except Exception as e:
-            logger.info(f"✗ Feature importance error: {e}")
-            import traceback
-            traceback.print_exc()
-            feature_importance_response = None
-    else:
-        feature_importance_response = None
     
     # ============================================================================
     # STEP 9: Ensemble Training with Consensus Features
@@ -619,7 +546,6 @@ def combine_and_run_pipeline(
         'config': {
             'osd_ids': osd_ids_used,
             'target_column': target_column,
-            'algorithm': algorithm,
             'test_size': test_size,
             'min_features': min_features,
             'transformations': trans_list
@@ -628,7 +554,9 @@ def combine_and_run_pipeline(
             'model_id': model_id,
             'n_samples': len(combined_df),
             'n_features': len(selected_genes),
-            'metrics': metrics or {}
+            'metrics': metrics or {},
+            'loocv_metrics': loocv_metrics or {}  # ADD THIS LINE
+
         },
         'feature_importance': convert_importance_response_to_dict(feature_importance_response) if feature_importance_response else {},  # ← NEW
         'ensemble_results': {
@@ -672,7 +600,7 @@ def get_data_client():
 
     return data_client
 
-def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, algorithm, test_size, trans_list, factor_name, factor_values, min_features, fi_methods, exclude_columns, cv_step):
+def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, test_size, trans_list, factor_name, factor_values, min_features, fi_methods, exclude_columns, cv_step):
     """Run full ML pipeline"""
     logger.info("\n" + "=" * 60)
     logger.info("STEP 7: Run ML Pipeline")
@@ -688,7 +616,6 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, a
             "target_column": target_column,
             "task_type": task_type,
             "feature_columns": [],
-            "algorithm": algorithm,
             "hyperparameters": {},
             "metrics": ["accuracy", "f1_score"],
             "test_size": test_size,
@@ -960,11 +887,11 @@ def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values,
     # 1. Train ensemble of models
     ml_channel = grpc.insecure_channel('localhost:50052')
     ml_stub = ml_service_pb2_grpc.MLServiceStub(ml_channel)
+    logger.info(f'running algorithms in ml_service_pb2.EnsembleRequest: {algorithms}')
     
     ensemble_request = ml_service_pb2.EnsembleRequest(
         dataset_id=dataset_id,
         target_column=target_column,
-        #algorithms=["random_forest", "svm", "logistic_regression", "neural_network", "gradient_boosting"]
         algorithms = algorithms
     )
     
@@ -1104,19 +1031,32 @@ def run_ensemble_pipeline(algorithms, dataset_id, target_column, factor_values,
     
     # Also collect individual model metrics
     model_metrics = []
+    loocv_data = []
     logger.info(f'ensemble_response: {ensemble_response}')
     for model in ensemble_response.models:
-        model_metrics.append({
+        model_info = { 
             'algorithm': model.algorithm,
             'accuracy': model.accuracy if hasattr(model, 'accuracy') else 0.0,
             'model_id': model.model_id
-        })
-    
+        }
+        # Extract LOOCV metrics if available
+        if hasattr(model, 'loocv_accuracy'):
+            model_info['loocv_accuracy'] = model.loocv_accuracy
+            loocv_data.append(model.loocv_accuracy)
+        model_metrics.append(model_info)
+ 
     ensemble_metrics['models'] = model_metrics
+
+    # Add aggregate LOOCV metrics
+    if loocv_data:
+        ensemble_metrics['loocv_mean_accuracy'] = float(np.mean(loocv_data))
+        ensemble_metrics['loocv_std_accuracy'] = float(np.std(loocv_data))
+
     
     return consensus_result, ensemble_metrics
 
 def main():
+    import sys
     parser = argparse.ArgumentParser(
         description="Multi-Dataset Pipeline with Filtering, Transformation, and Ensemble"
     )
@@ -1136,7 +1076,6 @@ def main():
     
     # Pipeline parameters
     parser.add_argument('-tt', '--task_type', default='classification', help='classification|regression')
-    parser.add_argument('-al', '--algorithm', default='random_forest', help='ML algorithm')
     parser.add_argument('-ts', '--test_size', type=float, default=0.2, help='test set fraction')
     parser.add_argument('-tc', '--target_column', default="Factor Value[Spaceflight]", help='target column name', required=True)
     parser.add_argument('-fl', '--factor_name', default='Factor Value[Spaceflight]', help='factor name')
@@ -1155,7 +1094,7 @@ def main():
     parser.add_argument('--no_ensemble', default=False, help='Skip ensemble training')
     parser.add_argument('--consensus_threshold', type=int, default=3, help='consensus threshold')
     parser.add_argument('--top_features', type=int, default=100, help='top N features per model')
-    parser.add_argument('--ensemble_algorithms', type=str, default='random_forest, logistic_regression, svm, xg_boost', help='neural_network, logistic_regression, svm, random_forest, gradient_boosting')
+    parser.add_argument('--ensemble_algorithms', type=str, default='random_forest, logistic_regression, svm, xgboost', help='neural_network, logistic_regression, svm, random_forest, gradient_boosting')
     
     # KEGG options
     parser.add_argument('--no_kegg', action='store_true', help='Skip KEGG enrichment')
@@ -1184,6 +1123,7 @@ def main():
     ensemble_algorithms = None
     if args.ensemble_algorithms:
         ensemble_algorithms = [alg.strip() for alg in args.ensemble_algorithms.split(',')]
+    logger.info(f'using algorithms: {ensemble_algorithms}')
     
     # Run the pipeline
     result = combine_and_run_pipeline(
@@ -1194,7 +1134,6 @@ def main():
         factor_values=factor_values,
         patterns=patterns,
         task_type=args.task_type,
-        algorithm=args.algorithm,
         test_size=args.test_size,
         trans_list=trans_list,
         cv_step=args.cv_step,

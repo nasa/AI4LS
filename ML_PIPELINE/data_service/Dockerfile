@@ -12,7 +12,7 @@ RUN apt-get update && \
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 
-COPY Mus_musculus.GRCm39.115.gtf.gz . 
+#COPY Mus_musculus.GRCm39.115.gtf.gz . 
 
 # Install grpcio-tools explicitly first, then the rest
 RUN pip install --no-cache-dir grpcio-tools==1.62.0 && \

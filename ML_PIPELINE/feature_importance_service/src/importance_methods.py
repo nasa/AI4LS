@@ -81,7 +81,7 @@ class FeatureImportanceMethods:
             )
             
             # Fit RFE
-            rfe.fit(X, y).transform()
+            rfe.fit(X, y)
             
             results = []
             for i, (name, selected, ranking) in enumerate(

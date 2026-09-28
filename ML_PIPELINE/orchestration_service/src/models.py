@@ -103,8 +103,10 @@ class PipelineConfig(BaseModel):
 
 class PipelineRequest(BaseModel):
     """Request to run full ML pipeline"""
-    dataset_id: str
+    osd_ids: Optional[str] = None     # ← Add this for OSD IDs (comma-separated string)
     config: PipelineConfig
+    dataset_id: Optional[str] = None  # ← Change this to Optional
+
 
 class PipelineStatus(str, Enum):
     """Pipeline execution status"""

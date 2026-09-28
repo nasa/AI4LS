@@ -5,17 +5,13 @@ import sys
 from pathlib import Path
 import logging
 
-# Add path to ml-service generated code
-#ml_service_path = Path(__file__).parent.parent.parent.parent / "ml-service" / "generated"
-#sys.path.insert(0, str(ml_service_path))
 
 
-
-from generated.ml_service_pb2 import (
+from src.generated.ml_service_pb2 import (
     TrainRequest, ModelInfoRequest, PredictRequest, 
     ListModelsRequest, TrainingProgress
 )
-from generated.ml_service_pb2_grpc import MLServiceStub
+from src.generated.ml_service_pb2_grpc import MLServiceStub
 
 logger = logging.getLogger(__name__)
 

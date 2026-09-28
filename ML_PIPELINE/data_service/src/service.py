@@ -939,85 +939,65 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             logger.error(f"GetDatasetInfo error: {e}", exc_info=True)
             context.abort(grpc.StatusCode.INTERNAL, str(e))
     
-    '''def GetDataset(self, request, context):
-        """Stream dataset back to client"""
-        try:
-            dataset_id = request.dataset_id
-            chunk_size = request.chunk_size or (1024 * 1024)  # Default 1MB
-            
-            # Load from disk if not in memory
-            if dataset_id not in self.datasets:
-                dataset_file = self.dataset_path / f"{dataset_id}.parquet"
-                if not dataset_file.exists():
-                    context.abort(grpc.StatusCode.NOT_FOUND, 
-                                f"Dataset {dataset_id} not found")
-                
-                df = pd.read_parquet(dataset_file)
-                self.datasets[dataset_id] = df
-            
-            df = self.datasets[dataset_id]
-            
-            # Convert to CSV and stream in chunks
-            csv_data = df.to_csv(index=True)
-            total_chunks = (len(csv_data) + chunk_size - 1) // chunk_size
-            
-            for i in range(0, len(csv_data), chunk_size):
-                chunk = csv_data[i:i + chunk_size]
-                chunk_number = i // chunk_size
-                is_final = (i + chunk_size >= len(csv_data))
-                
-                yield data_service_pb2.DataChunk(
-                    data=chunk.encode('utf-8'),
-                    chunk_number=chunk_number,
-                    is_final=is_final
-                )
-        
-        except Exception as e:
-            logger.error(f"GetDataset error: {e}")
-            context.abort(grpc.StatusCode.INTERNAL, str(e))'''
-
     def GetDataset(self, request, context):
         """Stream dataset back to client"""
         try:
             dataset_id = request.dataset_id
-            chunk_size = request.chunk_size or 1000  # Default 1000 rows (not bytes!)
+            logger.info(f"GetDataset requested for: {dataset_id}")
+            logger.info(f"Datasets in self.datasets: {list(self.datasets.keys())}")
+            logger.info(f"dataset_id in self.datasets: {dataset_id in self.datasets}")
+            logger.info(f"self.dataset_path: {self.dataset_path}")
+            logger.info(f"Datasets in cache: {list(self.datasets.keys())}")  # ← ADD THIS
+
+            chunk_size = request.chunk_size or 10000
         
             # Load from disk if not in memory
             if dataset_id not in self.datasets:
+                logger.warning(f"Dataset {dataset_id} not in memory cache, checking disk...")
                 dataset_file = self.dataset_path / f"{dataset_id}.parquet"
+                logger.info(f"Looking for file at: {dataset_file}")
+                logger.info(f"File exists: {dataset_file.exists()}")
                 if not dataset_file.exists():
-                    context.abort(grpc.StatusCode.NOT_FOUND, 
-                                f"Dataset {dataset_id} not found")
+                    context.abort(grpc.StatusCode.NOT_FOUND, f"Dataset {dataset_id} not found")
             
                 df = pd.read_parquet(dataset_file)
                 self.datasets[dataset_id] = df
         
             df = self.datasets[dataset_id]
         
-            # Stream by ROWS, not bytes
+            # Stream by ROWS
             num_chunks = (len(df) + chunk_size - 1) // chunk_size
-            logger.info(f"Streaming {len(df)} rows in {num_chunks} chunks of {chunk_size} rows")
+            logger.info(f"Streaming {len(df)} rows in {num_chunks} chunks")
         
             for i in range(num_chunks):
-                start_idx = i * chunk_size
-                end_idx = min((i + 1) * chunk_size, len(df))
-                chunk_df = df.iloc[start_idx:end_idx]
-            
-                # Convert chunk to CSV
-                csv_data = chunk_df.to_csv(index=True)
-            
-                yield data_service_pb2.DataChunk(
-                    data=csv_data.encode('utf-8'),
-                    chunk_number=i,
-                    is_final=(i == num_chunks - 1)
-                )
+                try:
+                    start_idx = i * chunk_size
+                    end_idx = min((i + 1) * chunk_size, len(df))
+                    chunk_df = df.iloc[start_idx:end_idx]
+                
+                    #csv_data = chunk_df.to_csv(index=True)
+                    parquet_bytes = chunk_df.to_parquet()
+                
+                    '''yield data_service_pb2.DataChunk(
+                        data=csv_data.encode('utf-8'),
+                        chunk_number=i,
+                        is_final=(i == num_chunks - 1)
+                    )'''
+                    yield data_service_pb2.DataChunk(
+                        data=parquet_bytes,
+                        chunk_number=i,
+                        is_final=(i == num_chunks - 1)
+                    )
+                except Exception as e:
+                    logger.error(f"Error in chunk {i}: {e}", exc_info=True)
+                    raise
         
             logger.info(f"Finished streaming dataset {dataset_id}")
     
         except Exception as e:
-            logger.error(f"GetDataset error: {e}")
-            context.abort(grpc.StatusCode.INTERNAL, str(e))
-    
+            logger.error(f"GetDataset error: {e}", exc_info=True)
+            context.abort(grpc.StatusCode.INTERNAL, str(e)) 
+
     def StreamDataset(self, request, context):
         """Stream dataset (alias for GetDataset)"""
         return self.GetDataset(request, context)
@@ -1160,7 +1140,16 @@ class MultiDatasetServiceImpl(data_service_pb2_grpc.MultiDatasetServiceServicer)
             # Save combined dataset with UUID
             combined_id = str(uuid.uuid4())
             output_path = Path("./datasets") / f"{combined_id}.parquet"
+            logger.info(f"Saving combined dataset to: {output_path}")
             combined_df.to_parquet(output_path)
+            logger.info(f"✓ Saved combined dataset: {output_path}")
+
+
+            # Store in memory cache so GetDataset can find it immediately
+            #self.datasets[combined_id] = combined_df
+            self.data_service.datasets[combined_id] = combined_df
+            logger.info(f"✓ Stored combined dataset in memory cache")
+
             
             # Count samples per source
             samples_per_source = {}

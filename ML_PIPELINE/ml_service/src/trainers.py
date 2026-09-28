@@ -168,3 +168,91 @@ class ModelTrainer:
         )
         
         return X_train, y_train, X_test, y_test
+
+
+    @staticmethod
+    def compute_loocv_metrics(
+        model,
+        X: pd.DataFrame,
+        y: pd.Series,
+        task_type: str
+    ) -> Dict[str, float]:
+        """
+        Compute Leave-One-Out Cross-Validation metrics on full dataset
+    
+        LOOCV is excellent for small datasets - it uses every sample as test set once.
+        This provides a robust estimate of model performance.
+    
+        Args:
+            model: Trained sklearn model
+            X: Full feature matrix
+            y: Full target vector
+            task_type: "classification" or "regression"
+    
+        Returns:
+            Dict with LOOCV metrics
+        """
+        from sklearn.model_selection import LeaveOneOut, cross_val_score, cross_validate
+    
+        logger.info(f"Computing Leave-One-Out Cross-Validation on {len(X)} samples...")
+    
+        loo = LeaveOneOut()
+    
+        try:
+            if task_type == "classification":
+                # Compute multiple metrics for classification
+                scoring = {
+                    'accuracy': 'accuracy',
+                    'precision': 'precision_weighted',
+                    'recall': 'recall_weighted',
+                    'f1': 'f1_weighted'
+                }
+            
+                cv_results = cross_validate(
+                    model, X, y, cv=loo, scoring=scoring, n_jobs=-1
+                )
+            
+                loocv_metrics = {
+                    "accuracy": float(cv_results['test_accuracy'].mean()),
+                    "precision": float(cv_results['test_precision'].mean()),
+                    "recall": float(cv_results['test_recall'].mean()),
+                    "f1_score": float(cv_results['test_f1'].mean()),
+                    "n_folds": len(cv_results['test_accuracy']),
+                    "std_accuracy": float(cv_results['test_accuracy'].std()),
+                }
+            
+                # Try to add ROC-AUC if binary classification
+                if hasattr(model, 'predict_proba'):
+                    try:
+                        roc_scores = cross_val_score(
+                            model, X, y, cv=loo, scoring='roc_auc_weighted'
+                        )
+                        loocv_metrics['roc_auc'] = float(roc_scores.mean())
+                    except:
+                        pass
+        
+            else:  # regression
+                scoring = {
+                    'rmse': 'neg_mean_squared_error',
+                    'mae': 'neg_mean_absolute_error',
+                    'r2': 'r2'
+                }
+            
+                cv_results = cross_validate(
+                    model, X, y, cv=loo, scoring=scoring, n_jobs=-1
+                )
+            
+                loocv_metrics = {
+                    "rmse": float(np.sqrt(-cv_results['test_rmse'].mean())),
+                    "mae": float(-cv_results['test_mae'].mean()),
+                    "r2_score": float(cv_results['test_r2'].mean()),
+                    "n_folds": len(cv_results['test_rmse']),
+                    "std_rmse": float(np.sqrt(-cv_results['test_rmse'].std())),
+                }
+        
+            logger.info(f"✓ LOOCV completed: {loocv_metrics}")
+            return loocv_metrics
+    
+        except Exception as e:
+            logger.error(f"Error computing LOOCV: {e}")
+            return {}

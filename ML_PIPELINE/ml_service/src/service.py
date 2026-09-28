@@ -126,6 +126,22 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 progress_percent=80,
                 training_metrics=training_metrics
             )
+
+            # Compute LOOCV metrics on FULL dataset
+            logger.info("Computing LOOCV metrics on full dataset...")
+        
+            # Combine train and test data for LOOCV
+            X_full = pd.concat([X_train, X_test], ignore_index=True)
+            y_full = pd.concat([y_train, y_test], ignore_index=True)
+        
+            loocv_metrics = ModelTrainer.compute_loocv_metrics(
+                model,
+                X_full,
+                y_full,
+                request.task_type
+            )
+        
+            logger.info(f"✓ LOOCV metrics: {loocv_metrics}")
             
             # Save model
             model_info = {
@@ -140,8 +156,8 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 "hyperparameters": dict(request.hyperparameters),
                 "training_metrics": training_metrics,
                 "test_metrics": test_metrics,
-            }
-            
+                "loocv_metrics": loocv_metrics,  # ADD THIS LINE
+            } 
             self.model_store.save_model(model_id, trained_model, model_info)
             
             # Build final ModelInfo message

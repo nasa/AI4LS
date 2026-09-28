@@ -14,7 +14,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy generated gRPC code (from data-service and ml-service)
-COPY generated/ ./generated/
+COPY src/generated/ ./src/generated/
 
 # Copy source code
 COPY src/ ./src/
