@@ -104,11 +104,6 @@ for i in tab_pfi.importances_mean.argsort()[::-1][:3]:
     tab_fi_list.append(features[i])
 
 
-# Print selected features
-'''tab_fi_list = list()
-for feature in sfs.selected_names:
-    tab_fi_list.append(feature)'''
-
 new_row += str(tab_fi_list)
 print(new_row)
 f.write(new_row + '\n')
