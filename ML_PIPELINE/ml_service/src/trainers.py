@@ -91,10 +91,29 @@ class ModelTrainer:
         y_train: pd.Series,
         X_test: pd.DataFrame,
         y_test: pd.Series,
-        task_type: str
-    ) -> Tuple[Any, Dict[str, float], Dict[str, float]]:
+        task_type: str,
+        min_features: int = None
+    ) -> Tuple[Any, Dict[str, float], Dict[str, float], List[str]]:
         """Train model and calculate metrics"""
+
+        # init selected_features to all cols
+        selected_features = list(X_train.columns)  # ← Add this line early
+
+
+
+        # Remove non-numeric columns that cause issues with some models
+        #cols_to_drop = ['source_dataset', 'Factor Value[Spaceflight]']
+        cols_to_drop = ['source_dataset']
+        X_train = X_train.drop(columns=[col for col in cols_to_drop if col in X_train.columns])
+        X_test = X_test.drop(columns=[col for col in cols_to_drop if col in X_test.columns])
         
+        # Keep only numeric columns
+        X_train = X_train.select_dtypes(include=[np.number])
+        X_test = X_test.select_dtypes(include=[np.number])
+
+        # update selected_features after dropping cols
+        selected_features = list(X_train.columns)
+
         # Train the model
         logger.info(f"Training {type(model).__name__}...")
         model.fit(X_train, y_train)
@@ -142,7 +161,7 @@ class ModelTrainer:
                 "r2_score": float(r2_score(y_test, y_test_pred)),
             }
         
-        return model, training_metrics, test_metrics
+        return model, training_metrics, test_metrics, selected_features
     
     @staticmethod
     def prepare_data(
@@ -153,7 +172,19 @@ class ModelTrainer:
         random_state: int
     ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
         """Prepare data for training"""
+
+        # Remove source_dataset and other non-numeric columns
+        df = df.drop(columns=['source_dataset'], errors='ignore')
         
+        # Keep only numeric columns (plus target)
+        numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+        
+        # Add target column if it's not numeric
+        if target_column not in numeric_cols and target_column in df.columns:
+            numeric_cols.append(target_column)
+        
+        df = df[numeric_cols] 
+
         # Select features
         if not feature_columns:
             # Use all columns except target

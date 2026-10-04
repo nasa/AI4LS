@@ -6,6 +6,11 @@ import logging
 import json
 from typing import Dict
 import time
+import numpy as np
+
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+warnings.filterwarnings('ignore', category=ConvergenceWarning)
 
 # Add ml_service path to import model_store
 ml_service_path = Path(__file__).parent.parent.parent / "ml_service"
@@ -54,20 +59,25 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
             
             # Get model metadata
             model_info = self.model_store.get_model_info(model_id)
-            logger.info(f"model_info: {model_info}")
+            #logger.info(f"model_info: {model_info}")
             
 
             feature_names = model_info["feature_columns"]
             
             # Get dataset from data service
             df = self.data_client.get_dataset(dataset_id)
-            logger.info(f"shape of data in model: {df.shape}")
+            # Remove source_dataset and keep only numeric columns (same as training)
+            df = df.drop(columns=['source_dataset'], errors='ignore')
+            numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+            df = df[numeric_cols]
             if df is None:
                 return feature_importance_service_pb2.ImportanceResponse(
                     success=False,
                     model_id=model_id,
                     error_message=f"Dataset {dataset_id} not found"
                 )
+
+            logger.info(f"shape of data in model: {df.shape}")
             
             # Prepare features and target
             X = df[feature_names]

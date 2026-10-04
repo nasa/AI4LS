@@ -9,7 +9,7 @@ import logging
 
 from src.generated.ml_service_pb2 import (
     TrainRequest, ModelInfoRequest, PredictRequest, 
-    ListModelsRequest, TrainingProgress
+    ListModelsRequest, TrainingProgress, EnsembleRequest
 )
 from src.generated.ml_service_pb2_grpc import MLServiceStub
 
@@ -68,6 +68,59 @@ class MLServiceClient:
                 
         except grpc.RpcError as e:
             logger.error(f"gRPC error in train_model: {e.code()} - {e.details()}")
+            raise
+
+    def train_ensemble(
+        self,
+        dataset_id: str,
+        algorithms: List[str],
+        target_column: str,
+        task_type: str = "classification",
+        feature_columns: List[str] = None,
+        hyperparameters: Dict[str, str] = None,
+        test_size: float = 0.2,
+        random_state: int = 42,
+        fi_methods: List[str] = None
+        ) -> Iterator[Dict]:
+        """Train ensemble of models with streaming progress"""
+        try:
+            request = EnsembleRequest(
+                dataset_id=dataset_id,
+                target_column=target_column,
+                algorithms=algorithms
+            )
+
+            response = self.stub.TrainEnsemble(request)
+
+            # Extract model results
+            models = []
+            if response.models:
+                for model in response.models:
+                    models.append({
+                        "model_id": model.model_id,
+                        "algorithm": model.algorithm,
+                        "accuracy": float(model.accuracy),
+                        "precision": float(model.precision),
+                        "recall": float(model.recall),
+                        "f1_score": float(model.f1_score)
+                    })
+            
+            yield {
+                "model_id": response.model_id if hasattr(response, 'model_id') else None,
+                "status": response.status if hasattr(response, 'status') else "training",
+                "message": response.message if hasattr(response, 'message') else f"Training {len(algorithms)} models",
+                "progress_percent": response.progress_percent if hasattr(response, 'progress_percent') else 50,
+                "training_metrics": dict(response.training_metrics) if hasattr(response, 'training_metrics') and response.training_metrics else None,
+                "test_metrics": {
+                    "num_models": response.num_models,
+                    "models": models,
+                    "mean_accuracy": float(sum(m["accuracy"] for m in models) / len(models)) if models else 0
+                } if response.success else None,
+                "error_message": response.error_message if hasattr(response, 'error_message') and response.error_message else None
+            }
+                
+        except grpc.RpcError as e:
+            logger.error(f"gRPC error in train_ensemble: {e.code()} - {e.details()}")
             raise
     
     def get_model_info(self, model_id: str) -> Dict:

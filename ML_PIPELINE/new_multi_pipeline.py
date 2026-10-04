@@ -600,7 +600,7 @@ def get_data_client():
 
     return data_client
 
-def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, test_size, trans_list, factor_name, factor_values, min_features, fi_methods, exclude_columns, cv_step):
+def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, test_size, trans_list, factor_name, factor_values, min_features, fi_methods, exclude_columns, cv_step, ensemble_algorithms):
     """Run full ML pipeline"""
     logger.info("\n" + "=" * 60)
     logger.info("STEP 7: Run ML Pipeline")
@@ -626,11 +626,12 @@ def run_pipeline(dataset_id, target_column, sample_column, columns, task_type, t
             "fi_methods": fi_methods,
             "exclude_columns": exclude_columns,
             "cv_step": cv_step,
+            "ensemble_algorithms": ensemble_algorithms
         }
     }
 
     logger.info("\nConfiguration:")
-    logger.info(f"  Algorithm: {payload['config']['algorithm']}")
+    logger.info(f"  Algorithms: {payload['config']['ensemble_algorithms']}")
     logger.info(f"  Target: {payload['config']['target_column']}")
     logger.info(f"  Features: All except target")
     logger.info(f"  Test size: {payload['config']['test_size']}")

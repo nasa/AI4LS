@@ -90,7 +90,7 @@ class PipelineConfig(BaseModel):
     task_type: str = "classification"
     feature_columns: List[str] = []  # empty means use all except target
     transformations: List[TransformationConfig] = []
-    algorithm: MLAlgorithm
+    ensemble_algorithms: List[str] 
     hyperparameters: Dict[str, Any] = {}
     metrics: List[MetricType]
     test_size: float = Field(default=0.2, ge=0.1, le=0.5)
@@ -100,6 +100,7 @@ class PipelineConfig(BaseModel):
     min_features: Optional[int] = 1000
     exclude_columns: Optional[List[str]] = None
     fi_methods: Optional[List[str]] = None
+    trans_list: Optional[str] = None
 
 class PipelineRequest(BaseModel):
     """Request to run full ML pipeline"""

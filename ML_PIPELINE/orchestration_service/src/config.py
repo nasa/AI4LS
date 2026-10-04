@@ -14,9 +14,9 @@ class Settings(BaseSettings):
     port: int = 8000
     
     # gRPC service URLs
-    data_service_url: str = "localhost:50051"
-    ml_service_url: str = "localhost:50052"
-    metrics_service_url: str = "localhost:50053"
+    data_service_url: str = "data_service:50051"
+    ml_service_url: str = "ml_service:50052"
+    feature_importance_service_url: str = "feature_importance_service:50053"
     
     # File upload limits
     max_upload_size: int = 100 * 1024 * 1024  # 100MB

@@ -189,6 +189,52 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         
         return df
 
+    def FilterByCV(self, request, context):
+        """Filter dataset by coefficient of variation"""
+        try:
+            dataset_id = request.dataset_id
+            min_features = request.min_features
+            target_column = request.target_column
+        
+            logger.info(f"Filtering dataset {dataset_id} to {min_features} features by CV...")
+        
+            # Load dataset
+            df = self.datasets.get(dataset_id)
+            if df is None:
+                return data_service_pb2.FilterByCVResponse(
+                    success=False,
+                    error_message=f"Dataset {dataset_id} not found"
+                )
+        
+            original_features = df.shape[1]
+        
+            # Apply CV filtering
+            df_filtered = self._filter_cvs(df, min_features=min_features)
+
+            # Always add back target column if it exists
+            if target_column and target_column in df.columns and target_column not in df_filtered.columns:
+                df_filtered[target_column] = df[target_column]
+        
+            filtered_features = df_filtered.shape[1]
+        
+            # Save filtered dataset
+            filtered_id = f"filtered_{dataset_id[:8]}"
+            self.datasets[filtered_id] = df_filtered
+        
+            logger.info(f"✓ Filtered {original_features} → {filtered_features} features")
+        
+            return data_service_pb2.FilterByCVResponse(
+                success=True,
+                filtered_dataset_id=filtered_id,
+                original_features=original_features,
+                filtered_features=filtered_features
+            )
+        except Exception as e:
+            logger.error(f"Error filtering by CV: {e}", exc_info=True)
+            return data_service_pb2.FilterByCVResponse(
+                success=False,
+                error_message=str(e)
+            )
 
     def _filter_cvs(self, df, start=None, step=None, min_features=1000):
         """

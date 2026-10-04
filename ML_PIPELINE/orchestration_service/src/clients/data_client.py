@@ -37,7 +37,8 @@ class DataServiceClient:
         # Import here to avoid issues if protobuf files not yet generated
         try:
             #from data_service.generated import data_service_pb2, data_service_pb2_grpc
-            from generated import data_service_pb2, data_service_pb2_grpc
+            #from generated import data_service_pb2, data_service_pb2_grpc
+            from src.generated import data_service_pb2, data_service_pb2_grpc
             self.data_service_pb2 = data_service_pb2
             self.data_service_pb2_grpc = data_service_pb2_grpc
         except ImportError as e:
@@ -48,6 +49,35 @@ class DataServiceClient:
         
         self.channel = grpc.insecure_channel(self.service_url)
         self.multi_stub = self.data_service_pb2_grpc.MultiDatasetServiceStub(self.channel)
+
+    def filter_by_cv(self, dataset_id: str, min_features: int, target_column: str=None) -> Dict:
+        """Filter dataset by coefficient of variation"""
+        try:
+            # Create stub for DataService
+            stub = self.data_service_pb2_grpc.DataServiceStub(self.channel)
+        
+            request = self.data_service_pb2.FilterByCVRequest(
+                dataset_id=dataset_id,
+                min_features=min_features,
+                target_column=target_column or ""
+            )
+        
+            response = stub.FilterByCV(request)
+        
+            return {
+                "success": response.success,
+                "filtered_dataset_id": response.filtered_dataset_id,
+                "original_features": response.original_features,
+                "filtered_features": response.filtered_features,
+                "error_message": response.error_message if not response.success else None
+            }
+        except Exception as e:
+            logger.error(f"Error filtering by CV: {e}")
+            return {
+                "success": False,
+                "error_message": str(e)
+            }
+
     
     # ============================================================================
     # MULTI-DATASET SERVICE METHODS

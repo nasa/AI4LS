@@ -25,6 +25,7 @@ from src.models import (
 )
 from src.clients.data_client import DataServiceClient
 from src.clients.ml_client import MLServiceClient
+from src.clients.feature_importance_client import FeatureImportanceClient
 
 from src.generated import data_service_pb2, data_service_pb2_grpc
 
@@ -37,11 +38,12 @@ logger = logging.getLogger(__name__)
 # Global clients
 data_client: DataServiceClient = None
 ml_client: MLServiceClient = None
+fi_client: FeatureImportanceClient = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle management for the application"""
-    global data_client, ml_client
+    global data_client, ml_client, fi_client
     
     settings = get_settings()
     
@@ -57,6 +59,12 @@ async def lifespan(app: FastAPI):
         logger.info("✓ ML Service client initialized")
     except Exception as e:
         logger.error(f"Failed to initialize ML Service client: {e}")
+
+    try:
+        fi_client = FeatureImportanceClient(settings.feature_importance_service_url)
+        logger.info("✓ Feature Importance Service client initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize Feature Importance Service client: {e}")
     
     yield
     
@@ -65,6 +73,8 @@ async def lifespan(app: FastAPI):
         data_client.close()
     if ml_client:
         ml_client.close()
+    if fi_client:
+        fi_client.close()
 
 app = FastAPI(
     title="ML Pipeline Orchestration Service",
@@ -108,7 +118,7 @@ async def health_check():
     services_status = {
         "data_service": False,
         "ml_service": False,
-        "metrics_service": False
+        "feature_importance_service": False
     }
     
     try:
@@ -356,37 +366,35 @@ async def run_pipeline(request: PipelineRequest):
                 raise HTTPException(status_code=400, detail=f"Failed to combine: {combine_response.error_message}")
         
             dataset_id = combine_response.combined_dataset_id
-            transformed_id = dataset_id  # ← ADD THIS
+            transformed_id = dataset_id
             logger.info(f"✓ Datasets combined: {dataset_id}")
             
         except Exception as e:
             logger.error(f"Error downloading datasets: {e}")
             raise HTTPException(status_code=400, detail=str(e))
-
+    else:
+        transformed_id = request.dataset_id
+    
+    # Validate ensemble algorithms
     VALID_ALGORITHMS = [
         'random_forest',
         'gradient_boosting',
         'xgboost',
         'svm',
-        'neural_network',  # Not 'mlp'
+        'neural_network',
         'logistic_regression',
         'naive_bayes'
     ]
-
-    if request.config.algorithm.value not in VALID_ALGORITHMS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid algorithm: '{request.config.algorithm.value}'. "
-                   f"Valid options are: {', '.join(VALID_ALGORITHMS)}")
-    # Before the generator function
-    if request.osd_ids and not request.dataset_id:
-        # ... combine datasets code ...
-        dataset_id = combine_response.combined_dataset_id
-        transformed_id = dataset_id
-    else:
-        transformed_id = request.dataset_id 
+    
+    for algo in request.config.ensemble_algorithms:
+        if algo not in VALID_ALGORITHMS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid algorithm: '{algo}'. Valid options are: {', '.join(VALID_ALGORITHMS)}"
+            ) 
     
     async def generate_progress():
+        nonlocal transformed_id
         try:
             #transformed_id = request.dataset_id
             factor_name = request.config.factor_name
@@ -394,42 +402,21 @@ async def run_pipeline(request: PipelineRequest):
             min_features = request.config.min_features
             #fi_methods = request.fi_methods
             
-            if request.config.transformations:
-                logger.info(f"Pipeline {pipeline_id}: Applying transformations...")
+            # Handle transformations if provided
+            trans_list = request.config.trans_list
+            if trans_list:
+                logger.info(f"Pipeline {pipeline_id}: Applying transformations: {trans_list}")
                 
                 yield json.dumps({
                     "pipeline_id": pipeline_id,
                     "status": "transforming",
-                    "message": "Applying data transformations...",
+                    "message": f"Applying transformations: {trans_list}...",
                     "progress_percent": 10
                 }) + "\n"
-
-                transformations = [
-                    {
-                        "type": t.type.value,
-                        "columns": t.columns,
-                        "params": t.params
-                    }
-                    for t in request.config.transformations
-                ]
                 
-                transform_result = data_client.apply_transformations(
-                    request.dataset_id, 
-                    transformations
-                )
-                
-                if not transform_result["success"]:
-                    yield json.dumps({
-                        "pipeline_id": pipeline_id,
-                        "status": "failed",
-                        "message": "Transformation failed",
-                        "error": transform_result["error_message"]
-                    }) + "\n"
-                    return
-               
-                # JC 
-                #transformed_id = transform_result["transformed_dataset_id"]
-                logger.info(f"Pipeline {pipeline_id}: Transformations complete")
+                # trans_list is comma-separated string like "s,l"
+                # For now, just log it - actual transformation happens in data service
+                logger.info(f"✓ Transformations: {trans_list}")
                 
                 yield json.dumps({
                     "pipeline_id": pipeline_id,
@@ -438,51 +425,120 @@ async def run_pipeline(request: PipelineRequest):
                     "progress_percent": 30,
                     "transformed_dataset_id": transformed_id
                 }) + "\n"
+
+            # Apply CV-based feature filtering
+            if request.config.min_features and request.config.min_features > 0:
+                logger.info(f"Pipeline {pipeline_id}: Filtering to {request.config.min_features} features by CV...")
+    
+                yield json.dumps({
+                    "pipeline_id": pipeline_id,
+                    "status": "filtering",
+                    "message": f"Filtering features by CV...",
+                    "progress_percent": 25
+                }) + "\n"
+    
+                try:
+                    filter_response_dict = data_client.filter_by_cv( 
+                        dataset_id=transformed_id,
+                        min_features=request.config.min_features,
+                        target_column=request.config.target_column
+                    )
+        
+                    if filter_response_dict['success']:
+                        transformed_id = filter_response_dict['filtered_dataset_id']
+                        logger.info(f"✓ Features filtered: {filter_response_dict['original_features']} → {filter_response_dict['filtered_features']}")
             
-            logger.info(f"Pipeline {pipeline_id}: Training model...")
+                        yield json.dumps({
+                            "pipeline_id": pipeline_id,
+                            "status": "filtering",
+                            "message": f"Filtered to {filter_response_dict['filtered_features']} features",
+                            "progress_percent": 30
+                        }) + "\n"
+                    else:
+                        logger.error(f"Feature filtering failed: {filter_response_dict['error_message']}")
+                        yield json.dumps({
+                            "pipeline_id": pipeline_id,
+                            "status": "failed",
+                            "message": f"Feature filtering failed: {filter_response_dict['error_message']}",
+                            "error": filter_response_dict['error_message']
+                        }) + "\n"
+                        return
+                except Exception as e:
+                    logger.error(f"Error calling FilterByCV: {e}", exc_info=True)
+                    yield json.dumps({
+                        "pipeline_id": pipeline_id,
+                        "status": "failed",
+                        "message": "Feature filtering error",
+                        "error": str(e)
+                    }) + "\n"
+                    return
+
+            logger.info(f"Pipeline {pipeline_id}: Training ensemble models...")
             
-            model_id = None
-            final_metrics = None
-            
-            for progress in ml_client.train_model(
+            ensemble_result = None
+
+            for progress in ml_client.train_ensemble(
                 dataset_id=transformed_id,
-                algorithm=request.config.algorithm.value,
+                algorithms=request.config.ensemble_algorithms,
                 target_column=request.config.target_column,
                 task_type=request.config.task_type,
                 feature_columns=request.config.feature_columns or [],
                 hyperparameters={k: str(v) for k, v in request.config.hyperparameters.items()},
                 test_size=request.config.test_size,
-                random_state=request.config.random_state
+                random_state=request.config.random_state,
+                fi_methods=request.config.fi_methods or []
             ):
-                pipeline_progress = 30 + int(progress["progress_percent"] * 0.7)
-                
+                ensemble_result = progress
+    
                 yield json.dumps({
                     "pipeline_id": pipeline_id,
                     "status": progress["status"],
                     "message": progress["message"],
-                    "progress_percent": pipeline_progress,
-                    "model_id": progress["model_id"],
+                    "progress_percent": 30 + int(progress["progress_percent"] * 0.7),
                     "training_metrics": progress.get("training_metrics"),
                     "test_metrics": progress.get("test_metrics"),
                     "error": progress.get("error_message")
                 }) + "\n"
-                
-                if progress["status"] == "completed":
-                    model_id = progress["model_id"]
-                    final_metrics = progress.get("test_metrics", {})
-                elif progress["status"] == "failed":
-                    return
-            
+
+            # Compute feature importance for each model
+            logger.info(f"Pipeline {pipeline_id}: Computing feature importance...")
+            feature_importance_results = {}
+
+            if ensemble_result and ensemble_result.get("test_metrics") and ensemble_result["test_metrics"].get("models"):
+                for model in ensemble_result["test_metrics"]["models"]:
+                    model_id = model["model_id"]
+                    logger.info(f"Computing importance for model {model_id}...")
+        
+                    fi_result = fi_client.compute_importance(
+                        model_id=model_id,
+                        dataset_id=transformed_id,
+                        methods=request.config.fi_methods or ["permutation"]
+                    )
+        
+                    if fi_result.get("success"):
+                        feature_importance_results[model_id] = fi_result.get("importances", {})
+                    else:
+                        logger.warning(f"Failed to compute importance for {model_id}: {fi_result.get('error')}")
+
+
+            # Final response with complete results
             yield json.dumps({
                 "pipeline_id": pipeline_id,
                 "status": "completed",
                 "message": "Pipeline completed successfully",
                 "progress_percent": 100,
-                "dataset_id": request.dataset_id,
-                "transformed_dataset_id": transformed_id,
-                "model_id": model_id,
-                "metrics": final_metrics
+                "config": {
+                    "osd_ids": request.osd_ids,
+                    "algorithms": request.config.ensemble_algorithms,
+                    "target_column": request.config.target_column,
+                    "test_size": request.config.test_size,
+                    "min_features": request.config.min_features
+                },
+                "training_results": ensemble_result or {},
+                "feature_importance": feature_importance_results,
+                "transformed_dataset_id": transformed_id
             }) + "\n"
+            
             
         except Exception as e:
             logger.error(f"Pipeline {pipeline_id} error: {e}", exc_info=True)

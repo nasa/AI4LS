@@ -343,8 +343,9 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                     )
                 
                     # Train model
-                    trained_model, train_metrics, test_metrics = self.model_trainer.train_model(
-                        model, X_train, y_train, X_test, y_test, task_type="classification"
+                    trained_model, train_metrics, test_metrics, selected_features = self.model_trainer.train_model(
+                        model, X_train, y_train, X_test, y_test, task_type="classification",
+                        min_features=100
                     )
                 
                     # Generate model ID
@@ -356,15 +357,15 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                         'task_type': 'classification',  # Add this
                         'dataset_id': dataset_id,
                         'target_column': target_column,
-                        'feature_columns': list(X.columns),  # Add this
+                        'feature_columns': selected_features, 
                         'num_samples': len(X_train) + len(X_test),  # Add this
-                        'num_features': len(X.columns),  # Add this
+                        'num_features': len(selected_features),
                         'hyperparameters': {},  # Add this
                         'train_size': len(X_train),
                         'test_size': len(X_test),
                         'training_metrics': train_metrics,  # Change from train_metrics
                         'test_metrics': test_metrics,
-                        'feature_names': list(X.columns)
+                        'feature_names': selected_features 
                     }) 
                     logger.info(f"✓ {algorithm} trained: {model_id}")
                     logger.info(f"  Accuracy: {test_metrics.get('accuracy', 0):.4f}")
