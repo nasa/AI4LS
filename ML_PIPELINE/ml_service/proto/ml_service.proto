@@ -106,6 +106,8 @@ message ModelResult {
     double precision = 4;
     double recall = 5;
     double f1_score = 6;
+    repeated int32 confusion_matrix_flat = 7;   // row-major, len = n_labels^2
+    repeated string labels = 8;
 }
 
 // Response from ensemble training

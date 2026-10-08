@@ -378,7 +378,9 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                             accuracy=test_metrics.get('accuracy', 0),
                             precision=test_metrics.get('precision', 0),
                             recall=test_metrics.get('recall', 0),
-                            f1_score=test_metrics.get('f1_score', 0)
+                            f1_score=test_metrics.get('f1_score', 0),
+                            confusion_matrix_flat=[int(v) for row in test_metrics["confusion_matrix"] for v in row],
+                            labels=test_metrics["labels"],
                         )
                     )
                 

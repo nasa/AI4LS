@@ -140,11 +140,15 @@ class ModelTrainer:
                 "f1_score": float(f1_score(y_train, y_train_pred, average='weighted', zero_division=0)),
             }
             
+            from sklearn.metrics import confusion_matrix   # better at the top of the file
+
+            labels = list(model.classes_) if hasattr(model, "classes_") else sorted(set(y_test) | set(y_test_pred))
             test_metrics = {
                 "accuracy": float(accuracy_score(y_test, y_test_pred)),
                 "precision": float(precision_score(y_test, y_test_pred, average='weighted', zero_division=0)),
                 "recall": float(recall_score(y_test, y_test_pred, average='weighted', zero_division=0)),
                 "f1_score": float(f1_score(y_test, y_test_pred, average='weighted', zero_division=0)),
+                "confusion_matrix": confusion_matrix(y_test, y_test_pred, labels=labels).tolist(), "labels": [str(l) for l in labels],
             }
             
             # Add ROC AUC if binary classification and model supports predict_proba

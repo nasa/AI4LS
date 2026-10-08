@@ -96,13 +96,19 @@ class MLServiceClient:
             models = []
             if response.models:
                 for model in response.models:
+                    labels = list(model.labels)
+                    flat = list(model.confusion_matrix_flat)
+                    n = len(labels)
                     models.append({
                         "model_id": model.model_id,
                         "algorithm": model.algorithm,
                         "accuracy": float(model.accuracy),
                         "precision": float(model.precision),
                         "recall": float(model.recall),
-                        "f1_score": float(model.f1_score)
+                        "f1_score": float(model.f1_score),
+                        "labels": labels,
+                        "confusion_matrix": [flat[i * n:(i + 1) * n] for i in range(n)]
+                                            if n and len(flat) == n * n else None,
                     })
             
             yield {
