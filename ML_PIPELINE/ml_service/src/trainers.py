@@ -99,13 +99,15 @@ class ModelTrainer:
         # init selected_features to all cols
         selected_features = list(X_train.columns)  # ← Add this line early
 
-
-
         # Remove non-numeric columns that cause issues with some models
         #cols_to_drop = ['source_dataset', 'Factor Value[Spaceflight]']
         cols_to_drop = ['source_dataset']
         X_train = X_train.drop(columns=[col for col in cols_to_drop if col in X_train.columns])
         X_test = X_test.drop(columns=[col for col in cols_to_drop if col in X_test.columns])
+
+        # pull out just the values from the y_train and y_test series
+        #y_train_array = y_train.to_numpy()
+        #y_test_array = y_test.to_numpy()
         
         # Keep only numeric columns
         X_train = X_train.select_dtypes(include=[np.number])
@@ -113,6 +115,13 @@ class ModelTrainer:
 
         # update selected_features after dropping cols
         selected_features = list(X_train.columns)
+
+        logger.info(f"columns of X_train: {X_train.columns}")
+        logger.info(f"y_train values: {y_train}")
+
+        #X_train_array = X_train.to_numpy()
+        #X_test_array = X_test.to_numpy()
+
 
         # Train the model
         logger.info(f"Training {type(model).__name__}...")

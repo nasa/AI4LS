@@ -76,7 +76,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                     error_message=f"Dataset {dataset_id} not found"
                 )
             
-            # Try to convert column names
+            '''# Try to convert column names
             original_names = list(df.columns)
             converted_names = []
             conversion_count = 0
@@ -90,13 +90,56 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                     converted_names.append(symbol)
                     if symbol != name:
                         conversion_count += 1
-                        logger.debug(f"  {name} → {symbol}")
+                        logger.info(f"  {name} → {symbol}")
                 else:
                     converted_names.append(name)
                     logger.warn(f"couldn't convert gene ID: {name}")
-            
+           
+            logger.info(f"converted names: {converted_names}") 
             # Rename columns
-            df.columns = converted_names
+            df.columns = converted_names'''
+
+            # Try to convert column names
+            original_names = list(df.columns)
+            converted_names = []
+            conversion_count = 0
+            unmapped = []
+
+            for name in original_names:
+                name_str = str(name)
+                if name_str.startswith('ENS') or name in self.ensembl_mapping:
+                    # Mapping may contain the key with a NaN/empty symbol, so check the value
+                    symbol = self.ensembl_mapping.get(name)
+                    if symbol is None and '.' in name_str:          # ENSMUSG000001.3 -> ENSMUSG000001
+                        symbol = self.ensembl_mapping.get(name_str.split('.')[0])
+                    if symbol is None or pd.isna(symbol) or str(symbol).strip() == '':
+                        converted_names.append(name_str)            # keep the Ensembl ID
+                        unmapped.append(name_str)
+                    else:
+                        converted_names.append(str(symbol).strip())
+                        conversion_count += 1
+                        logger.debug(f"  {name} → {symbol}")
+                else:
+                    converted_names.append(name_str)                # metadata column etc.
+
+            logger.info(f"Converted {conversion_count} Ensembl IDs to symbols; "
+                        f"{len(unmapped)} had no symbol and kept their Ensembl ID")
+
+            # Several Ensembl IDs can map to the same symbol; make names unique
+            seen = {}
+            unique_names = []
+            for n in converted_names:
+                if n in seen:
+                    seen[n] += 1
+                    unique_names.append(f"{n}_{seen[n]}")
+                else:
+                    seen[n] = 0
+                    unique_names.append(n)
+            n_dupes = sum(v for v in seen.values())
+            if n_dupes:
+                logger.warning(f"{n_dupes} duplicate symbols renamed with _1, _2 ... suffixes")
+
+            df.columns = unique_names
             
             # Store converted dataset
             converted_id = f"symbols_{dataset_id[:8]}"
