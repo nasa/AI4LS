@@ -11,7 +11,8 @@ RUN apt-get update && \
 
 # Copy requirements and install
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip3 install --no-cache-dir --upgrade protobuf
 
 # Copy proto files
 COPY proto/ ./proto/

@@ -5,7 +5,8 @@ from concurrent import futures
 import logging
 import os
 
-from generated import bioinformatics_service_pb2_grpc
+#from src.generated import bioinformatics_service_pb2_grpc
+from src import bioinformatics_service_pb2_grpc
 from src.service import BioinformaticsServiceImpl
 
 logging.basicConfig(level=logging.INFO)

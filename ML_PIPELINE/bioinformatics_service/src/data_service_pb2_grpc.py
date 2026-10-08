@@ -64,6 +64,16 @@ class DataServiceStub(object):
                 request_serializer=data__service__pb2.FilterRequest.SerializeToString,
                 response_deserializer=data__service__pb2.FilterResponse.FromString,
                 _registered_method=True)
+        self.FilterByCV = channel.unary_unary(
+                '/data.DataService/FilterByCV',
+                request_serializer=data__service__pb2.FilterByCVRequest.SerializeToString,
+                response_deserializer=data__service__pb2.FilterByCVResponse.FromString,
+                _registered_method=True)
+        self.ConvertFeatureNames = channel.unary_unary(
+                '/data.DataService/ConvertFeatureNames',
+                request_serializer=data__service__pb2.ConvertFeaturesRequest.SerializeToString,
+                response_deserializer=data__service__pb2.ConvertFeaturesResponse.FromString,
+                _registered_method=True)
 
 
 class DataServiceServicer(object):
@@ -129,6 +139,18 @@ class DataServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def FilterByCV(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ConvertFeatureNames(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DataServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -181,6 +203,16 @@ def add_DataServiceServicer_to_server(servicer, server):
                     servicer.FilterDataset,
                     request_deserializer=data__service__pb2.FilterRequest.FromString,
                     response_serializer=data__service__pb2.FilterResponse.SerializeToString,
+            ),
+            'FilterByCV': grpc.unary_unary_rpc_method_handler(
+                    servicer.FilterByCV,
+                    request_deserializer=data__service__pb2.FilterByCVRequest.FromString,
+                    response_serializer=data__service__pb2.FilterByCVResponse.SerializeToString,
+            ),
+            'ConvertFeatureNames': grpc.unary_unary_rpc_method_handler(
+                    servicer.ConvertFeatureNames,
+                    request_deserializer=data__service__pb2.ConvertFeaturesRequest.FromString,
+                    response_serializer=data__service__pb2.ConvertFeaturesResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -453,6 +485,60 @@ class DataService(object):
             '/data.DataService/FilterDataset',
             data__service__pb2.FilterRequest.SerializeToString,
             data__service__pb2.FilterResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def FilterByCV(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.DataService/FilterByCV',
+            data__service__pb2.FilterByCVRequest.SerializeToString,
+            data__service__pb2.FilterByCVResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ConvertFeatureNames(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.DataService/ConvertFeatureNames',
+            data__service__pb2.ConvertFeaturesRequest.SerializeToString,
+            data__service__pb2.ConvertFeaturesResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -14,9 +14,10 @@ logger = logging.getLogger(__name__)
 class DESeq2Analysis:
     """DESeq2 differential expression analysis using R"""
     
-    def __init__(self, output_base_path: str = "/app/results"):
+    def __init__(self, output_base_path: str = "/app/results", data_client=None):
         self.output_base_path = Path(output_base_path)
         self.output_base_path.mkdir(parents=True, exist_ok=True)
+        self.data_client = data_client
         
         # Source R script once during initialization
         r_script_path = Path("/app/r_scripts/deseq2_wrapper.R")
@@ -47,13 +48,19 @@ class DESeq2Analysis:
             output_dir = self.output_base_path / analysis_id
             output_dir.mkdir(parents=True, exist_ok=True)
             
-            # Load dataset (assumes it's stored in /app/datasets)
+            '''# Load dataset (assumes it's stored in /app/datasets)
             dataset_path = Path(f"/app/datasets/{dataset_id}.parquet")
             if not dataset_path.exists():
                 raise FileNotFoundError(f"Dataset not found: {dataset_path}")
             
             df = pd.read_parquet(dataset_path)
+            logger.info(f"Loaded dataset: {df.shape}")'''
+
+            # Load dataset via gRPC (not from disk)
+            logger.info(f"Fetching dataset {dataset_id} from data service...")
+            df = self.data_client.get_dataset(dataset_id)
             logger.info(f"Loaded dataset: {df.shape}")
+
             
             # Step 1: Extract condition column
             condition_cols = [col for col in df.columns if 'Factor' in col or 'Condition' in col]

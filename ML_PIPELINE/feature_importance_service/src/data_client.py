@@ -37,7 +37,8 @@ class DataServiceClient:
         # Import here to avoid issues if protobuf files not yet generated
         try:
             #from data_service.generated import data_service_pb2, data_service_pb2_grpc
-            from generated import data_service_pb2, data_service_pb2_grpc
+            #from generated import data_service_pb2, data_service_pb2_grpc
+            from . import data_service_pb2, data_service_pb2_grpc
             self.data_service_pb2 = data_service_pb2
             self.data_service_pb2_grpc = data_service_pb2_grpc
         except ImportError as e:

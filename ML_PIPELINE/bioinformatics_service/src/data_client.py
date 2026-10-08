@@ -37,7 +37,8 @@ class DataServiceClient:
         # Import here to avoid issues if protobuf files not yet generated
         try:
             #from data_service.generated import data_service_pb2, data_service_pb2_grpc
-            from generated import data_service_pb2, data_service_pb2_grpc
+            #from generated import data_service_pb2, data_service_pb2_grpc
+            from . import data_service_pb2, data_service_pb2_grpc
             self.data_service_pb2 = data_service_pb2
             self.data_service_pb2_grpc = data_service_pb2_grpc
         except ImportError as e:
@@ -47,6 +48,7 @@ class DataServiceClient:
             raise
         
         self.channel = grpc.insecure_channel(self.service_url)
+        self.data_service_stub = self.data_service_pb2_grpc.DataServiceStub(self.channel)  # ← Add this
         self.multi_stub = self.data_service_pb2_grpc.MultiDatasetServiceStub(self.channel)
     
     # ============================================================================
@@ -255,6 +257,34 @@ class DataServiceClient:
     def close(self):
         """Close the channel"""
         self.channel.close()
+
+    def get_dataset(self, dataset_id):
+        """Load a dataset from disk"""
+        try:
+            from pathlib import Path
+            import pandas as pd
+            from io import BytesIO
+
+            logger.info(f"Fetching dataset {dataset_id} from data service...")
+        
+            # Call data service to get dataset
+            request = self.data_service_pb2.GetDatasetRequest(dataset_id=dataset_id)
+        
+            chunks = []
+            for chunk in self.data_service_stub.GetDataset(request):
+                chunks.append(chunk.data)
+            if not chunks:
+                raise FileNotFoundError(f"Dataset {dataset_id} not found")
+        
+            # Concatenate chunks and deserialize
+            combined_data = b''.join(chunks)
+            df = pd.read_parquet(BytesIO(combined_data))
+            logger.info(f"✓ Loaded dataset {dataset_id}: {df.shape[0]} samples × {df.shape[1]} features")
+            return df
+
+        except Exception as e:
+            logger.error(f"Error loading dataset {dataset_id}: {e}")
+            raise
 
 
 # ============================================================================

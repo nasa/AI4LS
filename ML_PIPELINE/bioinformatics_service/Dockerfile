@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-dev \
+    build-essential \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
@@ -16,6 +17,9 @@ RUN apt-get update && apt-get install -y \
     libtiff5-dev \
     libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
+
+
+#RUN pip3 install --no-cache-dir setuptools
 
 # Set R environment variables
 ENV R_HOME=/usr/local/lib/R
@@ -31,20 +35,21 @@ WORKDIR /app
 
 # Install Python dependencies
 COPY requirements.txt .
+#RUN pip3 install --no-cache-dir setuptools
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy proto files
 COPY proto/ ./proto/
 
 # Generate gRPC code
-RUN mkdir -p generated && \
-    touch generated/__init__.py && \
-    python3 -m grpc_tools.protoc \
-        -I./proto \
-        --python_out=./generated \
-        --grpc_python_out=./generated \
-        ./proto/bioinformatics_service.proto && \
-    sed -i 's/^import bioinformatics_service_pb2/from . import bioinformatics_service_pb2/' generated/bioinformatics_service_pb2_grpc.py
+#RUN mkdir -p generated && \
+#    touch generated/__init__.py && \
+#    python3 -m grpc_tools.protoc \
+#        -I./proto \
+#        --python_out=./generated \
+#        --grpc_python_out=./generated \
+#        ./proto/bioinformatics_service.proto && \
+#    sed -i 's/^import bioinformatics_service_pb2/from . import bioinformatics_service_pb2/' generated/bioinformatics_service_pb2_grpc.py
 
 # Set PYTHONPATH
 ENV PYTHONPATH=/app
@@ -52,6 +57,10 @@ ENV PYTHONPATH=/app
 # Copy source code
 COPY src/ ./src/
 COPY r_scripts/ ./r_scripts/
+
+# Copy pre-generated data_service protobuf files from host
+# Paths are relative to Dockerfile
+COPY generated/ /app/src/generated/
 
 # Expose gRPC port
 EXPOSE 50054

@@ -26,6 +26,7 @@ from src.models import (
 from src.clients.data_client import DataServiceClient
 from src.clients.ml_client import MLServiceClient
 from src.clients.feature_importance_client import FeatureImportanceClient
+from src.clients.bioinformatics_client import BioinformaticsClient
 
 from src.generated import data_service_pb2, data_service_pb2_grpc
 
@@ -39,11 +40,13 @@ logger = logging.getLogger(__name__)
 data_client: DataServiceClient = None
 ml_client: MLServiceClient = None
 fi_client: FeatureImportanceClient = None
+bio_client: BioinformaticsClient = None  # ← ADD
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle management for the application"""
-    global data_client, ml_client, fi_client
+    global data_client, ml_client, fi_client, bio_client
     
     settings = get_settings()
     
@@ -65,6 +68,12 @@ async def lifespan(app: FastAPI):
         logger.info("✓ Feature Importance Service client initialized")
     except Exception as e:
         logger.error(f"Failed to initialize Feature Importance Service client: {e}")
+
+    try:
+        bio_client = BioinformaticsClient(settings.bioinformatics_service_url)
+        logger.info("✓ Bioinformatics Service client initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize Bioinformatics Service client: {e}")
     
     yield
     
@@ -75,6 +84,8 @@ async def lifespan(app: FastAPI):
         ml_client.close()
     if fi_client:
         fi_client.close()
+    if bio_client:
+        bio_client.close()
 
 app = FastAPI(
     title="ML Pipeline Orchestration Service",
@@ -473,6 +484,36 @@ async def run_pipeline(request: PipelineRequest):
                     }) + "\n"
                     return
 
+            # Convert Ensembl IDs to gene symbols
+            logger.info(f"Pipeline {pipeline_id}: Converting Ensembl IDs to gene symbols...")
+
+            yield json.dumps({
+                "pipeline_id": pipeline_id,
+                "status": "converting",
+                "message": "Converting feature names...",
+                "progress_percent": 32
+            }) + "\n"
+            
+            try:
+                convert_result = data_client.convert_feature_names(transformed_id)
+                
+                if convert_result["success"]:
+                    transformed_id = convert_result["converted_dataset_id"]
+                    conversion_rate = convert_result["conversion_rate"]
+                    logger.info(f"✓ Converted {convert_result['converted_count']} features ({conversion_rate:.1%})")
+                    
+                    yield json.dumps({
+                        "pipeline_id": pipeline_id,
+                        "status": "converting",
+                        "message": f"Converted {convert_result['converted_count']} Ensembl IDs to gene symbols",
+                        "progress_percent": 33
+                    }) + "\n"
+                else:
+                    # Not a fatal error - continue with original IDs
+                    logger.warning(f"Feature conversion failed: {convert_result['error_message']}")
+            except Exception as e:
+                logger.warning(f"Feature conversion error: {e}")
+            
             logger.info(f"Pipeline {pipeline_id}: Training ensemble models...")
             
             ensemble_result = None
@@ -521,6 +562,55 @@ async def run_pipeline(request: PipelineRequest):
                         logger.warning(f"Failed to compute importance for {model_id}: {fi_result.get('error')}")
 
 
+            # Run DESeq2 analysis if requested
+            logger.info(f"Pipeline {pipeline_id}: Running DESeq2 analysis...")
+
+            yield json.dumps({
+                "pipeline_id": pipeline_id,
+                "status": "deseq2",
+                "message": "Running DESeq2 differential expression analysis...",
+                "progress_percent": 85
+            }) + "\n"
+            
+            deseq2_result = None
+            try:
+                # Get condition info from request
+                condition_col = request.config.factor_name or request.config.target_column
+                factor_values = request.config.factor_values or []
+                
+                if len(factor_values) >= 2:
+                    control = factor_values[0]
+                    treatment = factor_values[1]
+                    
+                    deseq2_result = bio_client.run_deseq2(
+                        dataset_id=transformed_id,
+                        condition_column=condition_col,
+                        control_group=control,
+                        treatment_group=treatment,
+                        padj_threshold=0.05,
+                        log2fc_threshold=0.0
+                    )
+                    
+                    if deseq2_result.get("success"):
+                        sig_genes = deseq2_result.get("num_significant", 0)
+                        up = deseq2_result.get("num_upregulated", 0)
+                        down = deseq2_result.get("num_downregulated", 0)
+                        logger.info(f"✓ DESeq2 complete: {sig_genes} significant genes ({up} up, {down} down)")
+                        
+                        yield json.dumps({
+                            "pipeline_id": pipeline_id,
+                            "status": "deseq2",
+                            "message": f"DESeq2: {sig_genes} significant genes ({up} up, {down} down)",
+                            "progress_percent": 90
+                        }) + "\n"
+                    else:
+                        logger.warning(f"DESeq2 failed: {deseq2_result.get('error')}")
+                else:
+                    logger.warning("Insufficient factor values for DESeq2 analysis")
+            except Exception as e:
+                logger.error(f"Error running DESeq2: {e}", exc_info=True)
+            
+            
             # Final response with complete results
             yield json.dumps({
                 "pipeline_id": pipeline_id,
@@ -536,6 +626,7 @@ async def run_pipeline(request: PipelineRequest):
                 },
                 "training_results": ensemble_result or {},
                 "feature_importance": feature_importance_results,
+                "deseq2_results": deseq2_result or {},  # ← ADD
                 "transformed_dataset_id": transformed_id
             }) + "\n"
             

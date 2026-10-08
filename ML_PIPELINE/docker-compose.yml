@@ -54,6 +54,7 @@ services:
       - "50051:50051"
     volumes:
       - ./datasets:/app/datasets
+      - ./data_service/data:/app/data 
     networks:
       - ml-pipeline-network
     restart: unless-stopped

@@ -144,6 +144,21 @@ message FilterResponse {
 
 
 
+message ConvertFeaturesRequest {
+    string dataset_id = 1;
+}
+
+message ConvertFeaturesResponse {
+    bool success = 1;
+    string converted_dataset_id = 2;
+    int32 original_count = 3;
+    int32 converted_count = 4;
+    float conversion_rate = 5;
+    string error_message = 6;
+}
+
+
+
 service DataService {
     rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
     rpc ValidateDataset(ValidationRequest) returns (ValidationResult);
@@ -156,6 +171,8 @@ service DataService {
     rpc GetDatasetInfo(GetDatasetInfoRequest) returns (DatasetInfo);
     rpc FilterDataset(FilterRequest) returns (FilterResponse);
     rpc FilterByCV(FilterByCVRequest) returns (FilterByCVResponse);
+    rpc ConvertFeatureNames(ConvertFeaturesRequest) returns (ConvertFeaturesResponse);
+
 }
 
 // ============================================================================

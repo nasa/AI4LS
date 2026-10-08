@@ -44,6 +44,81 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         logger.info(f"DataService initialized with dataset path: {self.dataset_path}")
         logger.info(f"Loaded {len(self.download_cache)} cached downloads")
 
+       # Load Ensembl to gene symbol mapping
+        self.ensembl_mapping = {}
+        mapping_file = Path("/app/data/ensembl_to_symbol.csv")
+        
+        if mapping_file.exists():
+            try:
+                mapping_df = pd.read_csv(mapping_file, sep=',', header=0)
+                # Create bidirectional mapping
+                self.ensembl_mapping = dict(zip(
+                    mapping_df['ensembl_id'],
+                    mapping_df['gene_symbol']
+                ))
+                logger.info(f"✓ Loaded {len(self.ensembl_mapping)} Ensembl→Symbol mappings")
+            except Exception as e:
+                logger.warning(f"Failed to load Ensembl mapping: {e}")
+        else:
+            logger.warning(f"Ensembl mapping file not found: {mapping_file}")
+
+    def ConvertFeatureNames(self, request, context):
+        """Convert Ensembl IDs to gene symbols in dataset feature names"""
+        try:
+            dataset_id = request.dataset_id
+            logger.info(f"Converting feature names for {dataset_id}...")
+            
+            # Load dataset
+            df = self.datasets.get(dataset_id)
+            if df is None:
+                return data_service_pb2.ConvertFeaturesResponse(
+                    success=False,
+                    error_message=f"Dataset {dataset_id} not found"
+                )
+            
+            # Try to convert column names
+            original_names = list(df.columns)
+            converted_names = []
+            conversion_count = 0
+            
+            for name in original_names:
+                # Check if this looks like an Ensembl ID
+                if name.startswith('ENS') or name in self.ensembl_mapping:
+                    logger.debug(f"converting ID: {name}")
+                    # Attempt conversion
+                    symbol = self.ensembl_mapping.get(name, name)
+                    converted_names.append(symbol)
+                    if symbol != name:
+                        conversion_count += 1
+                        logger.debug(f"  {name} → {symbol}")
+                else:
+                    converted_names.append(name)
+                    logger.warn(f"couldn't convert gene ID: {name}")
+            
+            # Rename columns
+            df.columns = converted_names
+            
+            # Store converted dataset
+            converted_id = f"symbols_{dataset_id[:8]}"
+            self.datasets[converted_id] = df
+            
+            logger.info(f"✓ Converted {conversion_count}/{len(original_names)} feature names")
+            
+            return data_service_pb2.ConvertFeaturesResponse(
+                success=True,
+                converted_dataset_id=converted_id,
+                original_count=len(original_names),
+                converted_count=conversion_count,
+                conversion_rate=conversion_count / len(original_names) if original_names else 0
+            )
+        
+        except Exception as e:
+            logger.error(f"Error converting features: {e}", exc_info=True)
+            return data_service_pb2.ConvertFeaturesResponse(
+                success=False,
+                error_message=str(e)
+            )
+
     
     def _load_download_cache(self):
         """Load download cache from disk"""

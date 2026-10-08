@@ -15,8 +15,9 @@ COPY requirements.txt .
 #COPY Mus_musculus.GRCm39.115.gtf.gz . 
 
 # Install grpcio-tools explicitly first, then the rest
-RUN pip install --no-cache-dir grpcio-tools==1.62.0 && \
-    pip install --no-cache-dir -r requirements.txt
+#RUN pip install --no-cache-dir grpcio-tools==1.62.0 && \
+RUN  pip install --no-cache-dir -r requirements.txt && \
+    pip3 install --no-cache-dir --upgrade protobuf
 
 # Copy proto files
 COPY proto/ ./proto/

@@ -50,6 +50,32 @@ class DataServiceClient:
         self.channel = grpc.insecure_channel(self.service_url)
         self.multi_stub = self.data_service_pb2_grpc.MultiDatasetServiceStub(self.channel)
 
+    def convert_feature_names(self, dataset_id: str) -> Dict:
+        """Convert Ensembl IDs to gene symbols"""
+        try:
+            stub = self.data_service_pb2_grpc.DataServiceStub(self.channel)
+        
+            request = self.data_service_pb2.ConvertFeaturesRequest(
+                dataset_id=dataset_id
+            )
+        
+            response = stub.ConvertFeatureNames(request)
+            
+            return {
+                "success": response.success,
+                "converted_dataset_id": response.converted_dataset_id,
+                "original_count": response.original_count,
+                "converted_count": response.converted_count,
+                "conversion_rate": float(response.conversion_rate),
+                "error_message": response.error_message if not response.success else None
+            }
+        except Exception as e:
+            logger.error(f"Error converting features: {e}")
+            return {
+                "success": False,
+                "error_message": str(e)
+            }
+
     def filter_by_cv(self, dataset_id: str, min_features: int, target_column: str=None) -> Dict:
         """Filter dataset by coefficient of variation"""
         try:

@@ -5,9 +5,10 @@ import logging
 import os
 from pathlib import Path
 
-from generated import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc
+from src import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc
 from src.kegg_enrichment import KEGGEnrichment
 from src.deseq2_analysis import DESeq2Analysis
+from src.data_client import DataServiceClient
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,9 +19,14 @@ class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsSe
     def __init__(self, results_path: str = "/app/results"):
         self.results_path = Path(results_path)
         self.results_path.mkdir(parents=True, exist_ok=True)
+
+        # Initialize data service client
+        self.data_client = DataServiceClient(service_url="data_service:50051")
         
         self.kegg_analyzer = KEGGEnrichment(results_path)
-        self.deseq2_analyzer = DESeq2Analysis(results_path)
+        self.deseq2_analyzer = DESeq2Analysis(results_path, self.data_client)
+
+    
         
         logger.info("BioinformaticsService initialized")
         logger.info(f"Results path: {self.results_path}")

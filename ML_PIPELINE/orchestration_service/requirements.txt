@@ -1,5 +1,5 @@
 fastapi
-protobuf
+protobuf==4.25.1
 uvicorn[standard]
 pydantic
 pydantic-settings

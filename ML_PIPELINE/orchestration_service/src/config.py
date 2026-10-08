@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     data_service_url: str = "data_service:50051"
     ml_service_url: str = "ml_service:50052"
     feature_importance_service_url: str = "feature_importance_service:50053"
+    bioinformatics_service_url: str = "bioinformatics_service:50054"
     
     # File upload limits
     max_upload_size: int = 100 * 1024 * 1024  # 100MB
