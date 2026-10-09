@@ -131,10 +131,14 @@ c(result$num_genes, result$num_significant, result$num_upregulated, result$num_d
                 results_df = pd.read_csv(results_file, index_col=0)
                 
                 # Filter significant genes
-                sig_genes = results_df[
+                # Return ALL tested genes, most significant first (NaN padj last).
+                # Significance counts above still use padj_threshold / log2fc_threshold.
+                sig_genes = results_df.sort_values('padj', na_position='last')
+
+                '''sig_genes = results_df[
                     (results_df['padj'] < padj_threshold) & 
                     (abs(results_df['log2FoldChange']) > log2fc_threshold)
-                ].sort_values('padj')
+                ].sort_values('padj')'''
                 
                 differential_genes = []
                 for idx, (gene_id, row) in enumerate(sig_genes.iterrows(), 1):
@@ -153,7 +157,7 @@ c(result$num_genes, result$num_significant, result$num_upregulated, result$num_d
                 "num_significant": num_significant,
                 "num_upregulated": num_upregulated,
                 "num_downregulated": num_downregulated,
-                "differential_genes": differential_genes[:500],  # Top 500
+                "differential_genes": differential_genes,  
                 "volcano_plot_path": str(output_dir / "volcano_plot.png"),
                 "ma_plot_path": str(output_dir / "ma_plot.png")
             }
