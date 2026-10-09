@@ -80,14 +80,18 @@ class MLServiceClient:
         hyperparameters: Dict[str, str] = None,
         test_size: float = 0.2,
         random_state: int = 42,
-        fi_methods: List[str] = None
+        fi_methods: List[str] = None,
+        trans_list: str = ""
         ) -> Iterator[Dict]:
         """Train ensemble of models with streaming progress"""
         try:
             request = EnsembleRequest(
                 dataset_id=dataset_id,
                 target_column=target_column,
-                algorithms=algorithms
+                algorithms=algorithms,
+                test_size=test_size,
+                random_state=random_state,
+                trans_list=trans_list or "",
             )
 
             response = self.stub.TrainEnsemble(request)

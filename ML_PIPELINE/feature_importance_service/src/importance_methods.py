@@ -8,6 +8,29 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+def _final_estimator(model):
+    """Underlying estimator, whether or not the model is a Pipeline([log, scale, model])."""
+    from sklearn.pipeline import Pipeline
+    return model.steps[-1][1] if isinstance(model, Pipeline) else model
+
+
+def _rfe_importance_getter(model):
+    """
+    importance_getter for RFE that reaches through a Pipeline to the final estimator.
+    Returns None when the estimator exposes neither coef_ nor feature_importances_
+    (e.g. RBF-kernel SVC, MLP), in which case RFE is not possible.
+    Needs a FITTED model to inspect.
+    """
+    from sklearn.pipeline import Pipeline
+    est = _final_estimator(model)
+    prefix = f"named_steps.{model.steps[-1][0]}." if isinstance(model, Pipeline) else ""
+    if hasattr(est, "feature_importances_"):
+        return prefix + "feature_importances_"
+    if hasattr(est, "coef_"):
+        return prefix + "coef_"
+    return None
+
 class FeatureImportanceMethods:
     """Methods for computing feature importance"""
     
@@ -18,8 +41,9 @@ class FeatureImportanceMethods:
         (Random Forest, Gradient Boosting, XGBoost, etc.)
         """
         try:
-            if hasattr(model, 'feature_importances_'):
-                importances = model.feature_importances_
+            est = _final_estimator(model)
+            if hasattr(est, 'feature_importances_'):
+                importances = est.feature_importances_
                 
                 results = []
                 for i, (name, importance) in enumerate(zip(feature_names, importances)):
@@ -65,19 +89,25 @@ class FeatureImportanceMethods:
             step: Number of features to remove at each iteration
         """
 
-        logger.info(f"examining feature importance for model of type {type(model)}")
-        if isinstance(model, (SVC, SVR)):
-            logger.warning("SVC/SVR don't support RFE - skipping")
+        est = _final_estimator(model)
+        logger.info(f"examining feature importance for model of type {type(est).__name__}"
+                    f"{' (in Pipeline)' if est is not model else ''}")
+        getter = _rfe_importance_getter(model)
+        if getter is None:
+            logger.warning(f"{type(est).__name__} exposes neither coef_ nor feature_importances_ "
+                           "(e.g. RBF SVC, MLP) - skipping RFE")
             return []
-        
+
         try:
             logger.info(f"Running RFE: selecting {n_features_to_select} features")
-            
-            # Create RFE selector
+
+            # Create RFE selector. RFE refits a clone of the whole Pipeline at each step,
+            # so the log/scale transforms are re-fit on the data RFE sees.
             rfe = RFE(
                 estimator=model,
-                n_features_to_select=20,
-                step=step
+                n_features_to_select=n_features_to_select,
+                step=step,
+                importance_getter=getter,
             )
             
             # Fit RFE
@@ -144,13 +174,13 @@ class FeatureImportanceMethods:
         
             # If model is MLPClassifier, use RandomForest for SFS instead
             # (MLPClassifier has convergence issues in cross-validation)
-            if isinstance(model, (MLPClassifier, MLPRegressor)):
+            if isinstance(_final_estimator(model), (MLPClassifier, MLPRegressor)):
                 logger.warn("sequential feature selection doesn't support MLP - skipping")
                 return []
         
             # Create Sequential Feature Selector
             sfs = SequentialFeatureSelector(
-                estimator=estimator,
+                estimator=model,
                 n_features_to_select=n_features_to_select,
                 direction=direction,
                 cv=cv,

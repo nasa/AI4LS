@@ -527,7 +527,8 @@ async def run_pipeline(request: PipelineRequest):
                 hyperparameters={k: str(v) for k, v in request.config.hyperparameters.items()},
                 test_size=request.config.test_size,
                 random_state=request.config.random_state,
-                fi_methods=request.config.fi_methods or []
+                fi_methods=request.config.fi_methods or [],
+                trans_list = request.config.trans_list or [],
             ):
                 ensemble_result = progress
     

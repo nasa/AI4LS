@@ -13,6 +13,7 @@ from generated import ml_service_pb2, ml_service_pb2_grpc
 from src.trainers import ModelTrainer
 from src.model_store import ModelStore
 from src.data_client import DataServiceClient
+from src.preprocessing import build_pipeline, check_input_for_log, parse_trans_list
 
 logger = logging.getLogger(__name__)
 
@@ -296,12 +297,21 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
             # Prepare data
             X = df.drop(columns=[target_column])
             y = df[target_column]
-       
+
+            test_size = round(request.test_size, 4) or 0.2   # proto float32 -> 0.20000000298...
+            random_state = request.random_state   # proto3 default 0 is a valid, reproducible seed
+            trans_list = request.trans_list
+            logger.info(f"test_size={test_size}, random_state={random_state}, "
+                        f"transformations={parse_trans_list(trans_list) or 'none'} (fit on train split only)")
+
             from sklearn.model_selection import train_test_split
             X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=0.2, random_state=random.randint(0, 100), stratify=y
+                X, y, test_size=test_size, random_state=random_state, stratify=y
             )
-        
+
+            # log1p expects raw counts; fail clearly if the data were already transformed
+            check_input_for_log(X_train, trans_list)
+
             logger.info(f"Train: {len(X_train)} samples, Test: {len(X_test)} samples")
         
             # Train each model
@@ -314,23 +324,26 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                     if algorithm == 'logistic_regression':
                         hyperparams = {
                             'max_iter': 100,
-                            'solver': 'lbfgs'
+                            'solver': 'lbfgs',
+                            'random_state': request.random_state or 42
                         }
                     elif algorithm == 'random_forest':
                         hyperparams = {
-                            'n_estimators': 50
+                            'n_estimators': 50,
+                            'random_state': request.random_state or 42
                         }
                     elif algorithm == "neural_network":
-                        defaults = {
-                            'hidden_layer_sizes': (100, 50),      # 2 hidden layers
-                            'max_iter': 100,                     # ← Was 200, now 1000
-                            'early_stopping': True,               # Stop if no improvement
+                        hyperparams = {
+                            'hidden_layer_sizes': (50,),      # 2 hidden layers
+                            'max_iter': 1000,                     # ← Was 200, now 1000
+                            'early_stopping': False,               # Stop if no improvement
                             'validation_fraction': 0.1,           # Use 10% for validation
                             'n_iter_no_change': 10,               # Stop after 20 iterations of no improvement
                             'learning_rate_init': 0.001,          # Better learning rate
                             'solver': 'adam',                     # Better optimizer
-                            'alpha': 0.0001,                      # L2 regularization
-                            'batch_size': 32,                     # Mini-batch size
+                            'alpha': 0.001,                      # L2 regularization
+                            'batch_size': 32, 			# Mini-batch size
+                            'random_state': request.random_state or 42
                         }
                     else:
                         hyperparams = {}
@@ -341,7 +354,10 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                         task_type="classification",
                         hyperparameters=hyperparams  # Use defaults
                     )
-                
+
+                    # Wrap as Pipeline([log, scale, model]); transforms are fit on X_train only
+                    model = build_pipeline(model, trans_list)
+
                     # Train model
                     trained_model, train_metrics, test_metrics, selected_features = self.model_trainer.train_model(
                         model, X_train, y_train, X_test, y_test, task_type="classification",
@@ -361,6 +377,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                         'num_samples': len(X_train) + len(X_test),  # Add this
                         'num_features': len(selected_features),
                         'hyperparameters': {},  # Add this
+                        'trans_list': ','.join(parse_trans_list(trans_list)),
                         'train_size': len(X_train),
                         'test_size': len(X_test),
                         'training_metrics': train_metrics,  # Change from train_metrics

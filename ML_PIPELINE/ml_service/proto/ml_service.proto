@@ -96,6 +96,9 @@ message EnsembleRequest {
     string dataset_id = 1;
     string target_column = 2;
     repeated string algorithms = 3;  // e.g., ["random_forest", "xgboost", "svm"]
+    float test_size = 4;             // 0 -> default 0.2
+    int32 random_state = 5;          // seed for the train/test split
+    string trans_list = 6;           // e.g. "l,s"; applied inside each model, fit on train only
 }
 
 // Individual model result

@@ -60,6 +60,12 @@ class ModelTrainer:
         parsed = {}
         
         for key, value in params.items():
+            if not isinstance(value, str):
+                parsed[key] = value
+                continue
+            if key == "hidden_layer_sizes":
+                parsed[key] = tuple(int(v) for v in value.replace("(", "").replace(")", "").split(",") if v.strip())
+                continue
             # Try to parse as int
             try:
                 parsed[key] = int(value)
