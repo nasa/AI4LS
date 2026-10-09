@@ -360,8 +360,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
 
                     # Train model
                     trained_model, train_metrics, test_metrics, selected_features = self.model_trainer.train_model(
-                        model, X_train, y_train, X_test, y_test, task_type="classification",
-                        min_features=100
+                        model, X_train, y_train, X_test, y_test, task_type="classification"
                     )
                 
                     # Generate model ID
