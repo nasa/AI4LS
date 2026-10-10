@@ -172,7 +172,25 @@ service DataService {
     rpc FilterDataset(FilterRequest) returns (FilterResponse);
     rpc FilterByCV(FilterByCVRequest) returns (FilterByCVResponse);
     rpc ConvertFeatureNames(ConvertFeaturesRequest) returns (ConvertFeaturesResponse);
+    rpc FilterByBiotype(FilterByBiotypeRequest) returns (FilterByBiotypeResponse);
+}
 
+// Keep only genes of the given biotypes (e.g. protein_coding), using the GTF(s) in GTF_DIR
+message FilterByBiotypeRequest {
+    string dataset_id = 1;
+    repeated string keep_biotypes = 2;      // default: ["protein_coding"]
+    repeated string protected_columns = 3;  // never dropped, e.g. the condition column
+    bool keep_unannotated = 4;              // keep genes missing from the GTF (default: drop)
+}
+
+message FilterByBiotypeResponse {
+    bool success = 1;
+    string filtered_dataset_id = 2;
+    int32 genes_before = 3;
+    int32 genes_after = 4;
+    int32 unannotated = 5;
+    map<string, int32> removed_by_biotype = 6;  // biotype -> genes removed
+    string error_message = 7;
 }
 
 // ============================================================================

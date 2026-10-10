@@ -17,6 +17,7 @@ from generated import data_service_pb2, data_service_pb2_grpc
 
 
 from src.transformations import DataTransformer
+from src.biotype_filter import filter_by_biotype
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -142,7 +143,7 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             df.columns = unique_names
             
             # Store converted dataset
-            converted_id = f"symbols_{dataset_id[:8]}"
+            converted_id = f"symbols_{uuid.uuid4().hex[:12]}"   # was symbols_{dataset_id[:8]} = always "symbols_filtered"
             self.datasets[converted_id] = df
             
             logger.info(f"✓ Converted {conversion_count}/{len(original_names)} feature names")
@@ -335,8 +336,8 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         
             filtered_features = df_filtered.shape[1]
         
-            # Save filtered dataset
-            filtered_id = f"filtered_{dataset_id[:8]}"
+            # Save filtered dataset (unique id, so concurrent runs can't overwrite each other)
+            filtered_id = f"filtered_{uuid.uuid4().hex[:12]}"
             self.datasets[filtered_id] = df_filtered
         
             logger.info(f"✓ Filtered {original_features} → {filtered_features} features")
@@ -353,6 +354,57 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
                 success=False,
                 error_message=str(e)
             )
+
+    def FilterByBiotype(self, request, context):
+        """Keep only genes of the requested biotypes (default protein_coding), using a local GTF."""
+        try:
+            dataset_id = request.dataset_id
+            keep_biotypes = list(request.keep_biotypes) or ["protein_coding"]
+
+            df = self.datasets.get(dataset_id)
+            if df is None:
+                dataset_file = self.dataset_path / f"{dataset_id}.parquet"
+                if not dataset_file.exists():
+                    return data_service_pb2.FilterByBiotypeResponse(
+                        success=False, error_message=f"Dataset {dataset_id} not found")
+                df = pd.read_parquet(dataset_file)
+                self.datasets[dataset_id] = df
+
+            # The condition column is numeric (encoded 1/0), so protect it explicitly
+            protected = set(request.protected_columns)
+            protected.update(c for c in df.columns if 'Factor' in str(c) or 'Condition' in str(c))
+
+            logger.info(f"Filtering {dataset_id} to biotypes {keep_biotypes} "
+                        f"(protected: {sorted(protected)})...")
+            df_filtered, report = filter_by_biotype(
+                df,
+                keep_biotypes=keep_biotypes,
+                protected_columns=sorted(protected),
+                keep_unannotated=request.keep_unannotated,
+            )
+            if report["genes_after"] == 0:
+                return data_service_pb2.FilterByBiotypeResponse(
+                    success=False,
+                    genes_before=report["genes_before"],
+                    unannotated=report["unannotated"],
+                    error_message=(f"No genes left after keeping {keep_biotypes}. "
+                                   f"{report['unannotated']} of {report['genes_before']} genes weren't in the GTF; "
+                                   "check the GTF matches this organism."))
+
+            filtered_id = f"coding_{uuid.uuid4().hex[:12]}"
+            self.datasets[filtered_id] = df_filtered
+
+            return data_service_pb2.FilterByBiotypeResponse(
+                success=True,
+                filtered_dataset_id=filtered_id,
+                genes_before=report["genes_before"],
+                genes_after=report["genes_after"],
+                unannotated=report["unannotated"],
+                removed_by_biotype={str(k): int(v) for k, v in report["removed_by_biotype"].items()},
+            )
+        except Exception as e:
+            logger.error(f"Error filtering by biotype: {e}", exc_info=True)
+            return data_service_pb2.FilterByBiotypeResponse(success=False, error_message=str(e))
 
     def _filter_cvs(self, df, start=None, step=None, min_features=1000):
         """

@@ -104,7 +104,31 @@ class DataServiceClient:
                 "error_message": str(e)
             }
 
-    
+    def filter_by_biotype(self, dataset_id: str, keep_biotypes: List[str] = None,
+                          protected_columns: List[str] = None, keep_unannotated: bool = False) -> Dict:
+        """Keep only genes of the given biotypes (default protein_coding)"""
+        try:
+            stub = self.data_service_pb2_grpc.DataServiceStub(self.channel)
+            request = self.data_service_pb2.FilterByBiotypeRequest(
+                dataset_id=dataset_id,
+                keep_biotypes=keep_biotypes or ["protein_coding"],
+                protected_columns=[c for c in (protected_columns or []) if c],
+                keep_unannotated=keep_unannotated,
+            )
+            response = stub.FilterByBiotype(request)
+            return {
+                "success": response.success,
+                "filtered_dataset_id": response.filtered_dataset_id,
+                "genes_before": response.genes_before,
+                "genes_after": response.genes_after,
+                "unannotated": response.unannotated,
+                "removed_by_biotype": dict(response.removed_by_biotype),
+                "error_message": response.error_message if not response.success else None,
+            }
+        except Exception as e:
+            logger.error(f"Error filtering by biotype: {e}")
+            return {"success": False, "error_message": str(e)}
+
     # ============================================================================
     # MULTI-DATASET SERVICE METHODS
     # ============================================================================

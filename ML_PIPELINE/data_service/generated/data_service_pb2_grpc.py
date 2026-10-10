@@ -74,6 +74,11 @@ class DataServiceStub(object):
                 request_serializer=data__service__pb2.ConvertFeaturesRequest.SerializeToString,
                 response_deserializer=data__service__pb2.ConvertFeaturesResponse.FromString,
                 _registered_method=True)
+        self.FilterByBiotype = channel.unary_unary(
+                '/data.DataService/FilterByBiotype',
+                request_serializer=data__service__pb2.FilterByBiotypeRequest.SerializeToString,
+                response_deserializer=data__service__pb2.FilterByBiotypeResponse.FromString,
+                _registered_method=True)
 
 
 class DataServiceServicer(object):
@@ -151,6 +156,12 @@ class DataServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def FilterByBiotype(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DataServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -213,6 +224,11 @@ def add_DataServiceServicer_to_server(servicer, server):
                     servicer.ConvertFeatureNames,
                     request_deserializer=data__service__pb2.ConvertFeaturesRequest.FromString,
                     response_serializer=data__service__pb2.ConvertFeaturesResponse.SerializeToString,
+            ),
+            'FilterByBiotype': grpc.unary_unary_rpc_method_handler(
+                    servicer.FilterByBiotype,
+                    request_deserializer=data__service__pb2.FilterByBiotypeRequest.FromString,
+                    response_serializer=data__service__pb2.FilterByBiotypeResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -539,6 +555,33 @@ class DataService(object):
             '/data.DataService/ConvertFeatureNames',
             data__service__pb2.ConvertFeaturesRequest.SerializeToString,
             data__service__pb2.ConvertFeaturesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def FilterByBiotype(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/data.DataService/FilterByBiotype',
+            data__service__pb2.FilterByBiotypeRequest.SerializeToString,
+            data__service__pb2.FilterByBiotypeResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -502,6 +502,28 @@ def _execute_pipeline(job: PipelineJob):
             logger.info(f"✓ Datasets combined: {transformed_id}")
             job.emit({"status": "downloading", "message": "Studies combined", "progress_percent": 20})
 
+        # ── Keep only coding genes (before CV, so min_features counts coding genes) ──
+        if getattr(request.config, "coding_only", False):
+            keep_biotypes = getattr(request.config, "keep_biotypes", None) or ["protein_coding"]
+            logger.info(f"Pipeline {pipeline_id}: Keeping biotypes {keep_biotypes}...")
+            job.emit({"status": "filtering",
+                      "message": f"Keeping only {', '.join(keep_biotypes)} genes...", "progress_percent": 22})
+            bt = data_client.filter_by_biotype(
+                dataset_id=transformed_id,
+                keep_biotypes=keep_biotypes,
+                protected_columns=[c for c in {request.config.target_column, request.config.factor_name} if c],
+            )
+            if not bt["success"]:
+                raise RuntimeError(f"Biotype filtering failed: {bt['error_message']}")
+            transformed_id = bt["filtered_dataset_id"]
+            removed = ", ".join(f"{n} {k}" for k, n in sorted(bt.get("removed_by_biotype", {}).items(),
+                                                              key=lambda kv: -kv[1])[:4])
+            job.emit({"status": "filtering",
+                      "message": f"Kept {bt['genes_after']:,} of {bt['genes_before']:,} genes"
+                                 + (f" (removed {removed}{', …' if len(bt.get('removed_by_biotype', {})) > 4 else ''})"
+                                    if removed else ""),
+                      "progress_percent": 24})
+
         # ── CV-based feature filtering ──
         if request.config.min_features and request.config.min_features > 0:
             logger.info(f"Pipeline {pipeline_id}: Filtering to {request.config.min_features} features by CV...")

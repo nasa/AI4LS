@@ -101,6 +101,8 @@ class PipelineConfig(BaseModel):
     exclude_columns: Optional[List[str]] = None
     fi_methods: Optional[List[str]] = None
     trans_list: Optional[str] = None
+    coding_only: bool = False
+    keep_biotypes: List[str] = ["protein_coding"]
 
 class PipelineRequest(BaseModel):
     """Request to run full ML pipeline"""

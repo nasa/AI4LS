@@ -55,6 +55,7 @@ services:
     volumes:
       - ./datasets:/app/datasets
       - ./data_service/data:/app/data 
+      - ./reference:/app/reference:ro
     networks:
       - ml-pipeline-network
     restart: unless-stopped
