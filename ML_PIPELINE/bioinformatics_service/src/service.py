@@ -42,7 +42,7 @@ class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsSe
                 control_group=request.control_group,
                 treatment_group=request.treatment_group,
                 padj_threshold=request.padj_threshold or 0.05,
-                log2fc_threshold=request.log2fc_threshold or 0
+                log2fc_threshold=request.log2fc_threshold or 2.0
             )
             
             # Build response
