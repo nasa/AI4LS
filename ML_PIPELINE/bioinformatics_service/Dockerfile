@@ -25,6 +25,9 @@ RUN apt-get update && apt-get install -y \
 ENV R_HOME=/usr/local/lib/R
 ENV LD_LIBRARY_PATH=/usr/local/lib/R/lib:$LD_LIBRARY_PATH
 
+RUN apt-get update && apt-get install -y --no-install-recommends libglpk40 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install R packages
 RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')"
 RUN R -e "BiocManager::install(c('DESeq2', 'clusterProfiler', 'enrichplot', 'DOSE', 'org.Mm.eg.db', 'org.Hs.eg.db', 'AnnotationDbi'), update=FALSE, ask=FALSE)"
