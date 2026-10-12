@@ -105,6 +105,7 @@ services:
       - DATA_SERVICE_URL=data_service:50051
       - ML_SERVICE_URL=ml_service:50052
       - CORS_ORIGINS=["http://localhost:3000","http://localhost:8000"]
+      - PIPELINE_WORKERS=10
     logging:
       driver: "json-file"
       options:
