@@ -69,8 +69,10 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
             dataset_id = request.dataset_id
             logger.info(f"Converting feature names for {dataset_id}...")
             
-            # Load dataset
+            # Load dataset (copy: the columns are renamed below, and the source may be shared)
             df = self.datasets.get(dataset_id)
+            if df is not None:
+                df = df.copy(deep=False)
             if df is None:
                 return data_service_pb2.ConvertFeaturesResponse(
                     success=False,
@@ -495,42 +497,52 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         key_string = "|".join(key_parts)
         return hashlib.md5(key_string.encode()).hexdigest()
     
-    def _build_dataset_info(self, dataset_id: str, df: pd.DataFrame):
-        """Build DatasetInfo message from DataFrame"""
-        
-        # Build ColumnInfo for each column
+    def _build_dataset_info(self, dataset_id: str, df: pd.DataFrame, max_gene_details: int = 50):
+        """Build DatasetInfo message from DataFrame.
+
+        Per-column details are built for every non-numeric column (condition, source, ...)
+        and only the first `max_gene_details` numeric (gene) columns. Doing all 57k genes
+        one by one took ~20 s per study, even on a cache hit. column_names still lists every column.
+        """
+        numeric = df.select_dtypes(include="number").columns
+        numeric_set = set(numeric)
+        # Non-numeric columns, plus the condition column (stored as 1/0, so numeric)
+        other = [c for c in df.columns
+                 if c not in numeric_set or 'Factor' in str(c) or 'Condition' in str(c)]
+        other_set = set(other)
+        detail_cols = other + [c for c in numeric[:max_gene_details] if c not in other_set]
+
+        null_counts = df[detail_cols].isnull().sum()
+        head = df[detail_cols].head(20)
+
         columns_info = []
-        for col in df.columns:
-            # Determine dtype
-            if pd.api.types.is_numeric_dtype(df[col]):
+        for col in detail_cols:
+            s = df[col]
+            if col in numeric_set:
                 dtype = "numeric"
-            elif pd.api.types.is_datetime64_any_dtype(df[col]):
+            elif pd.api.types.is_datetime64_any_dtype(s):
                 dtype = "datetime"
-            elif pd.api.types.is_categorical_dtype(df[col]) or df[col].dtype == "object":
+            elif isinstance(s.dtype, pd.CategoricalDtype) or s.dtype == "object":
                 dtype = "categorical"
             else:
                 dtype = "text"
-            
-            # Get sample values
-            sample_values = df[col].dropna().astype(str).head(3).tolist()
-            
             columns_info.append(data_service_pb2.ColumnInfo(
                 name=str(col),
                 dtype=dtype,
-                null_count=int(df[col].isnull().sum()),
-                sample_values=sample_values
+                null_count=int(null_counts[col]),
+                sample_values=head[col].dropna().astype(str).head(3).tolist(),
             ))
-        
+
         return data_service_pb2.DatasetInfo(
             dataset_id=dataset_id,
             num_rows=int(len(df)),
             num_columns=int(len(df.columns)),
             column_names=[str(c) for c in df.columns],
             sample_names=[str(s) for s in df.index],
-            size_bytes=int(df.memory_usage(deep=True).sum()),
+            size_bytes=int(df.memory_usage(deep=False).sum()),
             columns=columns_info
         )
-    
+
     def HealthCheck(self, request, context):
         """Health check endpoint"""
         return data_service_pb2.HealthCheckResponse(
@@ -1326,70 +1338,84 @@ class MultiDatasetServiceImpl(data_service_pb2_grpc.MultiDatasetServiceServicer)
                 error_message=str(e)
             )
     
-    def CombineDatasets(self, request, context):
-        """Combine multiple datasets into one"""
-        try:
-            # Load datasets from disk
-            datasets = {}
-            for dataset_id in request.dataset_ids:
-                dataset_path = Path("./datasets") / f"{dataset_id}.parquet"
-                if dataset_path.exists():
-                    datasets[dataset_id] = pd.read_parquet(dataset_path)
-            
-            if not datasets:
-                raise ValueError("No datasets found on disk")
-            
-            # Parse common genes if provided
-            # JC bug fix from chatgpt
-            common_genes = None
-            if request.common_genes:
-                common_genes = list(request.common_genes)
+    def _load_dataset(self, dataset_id: str) -> pd.DataFrame:
+        """Dataset from the shared in-memory cache, else from disk (and then cached)."""
+        df = self.data_service.datasets.get(dataset_id)
+        if df is None:
+            path = self.data_service.dataset_path / f"{dataset_id}.parquet"
+            if not path.exists():
+                raise ValueError(f"Dataset {dataset_id} not found in memory or at {path}")
+            df = pd.read_parquet(path)
+            self.data_service.datasets[dataset_id] = df
+        return df
 
-            
-            # Combine datasets
-            logger.info(f"datasets list in CombineDatasets {datasets}")
+    def _combined_cache_key(self, dataset_ids, common_genes) -> str:
+        """Same studies + same raw files + same gene list -> same key.
+
+        Each raw file's size and modification time are included, so if a study is
+        re-downloaded (e.g. with different factor values) the old combination isn't reused.
+        """
+        parts = []
+        for dataset_id in sorted(dataset_ids):
+            path = self.data_service.dataset_path / f"{dataset_id}.parquet"
+            st = path.stat() if path.exists() else None
+            parts.append(f"{dataset_id}:{st.st_size if st else 0}:{int(st.st_mtime) if st else 0}")
+        genes_hash = hashlib.md5(",".join(sorted(common_genes or [])).encode()).hexdigest()
+        return hashlib.md5(("|".join(parts) + "|" + genes_hash).encode()).hexdigest()[:16]
+
+    def _combine_response(self, combined_id: str, combined_df: pd.DataFrame):
+        samples_per_source = {str(k): int(v) for k, v in combined_df['source_dataset'].value_counts().items()}
+        condition_column = next((c for c in combined_df.columns if 'Factor' in c or 'Condition' in c), None)
+        return data_service_pb2.CombineDatasetsResponse(
+            success=True,
+            combined_dataset_id=combined_id,
+            total_samples=len(combined_df),
+            total_genes=len([c for c in combined_df.columns if c not in ['source_dataset', condition_column or '']]),
+            samples_per_source=samples_per_source,
+            condition_column=condition_column or ""
+        )
+
+    def CombineDatasets(self, request, context):
+        """Combine multiple datasets into one (reused when the same studies are requested again)"""
+        try:
+            dataset_ids = list(request.dataset_ids)
+            common_genes = list(request.common_genes) if request.common_genes else None
+
+            # Reuse an earlier combination of exactly these studies
+            combined_id = f"combined_{self._combined_cache_key(dataset_ids, common_genes)}"
+            output_path = self.data_service.dataset_path / f"{combined_id}.parquet"
+            if combined_id in self.data_service.datasets or output_path.exists():
+                combined_df = self._load_dataset(combined_id)
+                logger.info(f"✓ Reusing combined dataset {combined_id} for studies {sorted(dataset_ids)}")
+                return self._combine_response(combined_id, combined_df)
+
+            # Use the copies already in memory instead of re-reading each parquet file
+            datasets = {}
+            for dataset_id in dataset_ids:
+                try:
+                    datasets[dataset_id] = self._load_dataset(dataset_id)
+                except ValueError as e:
+                    logger.warning(str(e))
+            if not datasets:
+                raise ValueError("None of the requested datasets were found")
+            logger.info(f"Combining {len(datasets)} datasets: "
+                        f"{ {k: v.shape for k, v in datasets.items()} }")
+
             combined_df, dataset_map = self.combiner.combine_datasets(
                 datasets=datasets,
                 common_genes=common_genes
             )
-            
-            # Save combined dataset with UUID
-            combined_id = str(uuid.uuid4())
-            output_path = Path("./datasets") / f"{combined_id}.parquet"
-            logger.info(f"Saving combined dataset to: {output_path}")
-            combined_df.to_parquet(output_path)
+
+            # Write to a temp file and rename, so a parallel run never reads a half-written file
+            tmp_path = output_path.with_suffix(f".tmp-{uuid.uuid4().hex[:8]}")
+            combined_df.to_parquet(tmp_path)
+            os.replace(tmp_path, output_path)
+            self.data_service.datasets[combined_id] = combined_df
             logger.info(f"✓ Saved combined dataset: {output_path}")
 
-
-            # Store in memory cache so GetDataset can find it immediately
-            #self.datasets[combined_id] = combined_df
-            self.data_service.datasets[combined_id] = combined_df
-            logger.info(f"✓ Stored combined dataset in memory cache")
-
-            
-            # Count samples per source
-            samples_per_source = {}
-            for source, count in combined_df['source_dataset'].value_counts().items():
-                samples_per_source[source] = int(count)
-            
-            # Find condition column
-            condition_column = None
-            for col in combined_df.columns:
-                if 'Factor' in col or 'Condition' in col:
-                    condition_column = col
-                    break
-            
-            #return multi_dataset_service_pb2.CombineDatasetsResponse(
-            return data_service_pb2.CombineDatasetsResponse(
-                success=True,
-                combined_dataset_id=combined_id,
-                total_samples=len(combined_df),
-                total_genes=len([c for c in combined_df.columns if c not in ['source_dataset', condition_column or '']]),
-                samples_per_source=samples_per_source,
-                condition_column=condition_column or ""
-            )
+            return self._combine_response(combined_id, combined_df)
         except Exception as e:
-            logger.error(f"Error combining datasets: {e}")
+            logger.error(f"Error combining datasets: {e}", exc_info=True)
             return data_service_pb2.CombineDatasetsResponse(
                 success=False,
                 error_message=str(e)

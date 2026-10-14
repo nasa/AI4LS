@@ -96,18 +96,14 @@ class MultiDatasetCombiner:
                     logger.warning(f"No dataset_id in response for OSD-{osd_id}")
                     continue
                 
-                # Load the downloaded dataset from disk (stored as parquet)
-                dataset_path = Path("./datasets") / f"{dataset_id}.parquet"
-                print(f"DEBUG - Checking: {dataset_path.absolute()}")
-                print(f"DEBUG - Exists: {dataset_path.exists()}")
-                
-                
-                if not dataset_path.exists():
-                    logger.warning(f"Dataset file not found at {dataset_path}")
-                    continue
-                
-                # Read the parquet file
-                df = pd.read_parquet(dataset_path)
+                # Use the copy DownloadDataset just put in memory; read from disk only if it isn't there
+                df = getattr(self.data_client, "datasets", {}).get(dataset_id)
+                if df is None:
+                    dataset_path = Path("./datasets") / f"{dataset_id}.parquet"
+                    if not dataset_path.exists():
+                        logger.warning(f"Dataset file not found at {dataset_path}")
+                        continue
+                    df = pd.read_parquet(dataset_path)
                 #datasets[f"OSD-{osd_id}"] = df
                 datasets[osd_id] = df
                 
@@ -134,7 +130,6 @@ class MultiDatasetCombiner:
         logger.info(f"datasets data type: {type(datasets)}")
         for osd_id, df in datasets.items():
             logger.info(f"osd_id: {osd_id}")
-            logger.info(f"df head: {df.head()}")
             # Exclude the condition column and metadata columns
             condition_cols = [col for col in df.columns if 'Factor' in col or 'Condition' in col or col == 'source_dataset']
             genes = [col for col in df.columns if col not in condition_cols]
