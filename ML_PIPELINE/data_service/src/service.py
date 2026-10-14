@@ -12,6 +12,7 @@ import numpy as np
 from pathlib import Path
 from io import StringIO
 import requests
+import threading
 
 from generated import data_service_pb2, data_service_pb2_grpc
 
@@ -1250,6 +1251,8 @@ class MultiDatasetServiceImpl(data_service_pb2_grpc.MultiDatasetServiceServicer)
         """
         self.data_service = data_service_impl
         self.combiner = MultiDatasetCombiner(data_service_impl)  # Pass data_service as the "client"
+        self._combine_locks = {}
+        self._combine_locks_guard = threading.Lock()
         logger.info("MultiDatasetService initialized")
     
     def GetOSDIDsForTissue(self, request, context):
@@ -1384,43 +1387,53 @@ class MultiDatasetServiceImpl(data_service_pb2_grpc.MultiDatasetServiceServicer)
             # Reuse an earlier combination of exactly these studies
             combined_id = f"combined_{self._combined_cache_key(dataset_ids, common_genes)}"
             output_path = self.data_service.dataset_path / f"{combined_id}.parquet"
-            if combined_id in self.data_service.datasets or output_path.exists():
-                combined_df = self._load_dataset(combined_id)
-                logger.info(f"✓ Reusing combined dataset {combined_id} for studies {sorted(dataset_ids)}")
-                return self._combine_response(combined_id, combined_df)
 
-            # Use the copies already in memory instead of re-reading each parquet file
-            datasets = {}
-            for dataset_id in dataset_ids:
-                try:
-                    datasets[dataset_id] = self._load_dataset(dataset_id)
-                except ValueError as e:
-                    logger.warning(str(e))
-            if not datasets:
-                raise ValueError("None of the requested datasets were found")
-            logger.info(f"Combining {len(datasets)} datasets: "
-                        f"{ {k: v.shape for k, v in datasets.items()} }")
-
-            combined_df, dataset_map = self.combiner.combine_datasets(
-                datasets=datasets,
-                common_genes=common_genes
-            )
-
-            # Write to a temp file and rename, so a parallel run never reads a half-written file
-            tmp_path = output_path.with_suffix(f".tmp-{uuid.uuid4().hex[:8]}")
-            combined_df.to_parquet(tmp_path)
-            os.replace(tmp_path, output_path)
-            self.data_service.datasets[combined_id] = combined_df
-            logger.info(f"✓ Saved combined dataset: {output_path}")
-
-            return self._combine_response(combined_id, combined_df)
+            # One combine per set of studies: parallel runs asking for the same studies
+            # wait here for the first one to finish, then reuse its result
+            with self._combine_locks_guard:
+                key_lock = self._combine_locks.setdefault(combined_id, threading.Lock())
+            with key_lock:
+                return self._combine_locked(combined_id, output_path, dataset_ids, common_genes)
         except Exception as e:
             logger.error(f"Error combining datasets: {e}", exc_info=True)
             return data_service_pb2.CombineDatasetsResponse(
                 success=False,
                 error_message=str(e)
             )
-    
+
+    def _combine_locked(self, combined_id, output_path, dataset_ids, common_genes):
+        """Body of CombineDatasets, run while holding the lock for this set of studies."""
+        if combined_id in self.data_service.datasets or output_path.exists():
+            combined_df = self._load_dataset(combined_id)
+            logger.info(f"✓ Reusing combined dataset {combined_id} for studies {sorted(dataset_ids)}")
+            return self._combine_response(combined_id, combined_df)
+
+        # Use the copies already in memory instead of re-reading each parquet file
+        datasets = {}
+        for dataset_id in dataset_ids:
+            try:
+                datasets[dataset_id] = self._load_dataset(dataset_id)
+            except ValueError as e:
+                logger.warning(str(e))
+        if not datasets:
+            raise ValueError("None of the requested datasets were found")
+        logger.info(f"Combining {len(datasets)} datasets: "
+                    f"{ {k: v.shape for k, v in datasets.items()} }")
+
+        combined_df, dataset_map = self.combiner.combine_datasets(
+            datasets=datasets,
+            common_genes=common_genes
+        )
+
+        # Write to a temp file and rename, so a parallel run never reads a half-written file
+        tmp_path = output_path.with_suffix(f".tmp-{uuid.uuid4().hex[:8]}")
+        combined_df.to_parquet(tmp_path)
+        os.replace(tmp_path, output_path)
+        self.data_service.datasets[combined_id] = combined_df
+        logger.info(f"✓ Saved combined dataset: {output_path}")
+
+        return self._combine_response(combined_id, combined_df)
+
     def CombineByTissue(self, request, context):
         """Combine datasets by tissue name (convenience method)"""
         try:
