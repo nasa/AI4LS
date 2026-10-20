@@ -102,13 +102,30 @@ def load_annotation(gtf_paths: Optional[Sequence[str | Path]] = None) -> pd.Data
     return pd.concat([_load_one(Path(p)) for p in gtf_paths]).drop_duplicates("gene_id").reset_index(drop=True)
 
 
-def classify_columns(columns: Iterable[str], annotation: pd.DataFrame) -> pd.DataFrame:
-    """Biotype for each column: matched by Ensembl ID first, then by gene symbol."""
+_lookup_cache: Dict[int, Tuple[dict, dict]] = {}
+
+
+def _lookups(annotation: pd.DataFrame) -> Tuple[dict, dict]:
+    """gene_id -> biotype and gene_name -> biotype, built once per annotation table."""
+    key = id(annotation)
+    cached = _lookup_cache.get(key)
+    if cached is not None:
+        return cached
     by_id = dict(zip(annotation["gene_id"], annotation["biotype"]))
     named = annotation[annotation["gene_name"] != ""]
-    # A symbol shared by several genes counts as coding if any of them is (e.g. a gene and its pseudogene copy)
-    by_name = named.groupby("gene_name")["biotype"].agg(
-        lambda b: "protein_coding" if "protein_coding" in set(b) else b.iloc[0]).to_dict()
+    # A symbol shared by several genes counts as coding if any of them is (e.g. a gene and its
+    # pseudogene copy); otherwise it takes the biotype of its first gene
+    first = named.drop_duplicates("gene_name").set_index("gene_name")["biotype"]
+    coding_names = set(named.loc[named["biotype"] == "protein_coding", "gene_name"])
+    by_name = {n: ("protein_coding" if n in coding_names else bt) for n, bt in first.items()}
+    _lookup_cache.clear()          # keep only the current annotation
+    _lookup_cache[key] = (by_id, by_name)
+    return by_id, by_name
+
+
+def classify_columns(columns: Iterable[str], annotation: pd.DataFrame) -> pd.DataFrame:
+    """Biotype for each column: matched by Ensembl ID first, then by gene symbol."""
+    by_id, by_name = _lookups(annotation)
     out = []
     for col in columns:
         c = str(col)
@@ -138,9 +155,10 @@ def filter_by_biotype(
     annotation = load_annotation() if annotation is None else annotation
     keep = set(keep_biotypes)
     protected = set(protected_columns)
-    gene_cols = [c for c in df.columns
-                 if c not in protected and pd.api.types.is_numeric_dtype(df[c])]
-    other_cols = [c for c in df.columns if c not in set(gene_cols)]
+    numeric_cols = set(df.select_dtypes(include="number").columns)
+    gene_cols = [c for c in df.columns if c not in protected and c in numeric_cols]
+    gene_set = set(gene_cols)
+    other_cols = [c for c in df.columns if c not in gene_set]
 
     cls = classify_columns(gene_cols, annotation)
     unannotated = cls["biotype"].isna()

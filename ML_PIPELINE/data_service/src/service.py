@@ -441,25 +441,17 @@ class DataServiceImpl(data_service_pb2_grpc.DataServiceServicer):
         df_filtered = df[cols_to_keep].copy()
         logger.info(f"After removing low-count: {df_filtered.shape[1]} genes")
     
-        # Step 2: Calculate coefficient of variation for all genes
+        # Step 2: Calculate coefficient of variation for all genes (vectorized; was a per-gene loop)
         logger.info(f"\nCalculating coefficient of variation...")
-        cv_scores = {}
+        means = df_filtered.mean(axis=0)
+        stds = df_filtered.std(axis=0, ddof=0)          # population SD, same as np.std
+        cv = (stds / means).where(means != 0, 0.0)
     
-        for col in df_filtered.columns:
-            mean_val = np.mean(df_filtered[col])
-            std_val = np.std(df_filtered[col])
-        
-            # Avoid division by zero
-            if mean_val != 0:
-                cv = std_val / mean_val
-                cv_scores[col] = cv
-            else:
-                cv_scores[col] = 0
-    
-        # Step 3: Sort by CV and select top min_features
+        # Step 3: Sort by CV and select top min_features (stable: ties keep column order)
         logger.info(f"Selecting top {min_features} genes by CV...")
-        sorted_genes = sorted(cv_scores.items(), key=lambda x: x[1], reverse=True)
-        top_genes = [gene for gene, cv in sorted_genes[:min_features]]
+        order = np.argsort(-cv.to_numpy(), kind="stable")
+        sorted_genes = [(cv.index[i], float(cv.iloc[i])) for i in order]
+        top_genes = [gene for gene, _ in sorted_genes[:min_features]]
     
         logger.info(f"CV range: {sorted_genes[-1][1]:.6f} - {sorted_genes[0][1]:.6f}")
         logger.info(f"Top gene CV: {sorted_genes[0][0]} = {sorted_genes[0][1]:.6f}")
