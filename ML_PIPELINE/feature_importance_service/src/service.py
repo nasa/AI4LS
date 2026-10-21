@@ -97,7 +97,7 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
                 
                 elif method == "recursive":
                     n_features = int(params.get("n_features_to_select", 20))
-                    step = int(params.get("step", 1))
+                    step = int(params.get("step", 5))
                     scores = self.importance_methods.recursive_feature_elimination(
                         model, X, y, n_features_to_select=n_features, step=step
                     )
