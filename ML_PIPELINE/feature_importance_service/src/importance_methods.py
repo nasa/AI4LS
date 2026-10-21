@@ -75,7 +75,7 @@ class FeatureImportanceMethods:
         X: pd.DataFrame, 
         y: pd.Series,
         n_features_to_select: int = 20,
-        step: int = 0.25,
+        step: int = 0.10,
         n_jobs=-1
         
     ) -> List[Dict]:
