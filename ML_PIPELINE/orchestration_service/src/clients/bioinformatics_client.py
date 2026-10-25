@@ -13,6 +13,12 @@ class BioinformaticsClient:
         self.service_url = service_url
         self.channel = grpc.insecure_channel(service_url)
         self.stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(self.channel)
+        # Enrichment requests/responses carry thousands of genes and terms: allow larger messages
+        self.enrich_channel = grpc.insecure_channel(service_url, options=[
+            ('grpc.max_send_message_length', 64 * 1024 * 1024),
+            ('grpc.max_receive_message_length', 64 * 1024 * 1024),
+        ])
+        self.enrich_stub = bioinformatics_service_pb2_grpc.BioinformaticsServiceStub(self.enrich_channel)
         logger.info(f"Bioinformatics client initialized: {service_url}")
     
     def run_deseq2(
@@ -134,5 +140,66 @@ class BioinformaticsClient:
                 "error": str(e)
             }
     
+    def run_go_enrichment(
+        self,
+        gene_lists: Dict[str, List[str]],
+        rankings: Dict[str, Dict],          # name -> {"genes": [...], "scores": [...], "score_type": "std"|"pos"}
+        universe: List[str],
+        organism: str = "mmu",
+        ontologies: List[str] = None,
+        p_adjust_method: str = "BH",
+        padj_cutoff: float = 0.05,
+        qvalue_cutoff: float = 0.2,
+        min_gs_size: int = 10,
+        max_gs_size: int = 500,
+        simplify: bool = True,
+        simplify_cutoff: float = 0.7,
+        analysis_id: str = "",
+        timeout: float = 1800,
+    ) -> Dict:
+        """GO enrichment: ORA on each gene list, GSEA on each ranking"""
+        try:
+            request = bioinformatics_service_pb2.EnrichmentRequest(
+                analysis_id=analysis_id or "",
+                organism=organism,
+                gene_lists=[bioinformatics_service_pb2.GeneList(name=n, genes=list(g)) for n, g in gene_lists.items()],
+                rankings=[bioinformatics_service_pb2.GeneRanking(
+                    name=n, genes=list(r["genes"]), scores=[float(s) for s in r["scores"]],
+                    score_type=r.get("score_type", "std")) for n, r in rankings.items()],
+                universe=list(universe),
+                ontologies=list(ontologies or ["BP"]),
+                p_adjust_method=p_adjust_method,
+                padj_cutoff=padj_cutoff,
+                qvalue_cutoff=qvalue_cutoff,
+                min_gs_size=min_gs_size,
+                max_gs_size=max_gs_size,
+                simplify=simplify,
+                simplify_cutoff=simplify_cutoff,
+            )
+            response = self.enrich_stub.RunGOEnrichment(request, timeout=timeout)
+            if not response.success:
+                return {"success": False, "error": response.error_message}
+            return {
+                "success": True,
+                "output_dir": response.output_dir,
+                "terms": [{
+                    "analysis": t.analysis, "method": t.method, "ontology": t.ontology,
+                    "term_id": t.term_id, "description": t.description,
+                    "set_size": t.set_size, "count": t.count,
+                    "gene_ratio": t.gene_ratio, "bg_ratio": t.bg_ratio,
+                    "enrichment_score": t.enrichment_score, "nes": t.nes,
+                    "pvalue": t.pvalue, "padj": t.padj, "qvalue": t.qvalue,
+                    "genes": list(t.genes),
+                } for t in response.terms],
+                "summaries": [{
+                    "analysis": s.analysis, "method": s.method, "ontology": s.ontology,
+                    "n_input": s.n_input, "n_mapped": s.n_mapped, "n_terms": s.n_terms, "note": s.note,
+                } for s in response.summaries],
+            }
+        except Exception as e:
+            logger.error(f"Error running GO enrichment: {e}", exc_info=True)
+            return {"success": False, "error": str(e)}
+
     def close(self):
         self.channel.close()
+        self.enrich_channel.close()

@@ -78,7 +78,73 @@ message KEGGResponse {
     string error_message = 3;
 }
 
+// ── GO enrichment: ORA on gene lists, GSEA on rankings ─────────────────────
+message GeneList {
+    string name = 1;                 // e.g. "ml_consensus", "deseq2_significant", "overlap"
+    repeated string genes = 2;
+}
+
+message GeneRanking {
+    string name = 1;                 // e.g. "deseq2", "ml_importance"
+    repeated string genes = 2;
+    repeated double scores = 3;      // same order as genes
+    string score_type = 4;           // "std" (signed, up and down) or "pos" (importance-like)
+}
+
+message EnrichmentRequest {
+    string analysis_id = 1;
+    string organism = 2;             // "mmu" or "hsa"
+    repeated GeneList gene_lists = 3;
+    repeated GeneRanking rankings = 4;
+    repeated string universe = 5;    // all genes the pipeline analysed (background for ORA)
+    repeated string ontologies = 6;  // "BP", "MF", "CC"
+    string p_adjust_method = 7;
+    double padj_cutoff = 8;
+    double qvalue_cutoff = 9;
+    int32 min_gs_size = 10;
+    int32 max_gs_size = 11;
+    bool simplify = 12;
+    double simplify_cutoff = 13;
+}
+
+message EnrichedTerm {
+    string analysis = 1;             // list or ranking name
+    string method = 2;               // "ora" or "gsea"
+    string ontology = 3;
+    string term_id = 4;              // GO:0006412
+    string description = 5;
+    int32 set_size = 6;
+    int32 count = 7;                 // ORA: overlapping genes; GSEA: leading-edge genes
+    string gene_ratio = 8;           // ORA only
+    string bg_ratio = 9;             // ORA only
+    double enrichment_score = 10;    // GSEA only
+    double nes = 11;                 // GSEA only
+    double pvalue = 12;
+    double padj = 13;
+    double qvalue = 14;
+    repeated string genes = 15;      // gene symbols
+}
+
+message EnrichmentSummary {
+    string analysis = 1;
+    string method = 2;
+    string ontology = 3;
+    int32 n_input = 4;
+    int32 n_mapped = 5;
+    int32 n_terms = 6;
+    string note = 7;
+}
+
+message EnrichmentResponse {
+    bool success = 1;
+    string error_message = 2;
+    repeated EnrichedTerm terms = 3;
+    repeated EnrichmentSummary summaries = 4;
+    string output_dir = 5;
+}
+
 service BioinformaticsService {
     rpc RunDESeq2(DESeq2Request) returns (DESeq2Response);
     rpc RunKEGGEnrichment(KEGGRequest) returns (KEGGResponse);
+    rpc RunGOEnrichment(EnrichmentRequest) returns (EnrichmentResponse);
 }

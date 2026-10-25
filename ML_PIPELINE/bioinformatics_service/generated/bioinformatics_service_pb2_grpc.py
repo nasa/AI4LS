@@ -44,6 +44,11 @@ class BioinformaticsServiceStub(object):
                 request_serializer=bioinformatics__service__pb2.KEGGRequest.SerializeToString,
                 response_deserializer=bioinformatics__service__pb2.KEGGResponse.FromString,
                 _registered_method=True)
+        self.RunGOEnrichment = channel.unary_unary(
+                '/bioinformatics.BioinformaticsService/RunGOEnrichment',
+                request_serializer=bioinformatics__service__pb2.EnrichmentRequest.SerializeToString,
+                response_deserializer=bioinformatics__service__pb2.EnrichmentResponse.FromString,
+                _registered_method=True)
 
 
 class BioinformaticsServiceServicer(object):
@@ -61,6 +66,12 @@ class BioinformaticsServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RunGOEnrichment(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_BioinformaticsServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -73,6 +84,11 @@ def add_BioinformaticsServiceServicer_to_server(servicer, server):
                     servicer.RunKEGGEnrichment,
                     request_deserializer=bioinformatics__service__pb2.KEGGRequest.FromString,
                     response_serializer=bioinformatics__service__pb2.KEGGResponse.SerializeToString,
+            ),
+            'RunGOEnrichment': grpc.unary_unary_rpc_method_handler(
+                    servicer.RunGOEnrichment,
+                    request_deserializer=bioinformatics__service__pb2.EnrichmentRequest.FromString,
+                    response_serializer=bioinformatics__service__pb2.EnrichmentResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -129,6 +145,33 @@ class BioinformaticsService(object):
             '/bioinformatics.BioinformaticsService/RunKEGGEnrichment',
             bioinformatics__service__pb2.KEGGRequest.SerializeToString,
             bioinformatics__service__pb2.KEGGResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RunGOEnrichment(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/bioinformatics.BioinformaticsService/RunGOEnrichment',
+            bioinformatics__service__pb2.EnrichmentRequest.SerializeToString,
+            bioinformatics__service__pb2.EnrichmentResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from src import bioinformatics_service_pb2, bioinformatics_service_pb2_grpc
 from src.kegg_enrichment import KEGGEnrichment
+from src.go_enrichment import GOEnrichment
 from src.deseq2_analysis import DESeq2Analysis
 from src.data_client import DataServiceClient
 
@@ -27,6 +28,7 @@ class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsSe
         self.data_client = DataServiceClient(service_url="data_service:50051")
         
         self.kegg_analyzer = KEGGEnrichment(results_path)
+        self.go_analyzer = GOEnrichment(results_path)
         self.deseq2_analyzer = DESeq2Analysis(results_path, self.data_client)
 
     
@@ -134,3 +136,44 @@ class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsSe
                 success=False,
                 error_message=str(e)
             )
+
+    def RunGOEnrichment(self, request, context):
+        """GO enrichment: ORA on each gene list, GSEA on each ranking"""
+        try:
+            gene_lists = {gl.name: list(gl.genes) for gl in request.gene_lists}
+            rankings = {r.name: {"genes": list(r.genes), "scores": list(r.scores),
+                                 "score_type": r.score_type or "std"} for r in request.rankings}
+            if not gene_lists and not rankings:
+                return bioinformatics_service_pb2.EnrichmentResponse(
+                    success=False, error_message="No gene lists or rankings to analyse")
+            for name, r in rankings.items():
+                if len(r["genes"]) != len(r["scores"]):
+                    return bioinformatics_service_pb2.EnrichmentResponse(
+                        success=False, error_message=f"Ranking '{name}': {len(r['genes'])} genes but {len(r['scores'])} scores")
+
+            with R_LOCK:   # embedded R is not thread-safe
+                results = self.go_analyzer.run(
+                    gene_lists=gene_lists,
+                    rankings=rankings,
+                    universe=list(request.universe),
+                    organism=request.organism or "mmu",
+                    ontologies=list(request.ontologies) or ["BP"],
+                    p_adjust_method=request.p_adjust_method or "BH",
+                    padj_cutoff=request.padj_cutoff or 0.05,
+                    qvalue_cutoff=request.qvalue_cutoff or 0.2,
+                    min_gs_size=request.min_gs_size or 10,
+                    max_gs_size=request.max_gs_size or 500,
+                    simplify=request.simplify,
+                    simplify_cutoff=request.simplify_cutoff or 0.7,
+                    analysis_id=request.analysis_id or None,
+                )
+
+            return bioinformatics_service_pb2.EnrichmentResponse(
+                success=True,
+                terms=[bioinformatics_service_pb2.EnrichedTerm(**t) for t in results["terms"]],
+                summaries=[bioinformatics_service_pb2.EnrichmentSummary(**s) for s in results["summaries"]],
+                output_dir=results["output_dir"],
+            )
+        except Exception as e:
+            logger.error(f"GO enrichment error: {e}", exc_info=True)
+            return bioinformatics_service_pb2.EnrichmentResponse(success=False, error_message=str(e))

@@ -32,6 +32,7 @@ from src.clients.data_client import DataServiceClient
 from src.clients.ml_client import MLServiceClient
 from src.clients.feature_importance_client import FeatureImportanceClient
 from src.clients.bioinformatics_client import BioinformaticsClient
+from src.enrichment_models import EnrichmentRunRequest, detect_organism
 
 from src.generated import data_service_pb2, data_service_pb2_grpc
 
@@ -733,6 +734,60 @@ async def run_pipeline(request: PipelineRequest):
             await asyncio.sleep(1)
 
     return StreamingResponse(stream(), media_type="application/x-ndjson")
+
+
+# ── GO enrichment ─────────────────────────────────────────────────────────────
+
+@app.post("/api/enrichment")
+def run_enrichment(req: EnrichmentRunRequest):
+    """GO enrichment on gene lists (ORA) and rankings (GSEA), as selected in req.config.
+
+    A plain (non-async) endpoint, so FastAPI runs it in a worker thread and the R call
+    doesn't block other requests.
+    """
+    cfg = req.config
+    if cfg.min_gs_size > cfg.max_gs_size:
+        raise HTTPException(400, f"min_gs_size ({cfg.min_gs_size}) is larger than max_gs_size ({cfg.max_gs_size})")
+    if not req.universe:
+        raise HTTPException(400, "universe is empty: pass every gene the pipeline analysed")
+
+    gene_lists = {}
+    if "ora" in cfg.methods:
+        missing = [n for n in cfg.ora_lists if n not in req.gene_lists]
+        if missing:
+            raise HTTPException(400, f"Config asks for ORA on {missing}, but those lists weren't sent "
+                                     f"(sent: {sorted(req.gene_lists)})")
+        gene_lists = {n: req.gene_lists[n] for n in cfg.ora_lists}
+
+    rankings = {}
+    if "gsea" in cfg.methods:
+        missing = [n for n in cfg.gsea_rankings if n not in req.rankings]
+        if missing:
+            raise HTTPException(400, f"Config asks for GSEA on {missing}, but those rankings weren't sent "
+                                     f"(sent: {sorted(req.rankings)})")
+        for n in cfg.gsea_rankings:
+            r = req.rankings[n]
+            genes = list(r.scores)
+            rankings[n] = {"genes": genes, "scores": [r.scores[g] for g in genes], "score_type": r.score_type}
+
+    if not gene_lists and not rankings:
+        raise HTTPException(400, "Nothing to run: config.methods selects no lists or rankings")
+
+    organism = detect_organism(req.universe) if cfg.organism == "auto" else cfg.organism
+    analysis_id = req.analysis_id or uuid.uuid4().hex[:12]
+    logger.info(f"GO enrichment {analysis_id}: organism={organism} ora={list(gene_lists)} "
+                f"gsea={list(rankings)} ontologies={cfg.ontologies}")
+
+    result = bio_client.run_go_enrichment(
+        gene_lists=gene_lists, rankings=rankings, universe=req.universe, organism=organism,
+        ontologies=cfg.ontologies, p_adjust_method=cfg.p_adjust_method,
+        padj_cutoff=cfg.padj_cutoff, qvalue_cutoff=cfg.qvalue_cutoff,
+        min_gs_size=cfg.min_gs_size, max_gs_size=cfg.max_gs_size,
+        simplify=cfg.simplify, simplify_cutoff=cfg.simplify_cutoff, analysis_id=analysis_id,
+    )
+    if not result.get("success"):
+        raise HTTPException(502, f"GO enrichment failed in the bioinformatics service: {result.get('error')}")
+    return {"analysis_id": analysis_id, "organism": organism, **result}
 
 
 # ── Model endpoints ───────────────────────────────────────────────────────────
