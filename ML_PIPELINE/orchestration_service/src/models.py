@@ -86,16 +86,16 @@ class MetricType(str, Enum):
 
 class PipelineConfig(BaseModel):
     """Complete pipeline configuration"""
-    target_column: str  
+    target_column: str
     task_type: str = "classification"
     feature_columns: List[str] = []  # empty means use all except target
     transformations: List[TransformationConfig] = []
-    ensemble_algorithms: List[str] 
+    ensemble_algorithms: List[str]
     hyperparameters: Dict[str, Any] = {}
     metrics: List[MetricType]
     test_size: float = Field(default=0.2, ge=0.1, le=0.5)
     random_state: Optional[int] = 42
-    factor_name: Optional[str] = None 
+    factor_name: Optional[str] = None
     factor_values: Optional[List[str]] = None
     min_features: Optional[int] = 1000
     exclude_columns: Optional[List[str]] = None
