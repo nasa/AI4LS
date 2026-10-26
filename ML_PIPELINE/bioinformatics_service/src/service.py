@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 import threading
+import time
 R_LOCK = threading.Lock()
 
 class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsServiceServicer):
@@ -151,7 +152,16 @@ class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsSe
                     return bioinformatics_service_pb2.EnrichmentResponse(
                         success=False, error_message=f"Ranking '{name}': {len(r['genes'])} genes but {len(r['scores'])} scores")
 
+            if R_LOCK.locked():
+                logger.info("GO enrichment: waiting for another R analysis to finish")
             with R_LOCK:   # embedded R is not thread-safe
+                if not context.is_active():   # caller timed out or went away while we waited
+                    logger.warning("GO enrichment: caller gone before start, skipping")
+                    return bioinformatics_service_pb2.EnrichmentResponse(
+                        success=False, error_message="Request cancelled before it started")
+                t0 = time.time()
+                logger.info(f"GO enrichment: starting (lists={list(gene_lists)}, rankings={list(rankings)}, "
+                            f"universe={len(request.universe)})")
                 results = self.go_analyzer.run(
                     gene_lists=gene_lists,
                     rankings=rankings,
@@ -167,6 +177,7 @@ class BioinformaticsServiceImpl(bioinformatics_service_pb2_grpc.BioinformaticsSe
                     simplify_cutoff=request.simplify_cutoff or 0.7,
                     analysis_id=request.analysis_id or None,
                 )
+                logger.info(f"GO enrichment: finished in {time.time() - t0:.0f} s, {len(results['terms'])} terms")
 
             return bioinformatics_service_pb2.EnrichmentResponse(
                 success=True,
