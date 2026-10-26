@@ -1,214 +1,114 @@
-# r_scripts/go_enrichment.R
-# GO enrichment with clusterProfiler: over-representation (ORA) on gene lists and
-# GSEA on ranked genes. Works offline (org.Mm.eg.db / org.Hs.eg.db).
-#
-# Inputs (written by src/go_enrichment.py):
-#   lists.csv     columns: name, gene                 (one row per gene per list)
-#   rankings.csv  columns: name, gene, score, score_type ("std" = signed, "pos" = positive only)
-#   universe.csv  column:  gene                       (the genes the pipeline analysed)
-# Genes may be symbols or Ensembl IDs (versions like .4 are fine).
-#
-# Outputs in output_dir:
-#   go_enrichment_results.csv   one row per enriched term
-#   go_enrichment_summary.csv   one row per (analysis, method, ontology), incl. mapping counts
-# Returns the number of enriched terms.
+# src/go_enrichment.py
+"""GO enrichment (ORA on gene lists + GSEA on rankings) using R clusterProfiler via rpy2."""
 
-suppressPackageStartupMessages({
-  library(clusterProfiler)
-  library(BiocParallel)
-})
-# Run single-process. gseGO -> fgsea otherwise uses BiocParallel's default MulticoreParam, which
-# forks one worker per core. Forking the multi-threaded gRPC server process can deadlock (the call
-# never returns) and, on many-core machines, multiplies memory use.
-BiocParallel::register(BiocParallel::SerialParam(), default = TRUE)
+import logging
+import math
+import re
+import uuid
+from pathlib import Path
+from typing import Dict, List, Optional, Sequence
 
-.go_orgdb <- function(organism) {
-  db <- switch(tolower(organism),
-               mmu = "org.Mm.eg.db", mouse = "org.Mm.eg.db",
-               hsa = "org.Hs.eg.db", human = "org.Hs.eg.db",
-               stop(paste("Unsupported organism:", organism, "(use mmu or hsa)")))
-  suppressPackageStartupMessages(library(db, character.only = TRUE))
-  get(db)
-}
+import pandas as pd
 
-# Map symbols and Ensembl IDs to Entrez IDs. Returns data.frame(input, ENTREZID), one row per input.
-.to_entrez <- function(genes, orgdb) {
-  genes <- unique(as.character(genes[!is.na(genes) & genes != ""]))
-  out <- data.frame(input = character(), ENTREZID = character(), stringsAsFactors = FALSE)
-  if (length(genes) == 0) return(out)
+logger = logging.getLogger(__name__)
 
-  is_ens <- grepl("^ENS[A-Z]*G[0-9]+", genes)
-  sym <- genes[!is_ens]
-  ens <- genes[is_ens]
+R_SCRIPT = Path("/app/r_scripts/go_enrichment.R")
+_DUP_SUFFIX = re.compile(r"_\d+$")   # ConvertFeatureNames renames duplicate symbols Gene_1, Gene_2
 
-  safe_bitr <- function(ids, from) {
-    if (length(ids) == 0) return(NULL)
-    tryCatch(suppressWarnings(suppressMessages(
-      bitr(ids, fromType = from, toType = "ENTREZID", OrgDb = orgdb))),
-      error = function(e) NULL)          # bitr errors when nothing maps
-  }
 
-  s <- safe_bitr(sym, "SYMBOL")
-  if (!is.null(s) && nrow(s) > 0) {
-    out <- rbind(out, data.frame(input = s$SYMBOL, ENTREZID = s$ENTREZID, stringsAsFactors = FALSE))
-  }
-  if (length(ens) > 0) {
-    unversioned <- sub("\\.[0-9]+$", "", ens)
-    e <- safe_bitr(unique(unversioned), "ENSEMBL")
-    if (!is.null(e) && nrow(e) > 0) {
-      back <- data.frame(input = ens, ENSEMBL = unversioned, stringsAsFactors = FALSE)
-      e <- merge(back, e, by = "ENSEMBL")
-      out <- rbind(out, data.frame(input = e$input, ENTREZID = e$ENTREZID, stringsAsFactors = FALSE))
-    }
-  }
-  out[!duplicated(out$input), , drop = FALSE]   # one Entrez ID per input gene
-}
+def clean_gene(gene: str) -> str:
+    """Undo the _1/_2 de-duplication suffix; leave Ensembl IDs alone."""
+    g = str(gene).strip()
+    return g if g.startswith("ENS") else _DUP_SUFFIX.sub("", g)
 
-.empty_terms <- function() {
-  data.frame(analysis = character(), method = character(), ontology = character(),
-             term_id = character(), description = character(), set_size = integer(),
-             count = integer(), gene_ratio = character(), bg_ratio = character(),
-             enrichment_score = numeric(), nes = numeric(), pvalue = numeric(),
-             padj = numeric(), qvalue = numeric(), genes = character(),
-             stringsAsFactors = FALSE)
-}
 
-.col <- function(df, name, default) if (name %in% names(df)) df[[name]] else rep(default, nrow(df))
+def _na(v, default=0.0):
+    try:
+        f = float(v)
+        return default if math.isnan(f) else f
+    except (TypeError, ValueError):
+        return default
 
-.maybe_simplify <- function(x, do_simplify, cutoff, label) {
-  if (!do_simplify || is.null(x) || nrow(as.data.frame(x)) < 2) return(x)
-  tryCatch(clusterProfiler::simplify(x, cutoff = cutoff, by = "p.adjust", select_fun = min),
-           error = function(e) {
-             message(sprintf("simplify() skipped for %s: %s", label, conditionMessage(e)))
-             x
-           })
-}
 
-run_go_enrichment <- function(lists_path, rankings_path, universe_path, output_dir, organism,
-                              ontologies, p_adjust_method, padj_cutoff, qvalue_cutoff,
-                              min_gs_size, max_gs_size, do_simplify, simplify_cutoff) {
-  orgdb <- .go_orgdb(organism)
-  ontologies <- as.character(ontologies)
-  min_gs_size <- as.integer(min_gs_size); max_gs_size <- as.integer(max_gs_size)
-  dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+class GOEnrichment:
+    def __init__(self, output_base_path: str = "/app/results", r_script: Path = R_SCRIPT):
+        self.output_base_path = Path(output_base_path)
+        self.output_base_path.mkdir(parents=True, exist_ok=True)
+        if not r_script.exists():
+            raise FileNotFoundError(f"R script not found: {r_script}")
+        import rpy2.robjects as ro
+        self._ro = ro
+        ro.r(f'source("{r_script}")')
+        self._r_func = ro.globalenv["run_go_enrichment"]
+        logger.info(f"Sourced R script: {r_script}")
 
-  universe <- read.csv(universe_path, stringsAsFactors = FALSE)$gene
-  uni_map <- .to_entrez(universe, orgdb)
-  universe_entrez <- unique(uni_map$ENTREZID)
-  cat(sprintf("Universe: %d genes, %d mapped to Entrez\n", length(unique(universe)), length(universe_entrez)))
+    def _call_r(self, lists_path, rankings_path, universe_path, output_dir, organism, ontologies,
+                p_adjust_method, padj_cutoff, qvalue_cutoff, min_gs_size, max_gs_size,
+                do_simplify, simplify_cutoff) -> int:
+        ro = self._ro
+        res = self._r_func(str(lists_path), str(rankings_path), str(universe_path), str(output_dir),
+                           organism, ro.StrVector(list(ontologies)), p_adjust_method,
+                           float(padj_cutoff), float(qvalue_cutoff), int(min_gs_size),
+                           int(max_gs_size), bool(do_simplify), float(simplify_cutoff))
+        return int(res[0]) if res is not None and len(res) else 0
 
-  terms <- list(); sums <- list()
-  add_summary <- function(analysis, method, ont, n_input, n_mapped, n_terms, note = "") {
-    sums[[length(sums) + 1]] <<- data.frame(
-      analysis = analysis, method = method, ontology = ont, n_input = n_input,
-      n_mapped = n_mapped, n_terms = n_terms, note = note, stringsAsFactors = FALSE)
-  }
+    def run(
+        self,
+        gene_lists: Dict[str, Sequence[str]],
+        rankings: Dict[str, Dict],            # name -> {"genes": [...], "scores": [...], "score_type": "std"|"pos"}
+        universe: Sequence[str],
+        organism: str = "mmu",
+        ontologies: Sequence[str] = ("BP",),
+        p_adjust_method: str = "BH",
+        padj_cutoff: float = 0.05,
+        qvalue_cutoff: float = 0.2,
+        min_gs_size: int = 10,
+        max_gs_size: int = 500,
+        simplify: bool = True,
+        simplify_cutoff: float = 0.7,
+        analysis_id: Optional[str] = None,
+    ) -> Dict:
+        analysis_id = analysis_id or uuid.uuid4().hex[:12]
+        output_dir = self.output_base_path / f"go_enrichment_{analysis_id}"
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-  # ── Over-representation on gene lists ─────────────────────────────────────
-  lists <- if (file.exists(lists_path)) read.csv(lists_path, stringsAsFactors = FALSE) else NULL
-  if (!is.null(lists) && nrow(lists) > 0) {
-    for (nm in unique(lists$name)) {
-      genes <- lists$gene[lists$name == nm]
-      m <- .to_entrez(genes, orgdb)
-      entrez <- intersect(unique(m$ENTREZID), universe_entrez)
-      for (ont in ontologies) {
-        label <- sprintf("ORA %s GO:%s", nm, ont)
-        if (length(entrez) < 3) {
-          add_summary(nm, "ora", ont, length(unique(genes)), length(entrez), 0L,
-                      "fewer than 3 genes mapped; skipped")
-          next
-        }
-        res <- tryCatch(enrichGO(gene = entrez, universe = universe_entrez, OrgDb = orgdb,
-                                 keyType = "ENTREZID", ont = ont,
-                                 pAdjustMethod = p_adjust_method, pvalueCutoff = padj_cutoff,
-                                 qvalueCutoff = qvalue_cutoff, minGSSize = min_gs_size,
-                                 maxGSSize = max_gs_size, readable = TRUE),
-                        error = function(e) { message(label, " failed: ", conditionMessage(e)); NULL })
-        res <- .maybe_simplify(res, do_simplify, simplify_cutoff, label)
-        df <- if (is.null(res)) data.frame() else as.data.frame(res)
-        if (nrow(df) > 0) {
-          df <- df[df$p.adjust <= padj_cutoff, , drop = FALSE]
-          q <- .col(df, "qvalue", NA_real_)
-          df <- df[is.na(q) | q <= qvalue_cutoff, , drop = FALSE]
-        }
-        if (nrow(df) > 0) {
-          set_size <- suppressWarnings(as.integer(sub("/.*$", "", df$BgRatio)))
-          terms[[length(terms) + 1]] <- data.frame(
-            analysis = nm, method = "ora", ontology = ont, term_id = df$ID,
-            description = df$Description, set_size = set_size, count = as.integer(df$Count),
-            gene_ratio = df$GeneRatio, bg_ratio = df$BgRatio,
-            enrichment_score = NA_real_, nes = NA_real_, pvalue = df$pvalue,
-            padj = df$p.adjust, qvalue = .col(df, "qvalue", NA_real_), genes = df$geneID,
-            stringsAsFactors = FALSE)
-        }
-        add_summary(nm, "ora", ont, length(unique(genes)), length(entrez), nrow(df))
-        cat(sprintf("%s: %d terms\n", label, nrow(df)))
-      }
-    }
-  }
+        universe_clean = sorted({clean_gene(g) for g in universe if str(g).strip()})
+        lists_rows = [(name, clean_gene(g)) for name, genes in gene_lists.items() for g in genes]
+        rank_rows = []
+        for name, r in rankings.items():
+            st = r.get("score_type", "std")
+            for g, s in zip(r["genes"], r["scores"]):
+                rank_rows.append((name, clean_gene(g), float(s), st))
 
-  # ── GSEA on rankings ───────────────────────────────────────────────────────
-  rankings <- if (file.exists(rankings_path)) read.csv(rankings_path, stringsAsFactors = FALSE) else NULL
-  if (!is.null(rankings) && nrow(rankings) > 0) {
-    for (nm in unique(rankings$name)) {
-      r <- rankings[rankings$name == nm, , drop = FALSE]
-      score_type <- r$score_type[1]
-      m <- .to_entrez(r$gene, orgdb)
-      r <- merge(r, m, by.x = "gene", by.y = "input")
-      # Several genes can map to one Entrez ID: keep the strongest score
-      r <- r[order(-abs(r$score)), , drop = FALSE]
-      r <- r[!duplicated(r$ENTREZID), , drop = FALSE]
-      gl <- setNames(r$score, r$ENTREZID)
-      gl <- sort(gl[is.finite(gl)], decreasing = TRUE)
-      for (ont in ontologies) {
-        label <- sprintf("GSEA %s GO:%s", nm, ont)
-        if (length(gl) < 15) {
-          add_summary(nm, "gsea", ont, length(unique(rankings$gene[rankings$name == nm])),
-                      length(gl), 0L, "fewer than 15 ranked genes mapped; skipped")
-          next
-        }
-        run <- function(extra) {
-          set.seed(42)
-          do.call(gseGO, c(list(geneList = gl, ont = ont, OrgDb = orgdb, keyType = "ENTREZID",
-                                minGSSize = min_gs_size, maxGSSize = max_gs_size,
-                                pvalueCutoff = padj_cutoff, pAdjustMethod = p_adjust_method,
-                                eps = 0, verbose = FALSE, seed = TRUE), extra))
-        }
-        res <- tryCatch(run(list(scoreType = score_type)), error = function(e) {
-          # Older clusterProfiler versions don't pass scoreType through to fgsea
-          message(label, ": retrying without scoreType (", conditionMessage(e), ")")
-          tryCatch(run(list()), error = function(e2) {
-            message(label, " failed: ", conditionMessage(e2)); NULL })
-        })
-        if (!is.null(res)) res <- tryCatch(setReadable(res, OrgDb = orgdb, keyType = "ENTREZID"),
-                                           error = function(e) res)
-        res <- .maybe_simplify(res, do_simplify, simplify_cutoff, label)
-        df <- if (is.null(res)) data.frame() else as.data.frame(res)
-        if (nrow(df) > 0) df <- df[df$p.adjust <= padj_cutoff, , drop = FALSE]
-        if (nrow(df) > 0) {
-          q <- if ("qvalue" %in% names(df)) df$qvalue else .col(df, "qvalues", NA_real_)
-          terms[[length(terms) + 1]] <- data.frame(
-            analysis = nm, method = "gsea", ontology = ont, term_id = df$ID,
-            description = df$Description, set_size = as.integer(df$setSize),
-            count = as.integer(lengths(strsplit(df$core_enrichment, "/"))),
-            gene_ratio = NA_character_, bg_ratio = NA_character_,
-            enrichment_score = df$enrichmentScore, nes = df$NES, pvalue = df$pvalue,
-            padj = df$p.adjust, qvalue = q, genes = df$core_enrichment,
-            stringsAsFactors = FALSE)
-        }
-        add_summary(nm, "gsea", ont, length(unique(rankings$gene[rankings$name == nm])),
-                    length(gl), nrow(df))
-        cat(sprintf("%s: %d terms\n", label, nrow(df)))
-      }
-    }
-  }
+        lists_path = output_dir / "lists.csv"
+        rankings_path = output_dir / "rankings.csv"
+        universe_path = output_dir / "universe.csv"
+        pd.DataFrame(lists_rows, columns=["name", "gene"]).drop_duplicates().to_csv(lists_path, index=False)
+        pd.DataFrame(rank_rows, columns=["name", "gene", "score", "score_type"]).to_csv(rankings_path, index=False)
+        pd.DataFrame({"gene": universe_clean}).to_csv(universe_path, index=False)
 
-  all_terms <- if (length(terms)) do.call(rbind, terms) else .empty_terms()
-  all_summary <- if (length(sums)) do.call(rbind, sums) else
-    data.frame(analysis = character(), method = character(), ontology = character(),
-               n_input = integer(), n_mapped = integer(), n_terms = integer(), note = character())
-  write.csv(all_terms, file.path(output_dir, "go_enrichment_results.csv"), row.names = FALSE)
-  write.csv(all_summary, file.path(output_dir, "go_enrichment_summary.csv"), row.names = FALSE)
-  cat(sprintf("GO enrichment complete: %d terms\n", nrow(all_terms)))
-  nrow(all_terms)
-}
+        logger.info(f"GO enrichment {analysis_id}: lists={list(gene_lists)} rankings={list(rankings)} "
+                    f"universe={len(universe_clean)} organism={organism} ontologies={list(ontologies)}")
+        n_terms = self._call_r(lists_path, rankings_path, universe_path, output_dir, organism, ontologies,
+                               p_adjust_method, padj_cutoff, qvalue_cutoff, min_gs_size, max_gs_size,
+                               simplify, simplify_cutoff)
+
+        terms_df = pd.read_csv(output_dir / "go_enrichment_results.csv")
+        summary_df = pd.read_csv(output_dir / "go_enrichment_summary.csv")
+        terms = [{
+            "analysis": str(r["analysis"]), "method": str(r["method"]), "ontology": str(r["ontology"]),
+            "term_id": str(r["term_id"]), "description": str(r["description"]),
+            "set_size": int(_na(r["set_size"])), "count": int(_na(r["count"])),
+            "gene_ratio": "" if pd.isna(r["gene_ratio"]) else str(r["gene_ratio"]),
+            "bg_ratio": "" if pd.isna(r["bg_ratio"]) else str(r["bg_ratio"]),
+            "enrichment_score": _na(r["enrichment_score"]), "nes": _na(r["nes"]),
+            "pvalue": _na(r["pvalue"], 1.0), "padj": _na(r["padj"], 1.0), "qvalue": _na(r["qvalue"], 1.0),
+            "genes": [] if pd.isna(r["genes"]) else str(r["genes"]).split("/"),
+        } for _, r in terms_df.iterrows()]
+        summaries = [{
+            "analysis": str(r["analysis"]), "method": str(r["method"]), "ontology": str(r["ontology"]),
+            "n_input": int(_na(r["n_input"])), "n_mapped": int(_na(r["n_mapped"])),
+            "n_terms": int(_na(r["n_terms"])), "note": "" if pd.isna(r["note"]) else str(r["note"]),
+        } for _, r in summary_df.iterrows()]
+        logger.info(f"✓ GO enrichment {analysis_id}: {n_terms} terms")
+        return {"terms": terms, "summaries": summaries, "output_dir": str(output_dir)}

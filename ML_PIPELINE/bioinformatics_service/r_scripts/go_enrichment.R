@@ -15,7 +15,12 @@
 
 suppressPackageStartupMessages({
   library(clusterProfiler)
+  library(BiocParallel)
 })
+# Run single-process. gseGO -> fgsea otherwise uses BiocParallel's default MulticoreParam, which
+# forks one worker per core. Forking the multi-threaded gRPC server process can deadlock (the call
+# never returns) and, on many-core machines, multiplies memory use.
+BiocParallel::register(BiocParallel::SerialParam(), default = TRUE)
 
 .go_orgdb <- function(organism) {
   db <- switch(tolower(organism),
