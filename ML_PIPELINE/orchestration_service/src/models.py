@@ -86,22 +86,22 @@ class MetricType(str, Enum):
 
 class PipelineConfig(BaseModel):
     """Complete pipeline configuration"""
-    target_column: str
+    target_column: str = "Factor Value[Spaceflight]"
     task_type: str = "classification"
     feature_columns: List[str] = []  # empty means use all except target
     transformations: List[TransformationConfig] = []
-    ensemble_algorithms: List[str]
+    ensemble_algorithms: List[str] = ["random_forest", "logistic_regression", "xgboost", "svm", "neural_network"]
     hyperparameters: Dict[str, Any] = {}
-    metrics: List[MetricType]
+    metrics: List[MetricType] = ["accuracy", "precision", "recall", "f1_score"]
     test_size: float = Field(default=0.2, ge=0.1, le=0.5)
     random_state: Optional[int] = 42
-    factor_name: Optional[str] = None
-    factor_values: Optional[List[str]] = None
+    factor_name: Optional[str] = "Factor Value[Spaceflight]" 
+    factor_values: Optional[List[str]] = ["Ground Control", "Space Flight"] 
     min_features: Optional[int] = 1000
     exclude_columns: Optional[List[str]] = None
-    fi_methods: Optional[List[str]] = None
-    trans_list: Optional[str] = None
-    coding_only: bool = False
+    fi_methods: Optional[List[str]] = ["permutation", "recursive"] 
+    trans_list: Optional[str] = "s,l" 
+    coding_only: bool = True
     keep_biotypes: List[str] = ["protein_coding"]
 
 class PipelineRequest(BaseModel):
