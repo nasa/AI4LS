@@ -93,7 +93,8 @@ class PipelineConfig(BaseModel):
     transformations: List[TransformationConfig] = []
     ensemble_algorithms: List[str] = ["random_forest", "logistic_regression", "xgboost", "svm", "neural_network"]
     hyperparameters: Dict[str, Any] = {}
-    metrics: List[MetricType] = ["accuracy", "precision", "recall", "f1_score"]
+    #metrics: List[MetricType] = ["accuracy", "precision", "recall", "f1_score"]
+    metrics: List[MetricType] = Field(default=["accuracy", "precision", "recall", "f1_score"], validate_default=True)
     test_size: float = Field(default=0.2, ge=0.1, le=0.5)
     random_state: Optional[int] = 42
     factor_name: Optional[str] = "Factor Value[Spaceflight]" 
