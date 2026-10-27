@@ -102,7 +102,8 @@ class PipelineConfig(BaseModel):
     fi_methods: Optional[List[str]] = ["permutation", "recursive"] 
     trans_list: Optional[str] = "s,l" 
     coding_only: bool = True
-    keep_biotypes: List[str] = ["protein_coding"]
+    keep_biotypes: List[str] = ["protein_coding", "lncRNA"]
+    enrichment: EnrichmentConfig = EnrichmentConfig()
 
 class PipelineRequest(BaseModel):
     """Request to run full ML pipeline"""

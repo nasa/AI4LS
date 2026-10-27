@@ -821,6 +821,12 @@ async def get_model_info(model_id: str):
         logger.error(f"Error getting model info: {e}")
         raise HTTPException(status_code=404, detail=f"Model not found: {str(e)}")
 
+@app.get("/api/config/defaults")
+async def config_defaults():
+    """Every pipeline setting with its default value (including the enrichment block)."""
+    cfg = PipelineConfig()
+    return cfg.model_dump() if hasattr(cfg, "model_dump") else cfg.dict()
+
 
 # ── Root ──────────────────────────────────────────────────────────────────────
 
