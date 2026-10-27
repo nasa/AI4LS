@@ -21,6 +21,7 @@ from src.models import (
     ValidationResponse,
     TransformationRequest,
     TransformationResponse,
+    PipelineConfig,
     PipelineRequest,
     PipelineResponse,
     PipelineStatus,
