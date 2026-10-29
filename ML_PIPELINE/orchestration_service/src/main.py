@@ -591,11 +591,11 @@ def _execute_pipeline(job: PipelineJob):
 
         ensemble_result = None
         for progress in ml_client.train_ensemble(
-            tune_hyperparameters=config.tune_hyperparameters,
-            cv_folds=config.cv_folds,
-            cv_repeats=config.cv_repeats,
-            cv_scoring=config.cv_scoring,
-            param_grids=config.param_grids,
+            tune_hyperparameters=request.config.tune_hyperparameters,
+            cv_folds=request.config.cv_folds,
+            cv_repeats=request.config.cv_repeats,
+            cv_scoring=request.config.cv_scoring,
+            param_grids=request.config.param_grids,
             dataset_id=transformed_id,
             algorithms=request.config.ensemble_algorithms,
             target_column=request.config.target_column,
