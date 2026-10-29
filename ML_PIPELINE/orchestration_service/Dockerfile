@@ -12,7 +12,7 @@ RUN apt-get update && \
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
-    pip3 install --no-cache-dir --upgrade protobuf
+    pip3 install --upgrade protobuf
 
 # Copy generated gRPC code (from data-service and ml-service)
 COPY src/generated/ ./src/generated/

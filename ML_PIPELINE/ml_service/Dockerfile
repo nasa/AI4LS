@@ -10,8 +10,7 @@ RUN apt-get update && \
 #libomp-dev 
 
 COPY requirements.txt .
-#RUN pip install --no-cache-dir grpcio-tools==1.62.0 && \
-RUN  pip install --no-cache-dir -r requirements.txt && \
+RUN  pip install -r requirements.txt && \
     pip3 install --no-cache-dir --upgrade protobuf
 
 # Copy proto files (relative to ml_service/ directory)
