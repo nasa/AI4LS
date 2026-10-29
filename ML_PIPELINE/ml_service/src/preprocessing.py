@@ -53,7 +53,9 @@ def check_input_for_log(X, trans_list: Optional[str]) -> None:
     """log1p needs non-negative input (raw or normalized counts). Fail loudly otherwise."""
     if "l" not in parse_trans_list(trans_list):
         return
-    values = X.values if isinstance(X, pd.DataFrame) else np.asarray(X)
+    # numeric columns only: a text column such as source_dataset is dropped before training
+    values = (X.select_dtypes(include=[np.number]).to_numpy(dtype=float) if isinstance(X, pd.DataFrame)
+              else np.asarray(X, dtype=float))
     if np.isnan(values).any():
         raise ValueError("Input contains NaN; log transform would propagate it.")
     if (values < 0).any():

@@ -6,7 +6,7 @@ from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, 
-    roc_auc_score, mean_squared_error, mean_absolute_error, r2_score
+    roc_auc_score, confusion_matrix, mean_squared_error, mean_absolute_error, r2_score
 )
 import xgboost as xgb
 import pandas as pd
@@ -46,6 +46,8 @@ class ModelTrainer:
             model_class = ModelTrainer.CLASSIFICATION_MODELS.get(algorithm)
         elif task_type == "regression":
             model_class = ModelTrainer.REGRESSION_MODELS.get(algorithm)
+        else:
+            raise ValueError(f"Unknown task_type: {task_type}")
         if model_class is None:
             raise ValueError(f"Unknown algorithm: {algorithm} for task: {task_type}")
         
@@ -122,8 +124,8 @@ class ModelTrainer:
         # update selected_features after dropping cols
         selected_features = list(X_train.columns)
 
-        logger.info(f"columns of X_train: {X_train.columns}")
-        logger.info(f"y_train values: {y_train}")
+        logger.debug(f"columns of X_train: {X_train.columns}")
+        logger.debug(f"y_train values: {y_train}")
 
         #X_train_array = X_train.to_numpy()
         #X_test_array = X_test.to_numpy()
@@ -146,8 +148,6 @@ class ModelTrainer:
                 "f1_score": float(f1_score(y_train, y_train_pred, average='weighted', zero_division=0)),
             }
             
-            from sklearn.metrics import confusion_matrix   # better at the top of the file
-
             labels = list(model.classes_) if hasattr(model, "classes_") else sorted(set(y_test) | set(y_test_pred))
             test_metrics = {
                 "accuracy": float(accuracy_score(y_test, y_test_pred)),
@@ -218,91 +218,3 @@ class ModelTrainer:
         )
         
         return X_train, y_train, X_test, y_test
-
-
-    @staticmethod
-    def compute_loocv_metrics(
-        model,
-        X: pd.DataFrame,
-        y: pd.Series,
-        task_type: str
-    ) -> Dict[str, float]:
-        """
-        Compute Leave-One-Out Cross-Validation metrics on full dataset
-    
-        LOOCV is excellent for small datasets - it uses every sample as test set once.
-        This provides a robust estimate of model performance.
-    
-        Args:
-            model: Trained sklearn model
-            X: Full feature matrix
-            y: Full target vector
-            task_type: "classification" or "regression"
-    
-        Returns:
-            Dict with LOOCV metrics
-        """
-        from sklearn.model_selection import LeaveOneOut, cross_val_score, cross_validate
-    
-        logger.info(f"Computing Leave-One-Out Cross-Validation on {len(X)} samples...")
-    
-        loo = LeaveOneOut()
-    
-        try:
-            if task_type == "classification":
-                # Compute multiple metrics for classification
-                scoring = {
-                    'accuracy': 'accuracy',
-                    'precision': 'precision_weighted',
-                    'recall': 'recall_weighted',
-                    'f1': 'f1_weighted'
-                }
-            
-                cv_results = cross_validate(
-                    model, X, y, cv=loo, scoring=scoring, n_jobs=-1
-                )
-            
-                loocv_metrics = {
-                    "accuracy": float(cv_results['test_accuracy'].mean()),
-                    "precision": float(cv_results['test_precision'].mean()),
-                    "recall": float(cv_results['test_recall'].mean()),
-                    "f1_score": float(cv_results['test_f1'].mean()),
-                    "n_folds": len(cv_results['test_accuracy']),
-                    "std_accuracy": float(cv_results['test_accuracy'].std()),
-                }
-            
-                # Try to add ROC-AUC if binary classification
-                if hasattr(model, 'predict_proba'):
-                    try:
-                        roc_scores = cross_val_score(
-                            model, X, y, cv=loo, scoring='roc_auc_weighted'
-                        )
-                        loocv_metrics['roc_auc'] = float(roc_scores.mean())
-                    except:
-                        pass
-        
-            else:  # regression
-                scoring = {
-                    'rmse': 'neg_mean_squared_error',
-                    'mae': 'neg_mean_absolute_error',
-                    'r2': 'r2'
-                }
-            
-                cv_results = cross_validate(
-                    model, X, y, cv=loo, scoring=scoring, n_jobs=-1
-                )
-            
-                loocv_metrics = {
-                    "rmse": float(np.sqrt(-cv_results['test_rmse'].mean())),
-                    "mae": float(-cv_results['test_mae'].mean()),
-                    "r2_score": float(cv_results['test_r2'].mean()),
-                    "n_folds": len(cv_results['test_rmse']),
-                    "std_rmse": float(np.sqrt(-cv_results['test_rmse'].std())),
-                }
-        
-            logger.info(f"✓ LOOCV completed: {loocv_metrics}")
-            return loocv_metrics
-    
-        except Exception as e:
-            logger.error(f"Error computing LOOCV: {e}")
-            return {}

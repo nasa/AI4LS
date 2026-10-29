@@ -1,6 +1,6 @@
 # src/models.py
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Literal
 from enum import Enum
 from src.enrichment_models import EnrichmentConfig
 
@@ -102,7 +102,13 @@ class PipelineConfig(BaseModel):
     min_features: Optional[int] = 1000
     exclude_columns: Optional[List[str]] = None
     fi_methods: Optional[List[str]] = ["permutation", "recursive"] 
-    trans_list: Optional[str] = "s,l" 
+    trans_list: Optional[str] = "s,l"
+    # Cross-validation on the training split only (the test split is scored once at the end).
+    tune_hyperparameters: bool = False          # True -> GridSearchCV per model; False -> plain k-fold CV estimate
+    cv_folds: int = Field(default=5, ge=2, le=20)   # lowered automatically if a class has fewer training samples
+    cv_repeats: int = Field(default=1, ge=1, le=20)
+    cv_scoring: Literal["f1_weighted", "accuracy", "roc_auc", "balanced_accuracy"] = "f1_weighted"
+    param_grids: Optional[Dict[str, Any]] = None  # e.g. {"svm": {"C": [0.1, 1]}}; overrides the default grid per algorithm
     coding_only: bool = True
     keep_biotypes: List[str] = ["protein_coding", "lncRNA"]
     enrichment: EnrichmentConfig = EnrichmentConfig()

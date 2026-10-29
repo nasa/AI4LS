@@ -1,5 +1,6 @@
 # orchestration-service/src/clients/ml_client.py
 import grpc
+import json
 from typing import Dict, List, Iterator
 import sys
 from pathlib import Path
@@ -81,7 +82,12 @@ class MLServiceClient:
         test_size: float = 0.2,
         random_state: int = 42,
         fi_methods: List[str] = None,
-        trans_list: str = ""
+        trans_list: str = "",
+        tune_hyperparameters: bool = False,
+        cv_folds: int = 5,
+        cv_repeats: int = 1,
+        cv_scoring: str = "f1_weighted",
+        param_grids: Dict = None,
         ) -> Iterator[Dict]:
         """Train ensemble of models with streaming progress"""
         try:
@@ -92,6 +98,11 @@ class MLServiceClient:
                 test_size=test_size,
                 random_state=random_state,
                 trans_list=trans_list or "",
+                tune_hyperparameters=bool(tune_hyperparameters),
+                cv_folds=int(cv_folds or 0),
+                cv_repeats=int(cv_repeats or 0),
+                cv_scoring=cv_scoring or "",
+                param_grids_json=json.dumps(param_grids) if param_grids else "",
             )
 
             response = self.stub.TrainEnsemble(request)
@@ -113,6 +124,11 @@ class MLServiceClient:
                         "labels": labels,
                         "confusion_matrix": [flat[i * n:(i + 1) * n] for i in range(n)]
                                             if n and len(flat) == n * n else None,
+                        "roc_auc": float(model.roc_auc) if model.roc_auc else None,
+                        "cv_metrics": dict(model.cv_metrics),
+                        "best_params": dict(model.best_params),
+                        "tuned": bool(model.tuned),
+                        "hyperparameters": dict(model.hyperparameters),
                     })
             
             yield {

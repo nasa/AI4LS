@@ -99,18 +99,31 @@ message EnsembleRequest {
     float test_size = 4;             // 0 -> default 0.2
     int32 random_state = 5;          // seed for the train/test split
     string trans_list = 6;           // e.g. "l,s"; applied inside each model, fit on train only
+
+    // Cross-validation on the TRAINING split only; the test split is scored once at the end.
+    bool tune_hyperparameters = 7;   // true -> GridSearchCV per model; false -> plain k-fold CV estimate
+    int32 cv_folds = 8;              // 0 -> 5 (reduced automatically if a class is too small)
+    int32 cv_repeats = 9;            // 0 -> 1 (RepeatedStratifiedKFold)
+    string cv_scoring = 10;          // "" -> "f1_weighted"; metric used to pick the best grid point
+    string param_grids_json = 11;    // optional {"svm": {"C": [0.1, 1]}, ...}; overrides default grids per algorithm
 }
 
 // Individual model result
 message ModelResult {
     string model_id = 1;
     string algorithm = 2;
-    double accuracy = 3;
+    double accuracy = 3;             // held-out test set
     double precision = 4;
     double recall = 5;
     double f1_score = 6;
     repeated int32 confusion_matrix_flat = 7;   // row-major, len = n_labels^2
     repeated string labels = 8;
+
+    double roc_auc = 9;                       // test set; 0 if not available
+    map<string, double> cv_metrics = 10;      // accuracy_mean/_std, f1_weighted_mean/_std, roc_auc_mean/_std, n_splits, n_repeats
+    map<string, string> best_params = 11;     // empty unless tuned
+    bool tuned = 12;
+    map<string, string> hyperparameters = 13; // parameters of the final fitted model's estimator (non-default only)
 }
 
 // Response from ensemble training

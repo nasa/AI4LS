@@ -13,9 +13,40 @@ from generated import ml_service_pb2, ml_service_pb2_grpc
 from src.trainers import ModelTrainer
 from src.model_store import ModelStore
 from src.data_client import DataServiceClient
-from src.preprocessing import build_pipeline, check_input_for_log, parse_trans_list
+from src.preprocessing import build_pipeline, check_input_for_log, parse_trans_list, final_estimator
+from src.cross_validation import cross_validate_and_tune, DEFAULT_SCORING
 
 logger = logging.getLogger(__name__)
+
+
+def _numeric_metrics(metrics: Optional[Dict]) -> Dict[str, float]:
+    """Keep only scalar numeric metrics for proto map<string, double> fields
+    (drops confusion_matrix / labels, which made ListModels fail)."""
+    out = {}
+    for k, v in (metrics or {}).items():
+        if isinstance(v, bool):
+            out[k] = float(v)
+        elif isinstance(v, (int, float)):
+            out[k] = float(v)
+    return out
+
+
+def _str_params(params: Optional[Dict]) -> Dict[str, str]:
+    """Proto map<string, string> needs string values."""
+    return {str(k): str(v) for k, v in (params or {}).items()}
+
+
+def _non_default_params(estimator) -> Dict[str, str]:
+    """The estimator's parameters that differ from the class defaults, as strings."""
+    try:
+        defaults = type(estimator)().get_params()
+    except Exception:
+        defaults = {}
+    out = {}
+    for k, v in estimator.get_params(deep=False).items():
+        if k not in defaults or str(defaults[k]) != str(v):
+            out[k] = str(v)
+    return out
 
 class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
     """gRPC service implementation for ML operations"""
@@ -29,7 +60,33 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
         from src.trainers import ModelTrainer
         self.model_trainer = ModelTrainer()
     
-        logger.info("MLServiceImpl initialized") 
+        logger.info("MLServiceImpl initialized")
+
+    @staticmethod
+    def _base_hyperparameters(algorithm: str, random_state: int) -> Dict:
+        """Fixed hyperparameters used when not tuning (and as the starting point when tuning).
+        Models use the same seed as the train/test split."""
+        if algorithm == 'logistic_regression':
+            return {'max_iter': 1000, 'solver': 'lbfgs', 'random_state': random_state}
+        if algorithm == 'random_forest':
+            return {'n_estimators': 50, 'random_state': random_state}
+        if algorithm == 'xgboost':
+            return {'random_state': random_state}
+        if algorithm == 'svm':
+            return {'probability': True, 'random_state': random_state}   # predict_proba -> ROC-AUC
+        if algorithm == 'neural_network':
+            return {
+                'hidden_layer_sizes': (50,),     # one hidden layer of 50
+                'max_iter': 1000,
+                'early_stopping': False,         # so validation_fraction is unused
+                'n_iter_no_change': 10,          # stop after 10 epochs without training-loss improvement
+                'learning_rate_init': 0.001,
+                'solver': 'adam',
+                'alpha': 0.001,                  # L2 regularization
+                'batch_size': 32,
+                'random_state': random_state,
+            }
+        return {}
 
 
     def _get_dataset(self, dataset_id: str) -> Optional[pd.DataFrame]:
@@ -58,8 +115,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
             
             # Get dataset from Data Service
             df = self._get_dataset(request.dataset_id)
-            logger.info(f"shape: {df.shape[0]} by {df.shape[1]} ")
-            
+
             if df is None:
                 yield ml_service_pb2.TrainingProgress(
                     model_id=model_id,
@@ -111,7 +167,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 dict(request.hyperparameters)
             )
             
-            trained_model, training_metrics, test_metrics = ModelTrainer.train_model(
+            trained_model, training_metrics, test_metrics, _ = ModelTrainer.train_model(
                 model,
                 X_train,
                 y_train,
@@ -119,31 +175,15 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 y_test,
                 request.task_type
             )
-            
+
             yield ml_service_pb2.TrainingProgress(
                 model_id=model_id,
                 status="evaluating",
                 message="Evaluating model...",
                 progress_percent=80,
-                training_metrics=training_metrics
+                training_metrics=_numeric_metrics(training_metrics)
             )
 
-            # Compute LOOCV metrics on FULL dataset
-            logger.info("Computing LOOCV metrics on full dataset...")
-        
-            # Combine train and test data for LOOCV
-            X_full = pd.concat([X_train, X_test], ignore_index=True)
-            y_full = pd.concat([y_train, y_test], ignore_index=True)
-        
-            loocv_metrics = ModelTrainer.compute_loocv_metrics(
-                model,
-                X_full,
-                y_full,
-                request.task_type
-            )
-        
-            logger.info(f"✓ LOOCV metrics: {loocv_metrics}")
-            
             # Save model
             model_info = {
                 "model_id": model_id,
@@ -157,8 +197,7 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 "hyperparameters": dict(request.hyperparameters),
                 "training_metrics": training_metrics,
                 "test_metrics": test_metrics,
-                "loocv_metrics": loocv_metrics,  # ADD THIS LINE
-            } 
+            }
             self.model_store.save_model(model_id, trained_model, model_info)
             
             # Build final ModelInfo message
@@ -173,18 +212,18 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 num_features=len(X_train.columns),
                 hyperparameters=request.hyperparameters,
                 created_at=datetime.utcnow().isoformat(),
-                training_metrics=training_metrics,
-                test_metrics=test_metrics
+                training_metrics=_numeric_metrics(training_metrics),
+                test_metrics=_numeric_metrics(test_metrics)
             )
-            
+
             # Yield completed status
             yield ml_service_pb2.TrainingProgress(
                 model_id=model_id,
                 status="completed",
                 message="Training completed successfully",
                 progress_percent=100,
-                training_metrics=training_metrics,
-                test_metrics=test_metrics,
+                training_metrics=_numeric_metrics(training_metrics),
+                test_metrics=_numeric_metrics(test_metrics),
                 model_info=model_info_pb
             )
             
@@ -216,10 +255,10 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                 feature_columns=model_info["feature_columns"],
                 num_samples=model_info["num_samples"],
                 num_features=model_info["num_features"],
-                hyperparameters=model_info["hyperparameters"],
-                created_at=model_info["created_at"],
-                training_metrics=model_info["training_metrics"],
-                test_metrics=model_info["test_metrics"]
+                hyperparameters=_str_params(model_info.get("hyperparameters")),
+                created_at=model_info.get("created_at", ""),
+                training_metrics=_numeric_metrics(model_info.get("training_metrics")),
+                test_metrics=_numeric_metrics(model_info.get("test_metrics"))
             )
             
         except Exception as e:
@@ -314,78 +353,76 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
 
             logger.info(f"Train: {len(X_train)} samples, Test: {len(X_test)} samples")
         
+            # Cross-validation settings (training split only)
+            tune = bool(request.tune_hyperparameters)
+            cv_folds = request.cv_folds or 5
+            cv_repeats = request.cv_repeats or 1
+            cv_scoring = request.cv_scoring or DEFAULT_SCORING
+            logger.info(f"CV: {cv_folds}-fold x {cv_repeats} on the training split, "
+                        f"tune_hyperparameters={tune}, scoring={cv_scoring}")
+
             # Train each model
             model_results = []
-            
+
             for algorithm in algorithms:
                 try:
                     logger.info(f"Training {algorithm}...")
-                    # Set hyperparameters based on algorithm
-                    if algorithm == 'logistic_regression':
-                        hyperparams = {
-                            'max_iter': 100,
-                            'solver': 'lbfgs',
-                            'random_state': request.random_state or 42
-                        }
-                    elif algorithm == 'random_forest':
-                        hyperparams = {
-                            'n_estimators': 50,
-                            'random_state': request.random_state or 42
-                        }
-                    elif algorithm == "neural_network":
-                        hyperparams = {
-                            'hidden_layer_sizes': (50,),      # 2 hidden layers
-                            'max_iter': 1000,                     # ← Was 200, now 1000
-                            'early_stopping': False,               # Stop if no improvement
-                            'validation_fraction': 0.1,           # Use 10% for validation
-                            'n_iter_no_change': 10,               # Stop after 20 iterations of no improvement
-                            'learning_rate_init': 0.001,          # Better learning rate
-                            'solver': 'adam',                     # Better optimizer
-                            'alpha': 0.001,                      # L2 regularization
-                            'batch_size': 32, 			# Mini-batch size
-                            'random_state': request.random_state or 42
-                        }
-                    else:
-                        hyperparams = {}
-                
+                    # Base hyperparameters (used as-is when not tuning; the grid overrides
+                    # the parameters it covers when tuning)
+                    hyperparams = self._base_hyperparameters(algorithm, random_state)
+
                     # Create model using ModelTrainer factory
                     model = self.model_trainer.create_model(
                         algorithm=algorithm,
                         task_type="classification",
-                        hyperparameters=hyperparams  # Use defaults
+                        hyperparameters=hyperparams
                     )
 
                     # Wrap as Pipeline([log, scale, model]); transforms are fit on X_train only
                     model = build_pipeline(model, trans_list)
 
-                    # Train model
+                    # K-fold CV (and optional GridSearchCV) on X_train only; returns an
+                    # unfitted pipeline with the chosen parameters
+                    cv_result = cross_validate_and_tune(
+                        model, algorithm, X_train, y_train,
+                        tune=tune, cv_folds=cv_folds, cv_repeats=cv_repeats,
+                        random_state=random_state, scoring=cv_scoring,
+                        param_grids_json=request.param_grids_json,
+                    )
+                    model = cv_result["estimator"]
+
+                    # Refit on all of X_train, score once on the held-out test set
                     trained_model, train_metrics, test_metrics, selected_features = self.model_trainer.train_model(
                         model, X_train, y_train, X_test, y_test, task_type="classification"
                     )
-                
+                    final_params = _non_default_params(final_estimator(trained_model))
+
                     # Generate model ID
                     model_id = f"model_{uuid.uuid4().hex[:12]}"
-                    
+
                     # Store model
                     self.model_store.save_model(model_id, trained_model, {
                         'algorithm': algorithm,
-                        'task_type': 'classification',  # Add this
+                        'task_type': 'classification',
                         'dataset_id': dataset_id,
                         'target_column': target_column,
-                        'feature_columns': selected_features, 
-                        'num_samples': len(X_train) + len(X_test),  # Add this
+                        'feature_columns': selected_features,
+                        'num_samples': len(X_train) + len(X_test),
                         'num_features': len(selected_features),
-                        'hyperparameters': {},  # Add this
+                        'hyperparameters': final_params,
                         'trans_list': ','.join(parse_trans_list(trans_list)),
                         'train_size': len(X_train),
                         'test_size': len(X_test),
-                        'training_metrics': train_metrics,  # Change from train_metrics
+                        'training_metrics': train_metrics,
                         'test_metrics': test_metrics,
-                        'feature_names': selected_features 
-                    }) 
+                        'cv_metrics': cv_result["cv_metrics"],
+                        'best_params': cv_result["best_params"],
+                        'tuned': cv_result["tuned"],
+                        'feature_names': selected_features
+                    })
                     logger.info(f"✓ {algorithm} trained: {model_id}")
-                    logger.info(f"  Accuracy: {test_metrics.get('accuracy', 0):.4f}")
-                
+                    logger.info(f"  Test accuracy: {test_metrics.get('accuracy', 0):.4f}")
+
                     # Add to results
                     model_results.append(
                         ml_service_pb2.ModelResult(
@@ -397,6 +434,11 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                             f1_score=test_metrics.get('f1_score', 0),
                             confusion_matrix_flat=[int(v) for row in test_metrics["confusion_matrix"] for v in row],
                             labels=test_metrics["labels"],
+                            roc_auc=test_metrics.get('roc_auc', 0.0),
+                            cv_metrics=cv_result["cv_metrics"],
+                            best_params=cv_result["best_params"],
+                            tuned=cv_result["tuned"],
+                            hyperparameters=final_params,
                         )
                     )
                 
@@ -446,10 +488,10 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                         feature_columns=model_info["feature_columns"],
                         num_samples=model_info["num_samples"],
                         num_features=model_info["num_features"],
-                        hyperparameters=model_info["hyperparameters"],
-                        created_at=model_info["created_at"],
-                        training_metrics=model_info["training_metrics"],
-                        test_metrics=model_info["test_metrics"]
+                        hyperparameters=_str_params(model_info.get("hyperparameters")),
+                        created_at=model_info.get("created_at", ""),
+                        training_metrics=_numeric_metrics(model_info.get("training_metrics")),
+                        test_metrics=_numeric_metrics(model_info.get("test_metrics"))
                     )
                 )
             
