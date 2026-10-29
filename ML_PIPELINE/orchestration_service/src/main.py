@@ -1,5 +1,3 @@
-# orchestration-service/src/main.py
-
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -326,6 +324,42 @@ async def get_dataset_info(dataset_id: str):
         logger.error(f"Get dataset info error: {e}")
         raise HTTPException(status_code=404, detail=f"Dataset not found: {str(e)}")
 
+# Add to orchestration_service/src/main.py (for example after GET /api/datasets/{dataset_id}).
+# Needs the shared datasets folder mounted in the orchestration container, e.g. in docker-compose.yml:
+#   orchestration_service:
+#     volumes:
+#       - ./datasets:/app/datasets:ro
+
+from pathlib import Path
+
+
+# endpoint for the mean-variance distribution plot  
+# Add to orchestration_service/src/main.py (for example after GET /api/datasets/{dataset_id}),
+# replacing the earlier version. No volume mount needed: the dataset is fetched from the data service,
+# which also serves the filtered datasets that only exist in its memory.
+
+@app.get("/api/datasets/{dataset_id}/gene_stats")
+def dataset_gene_stats(dataset_id: str):
+    """Each gene's mean and variance across samples (for mean-variance plots).
+    Plain def: the gRPC fetch blocks, so FastAPI runs it in a worker thread."""
+    import numpy as np
+    import pandas as pd
+
+    try:
+        df = data_client.get_dataset(dataset_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    except grpc.RpcError as e:
+        code = e.code()
+        raise HTTPException(status_code=404 if code == grpc.StatusCode.NOT_FOUND else 502,
+                            detail=f"Data service: {code.name}: {e.details()}")
+
+    X = df.select_dtypes(include="number")
+    # Drop sample metadata columns (factor values, characteristics) that happen to be numeric
+    X = X.loc[:, [c for c in X.columns if not str(c).startswith(("Factor Value", "Characteristics", "Comment"))]]
+    stats = pd.DataFrame({"gene": X.columns.astype(str), "mean": X.mean().values, "variance": X.var().values})
+    stats = stats.replace([np.inf, -np.inf], np.nan).dropna()
+    return {"dataset_id": dataset_id, "n_samples": int(len(X)), "genes": stats.to_dict(orient="list")}
 
 # ── Pipeline jobs ─────────────────────────────────────────────────────────────
 #

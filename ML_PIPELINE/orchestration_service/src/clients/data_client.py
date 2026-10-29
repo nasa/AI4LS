@@ -337,24 +337,21 @@ class DataServiceClient:
         self.channel.close()
 
     def get_dataset(self, dataset_id):
-        """Load a dataset from disk"""
-        try:
-            from pathlib import Path
-            import pandas as pd
+        """Fetch a dataset from the data service (streamed in chunks) as a DataFrame.
+        Works for in-memory datasets too (filtered/converted ones are never written to disk)."""
+        import pandas as pd
+        from io import BytesIO
 
-            dataset_path = Path("./datasets") / f"{dataset_id}.parquet"
-
-            if not dataset_path.exists():
-                raise FileNotFoundError(f"Dataset not found: {dataset_path}")
-
-            df = pd.read_parquet(dataset_path)
-            logger.info(f"✓ Loaded dataset {dataset_id}: {df.shape[0]} samples × {df.shape[1]} features")
-
-            return df
-
-        except Exception as e:
-            logger.error(f"Error loading dataset {dataset_id}: {e}")
-            raise
+        if not hasattr(self, "data_stub"):
+            self.data_stub = self.data_service_pb2_grpc.DataServiceStub(self.channel)
+        logger.info(f"Fetching dataset {dataset_id} from data service...")
+        request = self.data_service_pb2.GetDatasetRequest(dataset_id=dataset_id)
+        chunks = [chunk.data for chunk in self.data_stub.GetDataset(request, timeout=300)]
+        if not chunks:
+            raise FileNotFoundError(f"Dataset {dataset_id} not found")
+        df = pd.read_parquet(BytesIO(b"".join(chunks)))
+        logger.info(f"✓ Loaded dataset {dataset_id}: {df.shape[0]} samples × {df.shape[1]} features")
+        return df
 
 
 # ============================================================================
