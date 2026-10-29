@@ -584,9 +584,14 @@ def _execute_pipeline(job: PipelineJob):
 
         # ── Train the ensemble (log/standardize happen inside each model, fit on the training split) ──
         n_algos = len(request.config.ensemble_algorithms)
-        logger.info(f"Pipeline {pipeline_id}: Training ensemble models...")
+        cv_desc = (f"{request.config.cv_folds}-fold CV"
+                   + (f" x{request.config.cv_repeats}" if request.config.cv_repeats > 1 else "")
+                   + (f", GridSearchCV tuning on {request.config.cv_scoring}"
+                      if request.config.tune_hyperparameters else ", no tuning"))
+        logger.info(f"Pipeline {pipeline_id}: Training ensemble models ({cv_desc})...")
         job.emit({"status": "training",
-                  "message": f"Training {n_algos} models: {', '.join(request.config.ensemble_algorithms)}...",
+                  "message": f"Training {n_algos} models ({cv_desc} on the training split): "
+                             f"{', '.join(request.config.ensemble_algorithms)}...",
                   "progress_percent": 35})
 
         ensemble_result = None
@@ -615,8 +620,13 @@ def _execute_pipeline(job: PipelineJob):
         if not models:
             raise RuntimeError("No models were trained: "
                                + ((ensemble_result or {}).get("error_message") or "see ML service logs"))
+        cv_summary = "; ".join(
+            f"{m.get('algorithm')} CV F1 {m['cv_metrics']['f1_weighted_mean']:.2f}"
+            f"±{m['cv_metrics'].get('f1_weighted_std', 0):.2f}"
+            for m in models if (m.get("cv_metrics") or {}).get("f1_weighted_mean") is not None)
         job.emit({"status": "training",
-                  "message": f"Trained {len(models)} of {n_algos} models",
+                  "message": f"Trained {len(models)} of {n_algos} models"
+                             + (f" ({cv_summary})" if cv_summary else " (no CV metrics returned)"),
                   "progress_percent": 55,
                   "test_metrics": ensemble_result.get("test_metrics")})
 
@@ -681,7 +691,14 @@ def _execute_pipeline(job: PipelineJob):
                 "algorithms": request.config.ensemble_algorithms,
                 "target_column": request.config.target_column,
                 "test_size": request.config.test_size,
-                "min_features": request.config.min_features
+                "min_features": request.config.min_features,
+                "random_state": request.config.random_state,
+                "trans_list": request.config.trans_list,
+                "tune_hyperparameters": request.config.tune_hyperparameters,
+                "cv_folds": request.config.cv_folds,
+                "cv_repeats": request.config.cv_repeats,
+                "cv_scoring": request.config.cv_scoring,
+                "param_grids": request.config.param_grids,
             },
             "training_results": ensemble_result or {},
             "feature_importance": feature_importance_results,
