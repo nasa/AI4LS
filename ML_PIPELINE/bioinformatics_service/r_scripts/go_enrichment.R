@@ -1,6 +1,12 @@
 # r_scripts/go_enrichment.R
-# GO enrichment with clusterProfiler: over-representation (ORA) on gene lists and
-# GSEA on ranked genes. Works offline (org.Mm.eg.db / org.Hs.eg.db).
+# GO and KEGG enrichment with clusterProfiler: over-representation (ORA) on gene lists and
+# GSEA on ranked genes. GO works offline (org.Mm.eg.db / org.Hs.eg.db).
+#
+# ontologies: any of "BP", "MF", "CC" (GO) and "KEGG" (KEGG pathways). KEGG gene sets are
+# downloaded from rest.kegg.jp once per species and kept for KEGG_CACHE_DAYS in this R session
+# (the bioinformatics service keeps one R session); if the download fails, the KEGG rows of the
+# summary say why and GO still runs. Genes are converted to Entrez IDs first, which for mouse and
+# human are also KEGG's gene IDs.
 #
 # Inputs (written by src/go_enrichment.py):
 #   lists.csv     columns: name, gene                 (one row per gene per list)
@@ -64,6 +70,39 @@ BiocParallel::register(BiocParallel::SerialParam(), default = TRUE)
   out[!duplicated(out$input), , drop = FALSE]   # one Entrez ID per input gene
 }
 
+# ── KEGG pathway gene sets ─────────────────────────────────────────────────────
+KEGG_CACHE_DAYS <- 7
+.kegg_cache <- new.env()
+
+.kegg_code <- function(organism) {
+  switch(tolower(organism), mmu = "mmu", mouse = "mmu", hsa = "hsa", human = "hsa",
+         stop(paste("Unsupported organism for KEGG:", organism, "(use mmu or hsa)")))
+}
+
+# list(t2g = data.frame(term, gene = Entrez ID), t2n = data.frame(term, name)); errors if KEGG is unreachable
+.kegg_sets <- function(organism) {
+  code <- .kegg_code(organism)
+  hit <- .kegg_cache[[code]]
+  if (!is.null(hit) && difftime(Sys.time(), hit$time, units = "days") < KEGG_CACHE_DAYS) return(hit)
+  download <- getFromNamespace("download_KEGG", "clusterProfiler")
+  k <- suppressMessages(download(code, keggType = "KEGG", keyType = "kegg"))
+  t2g <- data.frame(term = as.character(k$KEGGPATHID2EXTID[[1]]),
+                    gene = sub("^[a-z]+:", "", as.character(k$KEGGPATHID2EXTID[[2]])),
+                    stringsAsFactors = FALSE)
+  t2n <- data.frame(term = as.character(k$KEGGPATHID2NAME[[1]]),
+                    # "Glycolysis / Gluconeogenesis - Mus musculus (house mouse)" -> "Glycolysis / Gluconeogenesis"
+                    name = sub(" - [A-Z][a-z]+ [a-z]+ \\([^)]*\\)$", "", as.character(k$KEGGPATHID2NAME[[2]])),
+                    stringsAsFactors = FALSE)
+  if (nrow(t2g) == 0) stop("KEGG returned no pathway genes for ", code)
+  hit <- list(t2g = t2g, t2n = t2n, time = Sys.time())
+  assign(code, hit, envir = .kegg_cache)
+  cat(sprintf("KEGG %s: %d pathways, %d genes (downloaded)\n", code, length(unique(t2g$term)),
+              length(unique(t2g$gene))))
+  hit
+}
+
+.ont_label <- function(ont) if (ont == "KEGG") "KEGG" else paste0("GO:", ont)
+
 .empty_terms <- function() {
   data.frame(analysis = character(), method = character(), ontology = character(),
              term_id = character(), description = character(), set_size = integer(),
@@ -97,6 +136,13 @@ run_go_enrichment <- function(lists_path, rankings_path, universe_path, output_d
   universe_entrez <- unique(uni_map$ENTREZID)
   cat(sprintf("Universe: %d genes, %d mapped to Entrez\n", length(unique(universe)), length(universe_entrez)))
 
+  kegg <- NULL; kegg_error <- ""
+  if ("KEGG" %in% ontologies) {
+    kegg <- tryCatch(.kegg_sets(organism), error = function(e) {
+      kegg_error <<- paste("KEGG download failed:", conditionMessage(e)); NULL })
+    if (is.null(kegg)) message(kegg_error)
+  }
+
   terms <- list(); sums <- list()
   add_summary <- function(analysis, method, ont, n_input, n_mapped, n_terms, note = "") {
     sums[[length(sums) + 1]] <<- data.frame(
@@ -112,19 +158,35 @@ run_go_enrichment <- function(lists_path, rankings_path, universe_path, output_d
       m <- .to_entrez(genes, orgdb)
       entrez <- intersect(unique(m$ENTREZID), universe_entrez)
       for (ont in ontologies) {
-        label <- sprintf("ORA %s GO:%s", nm, ont)
+        label <- sprintf("ORA %s %s", nm, .ont_label(ont))
         if (length(entrez) < 3) {
           add_summary(nm, "ora", ont, length(unique(genes)), length(entrez), 0L,
                       "fewer than 3 genes mapped; skipped")
           next
         }
-        res <- tryCatch(enrichGO(gene = entrez, universe = universe_entrez, OrgDb = orgdb,
-                                 keyType = "ENTREZID", ont = ont,
-                                 pAdjustMethod = p_adjust_method, pvalueCutoff = padj_cutoff,
-                                 qvalueCutoff = qvalue_cutoff, minGSSize = min_gs_size,
-                                 maxGSSize = max_gs_size, readable = TRUE),
-                        error = function(e) { message(label, " failed: ", conditionMessage(e)); NULL })
-        res <- .maybe_simplify(res, do_simplify, simplify_cutoff, label)
+        if (ont == "KEGG" && is.null(kegg)) {
+          add_summary(nm, "ora", ont, length(unique(genes)), length(entrez), 0L, kegg_error)
+          next
+        }
+        note <- ""
+        fail <- function(e) { note <<- paste("failed:", conditionMessage(e)); message(label, " ", note); NULL }
+        res <- if (ont == "KEGG") {
+          tryCatch(enricher(gene = entrez, universe = universe_entrez,
+                            TERM2GENE = kegg$t2g, TERM2NAME = kegg$t2n,
+                            pAdjustMethod = p_adjust_method, pvalueCutoff = padj_cutoff,
+                            qvalueCutoff = qvalue_cutoff, minGSSize = min_gs_size,
+                            maxGSSize = max_gs_size), error = fail)
+        } else {
+          tryCatch(enrichGO(gene = entrez, universe = universe_entrez, OrgDb = orgdb,
+                            keyType = "ENTREZID", ont = ont,
+                            pAdjustMethod = p_adjust_method, pvalueCutoff = padj_cutoff,
+                            qvalueCutoff = qvalue_cutoff, minGSSize = min_gs_size,
+                            maxGSSize = max_gs_size, readable = TRUE), error = fail)
+        }
+        if (ont == "KEGG" && !is.null(res)) {   # Entrez IDs -> symbols in the gene column
+          res <- tryCatch(setReadable(res, OrgDb = orgdb, keyType = "ENTREZID"), error = function(e) res)
+        }
+        if (ont != "KEGG") res <- .maybe_simplify(res, do_simplify, simplify_cutoff, label)   # GO only
         df <- if (is.null(res)) data.frame() else as.data.frame(res)
         if (nrow(df) > 0) {
           df <- df[df$p.adjust <= padj_cutoff, , drop = FALSE]
@@ -141,7 +203,7 @@ run_go_enrichment <- function(lists_path, rankings_path, universe_path, output_d
             padj = df$p.adjust, qvalue = .col(df, "qvalue", NA_real_), genes = df$geneID,
             stringsAsFactors = FALSE)
         }
-        add_summary(nm, "ora", ont, length(unique(genes)), length(entrez), nrow(df))
+        add_summary(nm, "ora", ont, length(unique(genes)), length(entrez), nrow(df), note)
         cat(sprintf("%s: %d terms\n", label, nrow(df)))
       }
     }
@@ -161,28 +223,37 @@ run_go_enrichment <- function(lists_path, rankings_path, universe_path, output_d
       gl <- setNames(r$score, r$ENTREZID)
       gl <- sort(gl[is.finite(gl)], decreasing = TRUE)
       for (ont in ontologies) {
-        label <- sprintf("GSEA %s GO:%s", nm, ont)
+        label <- sprintf("GSEA %s %s", nm, .ont_label(ont))
+        n_in <- length(unique(rankings$gene[rankings$name == nm]))
         if (length(gl) < 15) {
-          add_summary(nm, "gsea", ont, length(unique(rankings$gene[rankings$name == nm])),
-                      length(gl), 0L, "fewer than 15 ranked genes mapped; skipped")
+          add_summary(nm, "gsea", ont, n_in, length(gl), 0L, "fewer than 15 ranked genes mapped; skipped")
           next
         }
+        if (ont == "KEGG" && is.null(kegg)) {
+          add_summary(nm, "gsea", ont, n_in, length(gl), 0L, kegg_error)
+          next
+        }
+        note <- ""
         run <- function(extra) {
           set.seed(42)
-          do.call(gseGO, c(list(geneList = gl, ont = ont, OrgDb = orgdb, keyType = "ENTREZID",
-                                minGSSize = min_gs_size, maxGSSize = max_gs_size,
-                                pvalueCutoff = padj_cutoff, pAdjustMethod = p_adjust_method,
-                                eps = 0, verbose = FALSE, seed = TRUE), extra))
+          common <- list(geneList = gl, minGSSize = min_gs_size, maxGSSize = max_gs_size,
+                         pvalueCutoff = padj_cutoff, pAdjustMethod = p_adjust_method,
+                         eps = 0, verbose = FALSE, seed = TRUE)
+          if (ont == "KEGG") {
+            do.call(GSEA, c(common, list(TERM2GENE = kegg$t2g, TERM2NAME = kegg$t2n), extra))
+          } else {
+            do.call(gseGO, c(common, list(ont = ont, OrgDb = orgdb, keyType = "ENTREZID"), extra))
+          }
         }
         res <- tryCatch(run(list(scoreType = score_type)), error = function(e) {
           # Older clusterProfiler versions don't pass scoreType through to fgsea
           message(label, ": retrying without scoreType (", conditionMessage(e), ")")
           tryCatch(run(list()), error = function(e2) {
-            message(label, " failed: ", conditionMessage(e2)); NULL })
+            note <<- paste("failed:", conditionMessage(e2)); message(label, " ", note); NULL })
         })
         if (!is.null(res)) res <- tryCatch(setReadable(res, OrgDb = orgdb, keyType = "ENTREZID"),
                                            error = function(e) res)
-        res <- .maybe_simplify(res, do_simplify, simplify_cutoff, label)
+        if (ont != "KEGG") res <- .maybe_simplify(res, do_simplify, simplify_cutoff, label)   # GO only
         df <- if (is.null(res)) data.frame() else as.data.frame(res)
         if (nrow(df) > 0) df <- df[df$p.adjust <= padj_cutoff, , drop = FALSE]
         if (nrow(df) > 0) {
@@ -196,8 +267,7 @@ run_go_enrichment <- function(lists_path, rankings_path, universe_path, output_d
             padj = df$p.adjust, qvalue = q, genes = df$core_enrichment,
             stringsAsFactors = FALSE)
         }
-        add_summary(nm, "gsea", ont, length(unique(rankings$gene[rankings$name == nm])),
-                    length(gl), nrow(df))
+        add_summary(nm, "gsea", ont, n_in, length(gl), nrow(df), note)
         cat(sprintf("%s: %d terms\n", label, nrow(df)))
       }
     }
@@ -209,6 +279,6 @@ run_go_enrichment <- function(lists_path, rankings_path, universe_path, output_d
                n_input = integer(), n_mapped = integer(), n_terms = integer(), note = character())
   write.csv(all_terms, file.path(output_dir, "go_enrichment_results.csv"), row.names = FALSE)
   write.csv(all_summary, file.path(output_dir, "go_enrichment_summary.csv"), row.names = FALSE)
-  cat(sprintf("GO enrichment complete: %d terms\n", nrow(all_terms)))
+  cat(sprintf("Enrichment complete: %d terms\n", nrow(all_terms)))
   nrow(all_terms)
 }

@@ -1,5 +1,5 @@
 # orchestration_service/src/enrichment_models.py
-"""Configuration and request models for GO enrichment.
+"""Configuration and request models for GO / KEGG enrichment.
 
 `EnrichmentConfig` is the `"enrichment": {...}` block of the pipeline config. Add it to
 PipelineConfig in models.py so it's checked when a run starts:
@@ -21,7 +21,7 @@ GseaRanking = Literal["deseq2", "ml_importance"]
 class EnrichmentConfig(BaseModel):
     enabled: bool = False
     methods: List[Literal["ora", "gsea"]] = ["ora", "gsea"]
-    ontologies: List[Literal["BP", "MF", "CC"]] = ["BP"]
+    ontologies: List[Literal["BP", "MF", "CC", "KEGG"]] = ["BP"]   # KEGG = KEGG pathways (downloaded from rest.kegg.jp)
     ora_lists: List[OraList] = ["ml_consensus", "deseq2_significant", "overlap"]
     gsea_rankings: List[GseaRanking] = ["deseq2", "ml_importance"]
     organism: Literal["auto", "mmu", "hsa"] = "auto"
