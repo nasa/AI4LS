@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import asyncio
+import hashlib
 import logging
 import os
 import threading
 import time
 import uuid
 import json
+from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from typing import Dict, List, Optional
@@ -556,6 +558,80 @@ def _start_job(request: PipelineRequest) -> PipelineJob:
     return job
 
 
+# ── DESeq2 result cache ───────────────────────────────────────────────────────
+# Keyed on every setting that determines the counts DESeq2 sees and how it's called. In memory
+# only: cleared when the orchestration container restarts. Bump DESEQ2_CACHE_VERSION after changing
+# the data service's filtering/conversion or the DESeq2 code, so old results aren't reused.
+DESEQ2_CACHE_VERSION = 1
+DESEQ2_CACHE_MAX = int(os.environ.get("DESEQ2_CACHE_MAX", "20"))
+DESEQ2_PADJ_THRESHOLD = 0.05
+DESEQ2_LOG2FC_THRESHOLD = 0.0
+DOWNLOAD_PATTERNS = ['unnormalized']
+DOWNLOAD_CV_STEP = 0.25
+
+_deseq2_cache: "OrderedDict[str, dict]" = OrderedDict()
+_deseq2_cache_lock = threading.Lock()
+_deseq2_key_locks: Dict[str, threading.Lock] = {}
+
+
+def _deseq2_cache_key(request: PipelineRequest, condition_col: str, factor_values: List[str]) -> str:
+    cfg = request.config
+    osd_ids = sorted({i.strip() for i in (request.osd_ids or "").split(",") if i.strip()},
+                     key=lambda s: (len(s), s))
+    coding_only = bool(getattr(cfg, "coding_only", False))
+    key = {
+        "version": DESEQ2_CACHE_VERSION,
+        # the pipeline uses dataset_id when given, otherwise downloads osd_ids
+        "source": {"dataset_id": request.dataset_id} if request.dataset_id else {"osd_ids": osd_ids},
+        "factor_name": cfg.factor_name or "Factor Value[Spaceflight]",
+        "download_factor_values": list(cfg.factor_values or ["Ground Control", "Space Flight"]),
+        "download_patterns": DOWNLOAD_PATTERNS,
+        "download_cv_step": DOWNLOAD_CV_STEP,
+        "coding_only": coding_only,
+        "keep_biotypes": sorted(getattr(cfg, "keep_biotypes", None) or ["protein_coding"]) if coding_only else None,
+        "target_column": cfg.target_column,
+        "min_features": cfg.min_features or 0,
+        "condition_column": condition_col,
+        "control": factor_values[0],
+        "treatment": factor_values[1],
+        "padj": DESEQ2_PADJ_THRESHOLD,
+        "log2fc": DESEQ2_LOG2FC_THRESHOLD,
+    }
+    digest = hashlib.sha1(json.dumps(key, sort_keys=True).encode()).hexdigest()[:12]
+    return f"deseq2_{digest}"
+
+
+def _deseq2_key_lock(key: str) -> threading.Lock:
+    with _deseq2_cache_lock:
+        return _deseq2_key_locks.setdefault(key, threading.Lock())
+
+
+def _deseq2_cache_get(key: str) -> Optional[dict]:
+    with _deseq2_cache_lock:
+        hit = _deseq2_cache.get(key)
+        if hit is None:
+            return None
+        _deseq2_cache.move_to_end(key)
+        return {**hit, "reused": True}
+
+
+def _deseq2_cache_put(key: str, result: dict):
+    with _deseq2_cache_lock:
+        _deseq2_cache[key] = result
+        _deseq2_cache.move_to_end(key)
+        while len(_deseq2_cache) > DESEQ2_CACHE_MAX:
+            _deseq2_cache.popitem(last=False)
+
+
+@app.delete("/api/deseq2/cache")
+async def clear_deseq2_cache():
+    """Forget all cached DESeq2 results (they are also cleared when the service restarts)."""
+    with _deseq2_cache_lock:
+        n = len(_deseq2_cache)
+        _deseq2_cache.clear()
+    return {"cleared": n}
+
+
 def _execute_pipeline(job: PipelineJob):
     """Runs in a worker thread. Same steps as before; progress goes to job.emit()."""
     pipeline_id = job.pipeline_id
@@ -582,11 +658,11 @@ def _execute_pipeline(job: PipelineJob):
                 data_stub = data_service_pb2_grpc.MultiDatasetServiceStub(data_channel)
                 download_request = data_service_pb2.DownloadMultipleDatasetsRequest(
                     osd_ids=osd_ids_list,
-                    patterns=['unnormalized'],
+                    patterns=DOWNLOAD_PATTERNS,
                     factor_name=request.config.factor_name or 'Factor Value[Spaceflight]',
                     factor_values=request.config.factor_values or ['Ground Control', 'Space Flight'],
                     min_features=request.config.min_features or 1000,
-                    cv_step=0.25
+                    cv_step=DOWNLOAD_CV_STEP
                 )
                 download_response = data_stub.DownloadMultipleDatasets(download_request)
                 if not download_response.success:
@@ -735,29 +811,46 @@ def _execute_pipeline(job: PipelineJob):
                 logger.warning(f"Failed to compute importance for {model_id}: {fi_result.get('error')}")
 
         # ── DESeq2 on the same filtered raw counts ──
-        logger.info(f"Pipeline {pipeline_id}: Running DESeq2 analysis...")
-        job.emit({"status": "deseq2", "message": "Running DESeq2 differential expression analysis...",
-                  "progress_percent": 85})
+        # Its input depends only on the data settings, so runs that share them (e.g. configs that
+        # differ only in ML settings) reuse the first run's result instead of recomputing it.
         deseq2_result = None
         try:
             condition_col = request.config.factor_name or request.config.target_column
             factor_values = request.config.factor_values or []
             if len(factor_values) >= 2:
-                deseq2_result = bio_client.run_deseq2(
-                    dataset_id=transformed_id,
-                    condition_column=condition_col,
-                    control_group=factor_values[0],
-                    treatment_group=factor_values[1],
-                    padj_threshold=0.05,
-                    log2fc_threshold=0.0
-                )
+                cache_key = _deseq2_cache_key(request, condition_col, factor_values)
+                reuse = getattr(request.config, "reuse_deseq2", True)
+                with _deseq2_key_lock(cache_key):     # an identical run in parallel waits, then reuses
+                    cached = _deseq2_cache_get(cache_key) if reuse else None
+                    if cached:
+                        deseq2_result = cached
+                        logger.info(f"Pipeline {pipeline_id}: reusing DESeq2 result {cache_key} "
+                                    f"from pipeline {cached.get('source_pipeline_id')}")
+                    else:
+                        logger.info(f"Pipeline {pipeline_id}: Running DESeq2 analysis ({cache_key})...")
+                        job.emit({"status": "deseq2", "message": "Running DESeq2 differential expression analysis...",
+                                  "progress_percent": 85})
+                        deseq2_result = bio_client.run_deseq2(
+                            dataset_id=transformed_id,
+                            condition_column=condition_col,
+                            control_group=factor_values[0],
+                            treatment_group=factor_values[1],
+                            padj_threshold=DESEQ2_PADJ_THRESHOLD,
+                            log2fc_threshold=DESEQ2_LOG2FC_THRESHOLD
+                        )
+                        if deseq2_result.get("success"):
+                            deseq2_result = {**deseq2_result, "cache_key": cache_key,
+                                             "source_pipeline_id": pipeline_id, "reused": False}
+                            _deseq2_cache_put(cache_key, deseq2_result)
                 if deseq2_result.get("success"):
                     sig = deseq2_result.get("num_significant", 0)
                     up = deseq2_result.get("num_upregulated", 0)
                     down = deseq2_result.get("num_downregulated", 0)
-                    logger.info(f"✓ DESeq2 complete: {sig} significant genes ({up} up, {down} down)")
+                    how = (f" (reused from run {deseq2_result['source_pipeline_id'][:8]}: same data settings)"
+                           if deseq2_result.get("reused") else "")
+                    logger.info(f"✓ DESeq2 complete: {sig} significant genes ({up} up, {down} down){how}")
                     job.emit({"status": "deseq2",
-                              "message": f"DESeq2: {sig} significant genes ({up} up, {down} down)",
+                              "message": f"DESeq2: {sig} significant genes ({up} up, {down} down){how}",
                               "progress_percent": 90})
                 else:
                     logger.warning(f"DESeq2 failed: {deseq2_result.get('error')}")

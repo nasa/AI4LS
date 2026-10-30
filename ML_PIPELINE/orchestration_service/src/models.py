@@ -109,6 +109,7 @@ class PipelineConfig(BaseModel):
     cv_repeats: int = Field(default=1, ge=1, le=20)
     cv_scoring: Literal["f1_weighted", "accuracy", "roc_auc", "balanced_accuracy"] = "f1_weighted"
     param_grids: Optional[Dict[str, Any]] = None  # e.g. {"svm": {"C": [0.1, 1]}}; overrides the default grid per algorithm
+    reuse_deseq2: bool = True   # reuse DESeq2 from an earlier run with the same data settings (same counts in, same result out)
     coding_only: bool = True
     keep_biotypes: List[str] = ["protein_coding", "lncRNA"]
     enrichment: EnrichmentConfig = EnrichmentConfig()
