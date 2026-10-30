@@ -128,32 +128,65 @@ class DownloadRequest(BaseModel):
 
 # ── Health ────────────────────────────────────────────────────────────────────
 
+HEALTH_TIMEOUT_SECONDS = float(os.environ.get("HEALTH_TIMEOUT_SECONDS", "2"))
+
+
+def _client_channel(client) -> Optional[grpc.Channel]:
+    """The client's gRPC channel, whatever the attribute is called."""
+    for attr in ("channel", "_channel"):
+        ch = getattr(client, attr, None)
+        if isinstance(ch, grpc.Channel):
+            return ch
+    return None
+
+
+def _channel_ready(name: str, client) -> bool:
+    """True if the service's gRPC channel connects within HEALTH_TIMEOUT_SECONDS.
+    Readiness means the server is up and accepting connections; it doesn't call any RPC,
+    so a client without a health_check() method no longer counts as down."""
+    if client is None:
+        logger.warning(f"Health: {name} client was not initialized")
+        return False
+    channel = _client_channel(client)
+    if channel is None:
+        # Fallback for a client that doesn't expose its channel
+        if hasattr(client, "health_check"):
+            try:
+                return bool(client.health_check())
+            except Exception as e:
+                logger.warning(f"Health: {name} health_check() failed: {e}")
+                return False
+        logger.warning(f"Health: {name} client has no channel attribute or health_check()")
+        return False
+    try:
+        grpc.channel_ready_future(channel).result(timeout=HEALTH_TIMEOUT_SECONDS)
+        return True
+    except grpc.FutureTimeoutError:
+        logger.warning(f"Health: {name} not reachable within {HEALTH_TIMEOUT_SECONDS}s")
+        return False
+    except Exception as e:
+        logger.warning(f"Health: {name} check failed: {e}")
+        return False
+
+
 @app.get("/health", response_model=HealthResponse)
-async def health_check():
-    """Check health of orchestration service and downstream services"""
-    services_status = {
-        "data_service": False,
-        "ml_service": False,
-        "feature_importance_service": False
+def health_check():
+    """Check health of orchestration service and downstream services.
+    Plain def (runs in a worker thread): the readiness checks block, and they run in
+    parallel so a down service costs one timeout, not one per service."""
+    clients = {
+        "data_service": data_client,
+        "ml_service": ml_client,
+        "feature_importance_service": fi_client,
+        "bioinformatics_service": bio_client,
     }
-    
-    try:
-        if data_client:
-            services_status["data_service"] = data_client.health_check()
-    except Exception as e:
-        logger.error(f"Data Service health check failed: {e}")
-    
-    try:
-        if ml_client:
-            services_status["ml_service"] = ml_client.health_check()
-    except Exception as e:
-        logger.error(f"ML Service health check failed: {e}")
-    
-    overall_status = "healthy" if all([
-        services_status["data_service"],
-        services_status["ml_service"]
-    ]) else "degraded"
-    
+    # Own short-lived pool: _executor runs pipelines and may be busy
+    with ThreadPoolExecutor(max_workers=len(clients), thread_name_prefix="health") as pool:
+        futures = {name: pool.submit(_channel_ready, name, c) for name, c in clients.items()}
+        services_status = {name: f.result() for name, f in futures.items()}
+
+    overall_status = "healthy" if all(services_status.values()) else "degraded"
+
     return HealthResponse(
         status=overall_status,
         version=settings.app_version,
