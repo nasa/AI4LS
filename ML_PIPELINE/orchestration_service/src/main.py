@@ -380,6 +380,61 @@ def dataset_gene_stats(dataset_id: str):
     stats = stats.replace([np.inf, -np.inf], np.nan).dropna()
     return {"dataset_id": dataset_id, "n_samples": int(len(X)), "genes": stats.to_dict(orient="list")}
 
+_METADATA_PREFIXES = ("Factor Value", "Characteristics", "Comment", "Parameter Value")
+_NON_GENE_COLUMNS = {"source_dataset"}
+
+
+class ExpressionRequest(BaseModel):
+    genes: List[str]
+    group_column: str = "Factor Value[Spaceflight]"
+    normalization: str = "log2_cpm"   # "log2_cpm" = log2(CPM + 1) over all genes in the dataset; "raw" = counts as stored
+
+
+@app.post("/api/datasets/{dataset_id}/expression")
+def dataset_expression(dataset_id: str, req: ExpressionRequest):
+    """Per-sample expression for selected genes, with each sample's group (and study, if combined).
+    For box plots. Plain def: the gRPC fetch blocks, so FastAPI runs it in a worker thread."""
+    import numpy as np
+
+    if req.normalization not in ("log2_cpm", "raw"):
+        raise HTTPException(status_code=400, detail="normalization must be 'log2_cpm' or 'raw'")
+    if not req.genes:
+        raise HTTPException(status_code=400, detail="genes is empty")
+    try:
+        df = data_client.get_dataset(dataset_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Dataset {dataset_id} not found")
+    except grpc.RpcError as e:
+        code = e.code()
+        raise HTTPException(status_code=404 if code == grpc.StatusCode.NOT_FOUND else 502,
+                            detail=f"Data service: {code.name}: {e.details()}")
+    if req.group_column not in df.columns:
+        raise HTTPException(status_code=400, detail=f"Column '{req.group_column}' not in dataset {dataset_id}")
+
+    gene_cols = [c for c in df.select_dtypes(include="number").columns
+                 if c != req.group_column and c not in _NON_GENE_COLUMNS
+                 and not str(c).startswith(_METADATA_PREFIXES)]
+    X = df[gene_cols].astype(float)
+    if req.normalization == "log2_cpm":
+        # Library size over every gene in this dataset (after the pipeline's biotype/CV filters)
+        lib = X.sum(axis=1).replace(0, np.nan)
+        X = np.log2(X.div(lib, axis=0) * 1e6 + 1)
+
+    present = [g for g in dict.fromkeys(req.genes) if g in X.columns]
+    missing = [g for g in dict.fromkeys(req.genes) if g not in X.columns]
+    return {
+        "dataset_id": dataset_id,
+        "n_samples": int(len(df)),
+        "normalization": req.normalization,
+        "group_column": req.group_column,
+        "samples": [str(s) for s in df.index],
+        "groups": df[req.group_column].astype(str).tolist(),
+        "studies": df["source_dataset"].astype(str).tolist() if "source_dataset" in df.columns else None,
+        "values": {g: [None if not np.isfinite(v) else float(v) for v in X[g].to_numpy()] for g in present},
+        "missing": missing,
+    }
+
+
 # ── Pipeline jobs ─────────────────────────────────────────────────────────────
 #
 # Each pipeline run is a background job in a worker thread, so:
