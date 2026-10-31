@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any, Literal
 from enum import Enum
 from src.enrichment_models import EnrichmentConfig
+from src.causal_models import CausalConfig
 
 
 # If you don't have an UploadRequest model, add it:
@@ -113,6 +114,7 @@ class PipelineConfig(BaseModel):
     coding_only: bool = True
     keep_biotypes: List[str] = ["protein_coding", "lncRNA"]
     enrichment: EnrichmentConfig = EnrichmentConfig()
+    causal: CausalConfig = CausalConfig()   # CRISP causal ensemble (needs causal_service)
 
 class PipelineRequest(BaseModel):
     """Request to run full ML pipeline"""

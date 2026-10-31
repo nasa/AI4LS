@@ -33,6 +33,7 @@ from src.clients.data_client import DataServiceClient
 from src.clients.ml_client import MLServiceClient
 from src.clients.feature_importance_client import FeatureImportanceClient
 from src.clients.bioinformatics_client import BioinformaticsClient
+from src.clients.causal_client import CausalServiceClient
 from src.enrichment_models import EnrichmentRunRequest, detect_organism
 
 from src.generated import data_service_pb2, data_service_pb2_grpc
@@ -48,12 +49,13 @@ data_client: DataServiceClient = None
 ml_client: MLServiceClient = None
 fi_client: FeatureImportanceClient = None
 bio_client: BioinformaticsClient = None  # ← ADD
+causal_client: Optional[CausalServiceClient] = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle management for the application"""
-    global data_client, ml_client, fi_client, bio_client
+    global data_client, ml_client, fi_client, bio_client, causal_client
     
     settings = get_settings()
     
@@ -81,6 +83,14 @@ async def lifespan(app: FastAPI):
         logger.info("✓ Bioinformatics Service client initialized")
     except Exception as e:
         logger.error(f"Failed to initialize Bioinformatics Service client: {e}")
+
+    try:
+        causal_url = getattr(settings, "causal_service_url", None) or os.environ.get(
+            "CAUSAL_SERVICE_URL", "causal_service:50055")
+        causal_client = CausalServiceClient(causal_url)
+        logger.info(f"✓ Causal Service (CRISP) client initialized ({causal_url})")
+    except Exception as e:
+        logger.error(f"Failed to initialize Causal Service client: {e}")
     
     yield
     
@@ -93,6 +103,8 @@ async def lifespan(app: FastAPI):
         fi_client.close()
     if bio_client:
         bio_client.close()
+    if causal_client:
+        causal_client.close()
 
 app = FastAPI(
     title="ML Pipeline Orchestration Service",
@@ -181,13 +193,15 @@ def health_check():
         "ml_service": ml_client,
         "feature_importance_service": fi_client,
         "bioinformatics_service": bio_client,
+        "causal_service": causal_client,      # optional: reported, but not counted in "healthy"
     }
+    optional = {"causal_service"}
     # Own short-lived pool: _executor runs pipelines and may be busy
     with ThreadPoolExecutor(max_workers=len(clients), thread_name_prefix="health") as pool:
         futures = {name: pool.submit(_channel_ready, name, c) for name, c in clients.items()}
         services_status = {name: f.result() for name, f in futures.items()}
 
-    overall_status = "healthy" if all(services_status.values()) else "degraded"
+    overall_status = "healthy" if all(v for k, v in services_status.items() if k not in optional) else "degraded"
 
     return HealthResponse(
         status=overall_status,
@@ -574,13 +588,13 @@ _deseq2_cache_lock = threading.Lock()
 _deseq2_key_locks: Dict[str, threading.Lock] = {}
 
 
-def _deseq2_cache_key(request: PipelineRequest, condition_col: str, factor_values: List[str]) -> str:
+def _data_settings(request: PipelineRequest) -> dict:
+    """Every setting that determines the final dataset (the counts DESeq2 and CRISP are given)."""
     cfg = request.config
     osd_ids = sorted({i.strip() for i in (request.osd_ids or "").split(",") if i.strip()},
                      key=lambda s: (len(s), s))
     coding_only = bool(getattr(cfg, "coding_only", False))
-    key = {
-        "version": DESEQ2_CACHE_VERSION,
+    return {
         # the pipeline uses dataset_id when given, otherwise downloads osd_ids
         "source": {"dataset_id": request.dataset_id} if request.dataset_id else {"osd_ids": osd_ids},
         "factor_name": cfg.factor_name or "Factor Value[Spaceflight]",
@@ -591,6 +605,13 @@ def _deseq2_cache_key(request: PipelineRequest, condition_col: str, factor_value
         "keep_biotypes": sorted(getattr(cfg, "keep_biotypes", None) or ["protein_coding"]) if coding_only else None,
         "target_column": cfg.target_column,
         "min_features": cfg.min_features or 0,
+    }
+
+
+def _deseq2_cache_key(request: PipelineRequest, condition_col: str, factor_values: List[str]) -> str:
+    key = {
+        "version": DESEQ2_CACHE_VERSION,
+        **_data_settings(request),
         "condition_column": condition_col,
         "control": factor_values[0],
         "treatment": factor_values[1],
@@ -630,6 +651,125 @@ async def clear_deseq2_cache():
         n = len(_deseq2_cache)
         _deseq2_cache.clear()
     return {"cleared": n}
+
+
+# ── CRISP (causal_service) result cache ───────────────────────────────────────
+# Same idea as the DESeq2 cache: keyed on the data settings plus every CRISP setting, in memory only.
+# CRISP can take minutes to hours, so runs that differ only in ML settings share one result.
+CRISP_CACHE_VERSION = 1
+
+
+class _ResultCache:
+    """Small LRU cache with one lock per key, so identical runs in parallel compute once."""
+
+    def __init__(self, max_entries: int):
+        self.max_entries = max_entries
+        self._items: "OrderedDict[str, dict]" = OrderedDict()
+        self._lock = threading.Lock()
+        self._key_locks: Dict[str, threading.Lock] = {}
+
+    def key_lock(self, key: str) -> threading.Lock:
+        with self._lock:
+            return self._key_locks.setdefault(key, threading.Lock())
+
+    def get(self, key: str) -> Optional[dict]:
+        with self._lock:
+            hit = self._items.get(key)
+            if hit is None:
+                return None
+            self._items.move_to_end(key)
+            return {**hit, "reused": True}
+
+    def put(self, key: str, value: dict):
+        with self._lock:
+            self._items[key] = value
+            self._items.move_to_end(key)
+            while len(self._items) > self.max_entries:
+                self._items.popitem(last=False)
+
+    def clear(self) -> int:
+        with self._lock:
+            n = len(self._items)
+            self._items.clear()
+            return n
+
+    def __len__(self):
+        return len(self._items)
+
+
+_crisp_cache = _ResultCache(int(os.environ.get("CRISP_CACHE_MAX", "20")))
+_CRISP_KEY_EXCLUDE = {"enabled", "reuse", "timeout_minutes", "min_votes"}
+
+
+def _crisp_cache_key(request: PipelineRequest, group_column: str, factor_values: List[str]) -> str:
+    causal = request.config.causal
+    key = {"version": CRISP_CACHE_VERSION, **_data_settings(request), "group_column": group_column,
+           "control": factor_values[0], "treatment": factor_values[1],
+           # settings that don't change CRISP's output are left out of the key
+           "crisp": causal.model_dump(exclude=_CRISP_KEY_EXCLUDE)
+           if hasattr(causal, "model_dump") else causal.dict(exclude=_CRISP_KEY_EXCLUDE)}
+    digest = hashlib.sha1(json.dumps(key, sort_keys=True, default=str).encode()).hexdigest()[:12]
+    return f"crisp_{digest}"
+
+
+@app.delete("/api/causal/cache")
+async def clear_crisp_cache():
+    """Forget all cached CRISP results (they are also cleared when the service restarts)."""
+    return {"cleared": _crisp_cache.clear()}
+
+
+def _run_crisp_step(job: "PipelineJob", request: PipelineRequest, dataset_id: str) -> Optional[dict]:
+    """CRISP on the final dataset, OSD study as the environment. Returns the result dict or None."""
+    causal = request.config.causal
+    pipeline_id = job.pipeline_id
+    factor_values = request.config.factor_values or []
+    group_column = request.config.factor_name or request.config.target_column
+    if len(factor_values) < 2:
+        job.emit({"status": "causal", "message": "CRISP skipped: needs two factor_values", "progress_percent": 91})
+        return None
+    if causal_client is None:
+        job.emit({"status": "causal", "message": "CRISP skipped: causal service not configured",
+                  "progress_percent": 91})
+        return {"success": False, "error": "causal service client not initialized (is causal_service running?)"}
+
+    cache_key = _crisp_cache_key(request, group_column, factor_values)
+    with _crisp_cache.key_lock(cache_key):
+        cached = _crisp_cache.get(cache_key) if causal.reuse else None
+        if cached:
+            logger.info(f"Pipeline {pipeline_id}: reusing CRISP result {cache_key}")
+            result = cached
+        else:
+            models = ", ".join(causal.models)
+            job.emit({"status": "causal",
+                      "message": f"Running CRISP ({models}; environments = {causal.environment_column}). "
+                                 f"This can take a while...", "progress_percent": 91})
+            df = data_client.get_dataset(dataset_id)
+            result = causal_client.run_crisp(
+                df, analysis_id=f"{pipeline_id[:8]}_{cache_key[-6:]}", group_column=group_column,
+                control_value=factor_values[0], treatment_value=factor_values[1],
+                environment_column=causal.environment_column, models=causal.models,
+                max_features=causal.max_features, seed=causal.seed, test_fraction=causal.test_fraction,
+                val_fraction=causal.val_fraction, ranking_method=causal.ranking_method, top_k=causal.top_k,
+                model_options=causal.model_options, timeout_minutes=causal.timeout_minutes)
+            result = {**result, "cache_key": cache_key, "source_pipeline_id": pipeline_id, "reused": False}
+            if result.get("success"):
+                _crisp_cache.put(cache_key, result)
+
+    if result.get("success"):
+        n_cons = sum(1 for g in result["ranking"] if g["consensus"])
+        how = (f" (reused from run {result['source_pipeline_id'][:8]}: same data and CRISP settings)"
+               if result.get("reused") else f" in {result.get('runtime_seconds', 0) / 60:.1f} min")
+        n_used = len([m for m in result["methods"] if m["causal"] and m["coefficients"]])
+        msg = (f"CRISP: {len(result['ranking'])} ranked genes, {n_cons} chosen by a majority of "
+               f"{n_used} method{'s' if n_used != 1 else ''}{how}")
+        for note in result.get("notes", []):
+            logger.info(f"Pipeline {pipeline_id}: CRISP note: {note}")
+    else:
+        msg = f"CRISP failed: {result.get('error')}"
+        logger.warning(f"Pipeline {pipeline_id}: {msg}")
+    logger.info(f"Pipeline {pipeline_id}: {msg}")
+    job.emit({"status": "causal", "message": msg, "progress_percent": 95})
+    return result
 
 
 def _execute_pipeline(job: PipelineJob):
@@ -862,6 +1002,16 @@ def _execute_pipeline(job: PipelineJob):
             logger.error(f"Error running DESeq2: {e}", exc_info=True)
             job.emit({"status": "deseq2", "message": f"DESeq2 error: {e}", "progress_percent": 90})
 
+        # ── CRISP causal ensemble (optional): genes whose link to the factor holds in every study ──
+        causal_result = None
+        if request.config.causal.enabled:
+            try:
+                causal_result = _run_crisp_step(job, request, transformed_id)
+            except Exception as e:
+                logger.error(f"Error running CRISP: {e}", exc_info=True)
+                job.emit({"status": "causal", "message": f"CRISP error: {e}", "progress_percent": 95})
+                causal_result = {"success": False, "error": str(e)}
+
         # ── Final result (same shape as before, so the notebook's result cells are unchanged) ──
         job.emit({
             "status": "completed",
@@ -880,10 +1030,13 @@ def _execute_pipeline(job: PipelineJob):
                 "cv_repeats": request.config.cv_repeats,
                 "cv_scoring": request.config.cv_scoring,
                 "param_grids": request.config.param_grids,
+                "causal": (request.config.causal.model_dump() if hasattr(request.config.causal, "model_dump")
+                           else request.config.causal.dict()),
             },
             "training_results": ensemble_result or {},
             "feature_importance": feature_importance_results,
             "deseq2_results": deseq2_result or {},
+            "causal_results": causal_result or {},
             "transformed_dataset_id": transformed_id
         })
         logger.info(f"Pipeline {pipeline_id}: completed")

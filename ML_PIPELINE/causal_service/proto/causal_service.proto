@@ -1,0 +1,76 @@
+// proto/causal_service.proto
+// CRISP (Causal Relation and Inference Search Platform) as a pipeline service.
+syntax = "proto3";
+
+package causal;
+
+service CausalService {
+  // Run the CRISP ensemble on one dataset; returns per-method results and a combined gene ranking.
+  rpc RunCRISP(CRISPRequest) returns (CRISPResponse);
+}
+
+message CRISPRequest {
+  string analysis_id = 1;
+  bytes dataset_csv_gz = 2;            // gzipped CSV: samples x (genes + metadata), first column = sample id
+  string group_column = 3;             // e.g. "Factor Value[Spaceflight]"
+  string control_value = 4;            // -> target 0, e.g. "Ground Control"
+  string treatment_value = 5;          // -> target 1, e.g. "Space Flight"
+  string environment_column = 6;       // e.g. "source_dataset" (OSD study)
+  repeated string models = 7;          // any of ICP, NLICP, IRM, LIRM, ERM, RF; empty -> ICP, NLICP, IRM, LIRM
+  int32 max_features = 8;              // genes kept by the feature-reduction IRM for ICP/NLICP/LIRM; 0 -> 20
+  int32 seed = 9;
+  double test_fraction = 10;           // 0 -> 0.2
+  double val_fraction = 11;            // 0 -> 0.1
+  string ranking_method = 12;          // "consensus" (default) or "crisp_v1.1"
+  int32 top_k = 13;                    // consensus: a method votes for its top_k genes; 0 -> max_features
+  string model_options_json = 14;      // optional {"ICP": {"alpha": 0.01}, "IRM": {"n_iterations": 500}, ...}
+  int32 timeout_seconds = 15;          // 0 -> CRISP_TIMEOUT_SECONDS env (default 6 h)
+}
+
+message MethodResult {
+  string method = 1;                   // CRISP's name, e.g. "Linear ICP"
+  string code = 2;                     // ICP, NLICP, IRM, LIRM, FRIRM (feature-reduction IRM), ERM, RF
+  bool causal = 3;                     // false for the ERM/RF baselines and the feature-reduction IRM
+  repeated string features = 4;
+  repeated double coefficients = 5;    // same order as features; empty if the method found no solution
+  repeated double pvals = 6;           // per feature, when the method gives them
+  double pvalue = 7;                   // overall p-value (ICP, NLICP), NaN if none
+  double test_acc = 8;                 // NaN if none
+  double val_acc = 9;                  // NaN if none
+  string note = 10;
+}
+
+message RankedGene {
+  string gene = 1;
+  int32 rank = 2;
+  double score = 3;                    // consensus: mean max-abs-scaled |coefficient|; crisp_v1.1: |weighted_coefficient|
+  int32 votes = 4;                     // number of causal methods ranking the gene in their top_k
+  int32 n_methods = 5;                 // causal methods that produced coefficients
+  int32 direction = 6;                 // sign of log2fc: +1 higher with the treatment value, -1 lower
+  bool consensus = 7;                  // votes >= majority of n_methods
+  double log2fc = 8;                   // mean log2(CPM+1), treatment - control, all used samples
+  bool consistent = 9;                 // treatment - control has the same sign in every environment
+}
+
+message EnvironmentInfo {
+  string name = 1;
+  int32 n_control = 2;
+  int32 n_treatment = 3;
+  bool used = 4;
+  string note = 5;
+}
+
+message CRISPResponse {
+  bool success = 1;
+  string error_message = 2;
+  string ranking_method = 3;
+  repeated MethodResult methods = 4;
+  repeated RankedGene ranking = 5;
+  repeated EnvironmentInfo environments = 6;
+  int32 n_samples = 7;
+  int32 n_genes = 8;
+  string normalization = 9;
+  double runtime_seconds = 10;
+  repeated string notes = 11;
+  string log_tail = 12;                // last lines of CRISP's output (always on failure)
+}

@@ -2,6 +2,17 @@
 #version: '3.8'
 
 services:
+
+  causal_service:
+    build: ./causal_service
+    container_name: causal_service
+    environment:
+      - CAUSAL_PORT=50055
+      - CRISP_MAX_CONCURRENT=1
+    volumes:
+      - ./causal_service/results:/app/results     # per-run CRISP inputs, logs, PDFs (optional)
+    mem_limit: 12g                                # adjust to the machine
+    restart: unless-stopped
   
   experiment_service:
     build:
