@@ -14,7 +14,8 @@ from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-OraList = Literal["ml_consensus", "deseq2_significant", "deseq2_up", "deseq2_down", "overlap", "crisp_invariant"]
+OraList = Literal["ml_consensus", "deseq2_significant", "deseq2_up", "deseq2_down", "overlap", "crisp_invariant",
+                  "crisp_ml_overlap", "crisp_deseq2_overlap"]
 GseaRanking = Literal["deseq2", "ml_importance"]
 
 
