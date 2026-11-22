@@ -1,0 +1,3 @@
+EXPERIMENTS/SYNTHETIC/2node-1.txt:           INFO     Saved the best model with score 0.488889                                                                                   aggregator.py:763
+EXPERIMENTS/SYNTHETIC/2node-1.txt:           INFO     Saved the best model with score 0.733333                                                                                   aggregator.py:763
+EXPERIMENTS/SYNTHETIC/2node-1.txt:           INFO     Saved the best model with score 0.777778   

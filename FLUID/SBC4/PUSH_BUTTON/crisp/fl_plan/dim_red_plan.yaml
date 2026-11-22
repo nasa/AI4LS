@@ -1,0 +1,104 @@
+aggregator:
+  defaults: plan/defaults/aggregator.yaml
+  settings:
+    best_state_path: save/crisp_best_.pbuf
+    db_store_rounds: 1
+    init_state_path: save/crisp_init_.pbuf
+    last_state_path: save/crisp_last_.pbuf
+    rounds_to_train: 100
+  template: openfl.component.Aggregator
+assigner:
+  defaults: plan/defaults/assigner.yaml
+  settings:
+    task_groups:
+    - name: train_IRM_and_validate
+      percentage: 1.0
+      tasks:
+      - dimensionality_reduction
+      - aggregated_model_validation
+      - train_IRM
+      - locally_tuned_model_validation
+  template: openfl.component.RandomGroupedAssigner
+collaborator:
+  defaults: plan/defaults/collaborator.yaml
+  settings:
+    db_store_rounds: 1
+    delta_updates: false
+    opt_treatment: RESET
+  template: openfl.component.Collaborator
+compression_pipeline:
+  defaults: plan/defaults/compression_pipeline.yaml
+  settings: {}
+  template: openfl.pipelines.NoCompressionPipeline
+data_loader:
+  defaults: plan/defaults/data_loader.yaml
+  settings:
+    batch_size: 10
+    seed: 0
+    collaborator_count: 3
+  template: src.synthetic_inmemory.PyTorchSyntheticInMemory
+network:
+  defaults: plan/defaults/network.yaml
+  settings:
+    agg_addr: paul-openfl-test
+    agg_port: auto
+    cert_folder: cert
+    client_reconnect_interval: 5
+    disable_client_auth: false
+    disable_tls: false
+    hash_salt: auto
+  template: openfl.federation.Network
+task_runner:
+  defaults: plan/defaults/task_runner.yaml
+  settings: 
+    output_data_regime: real-valued
+    num_classes: 1
+    #output_data_regime: binary
+    #num_classes: 2
+    seed: 0
+    num_features: 10
+  template: src.dim_red_crisp_task_runner.CRISPTaskRunner
+tasks:
+  aggregated_model_validation:
+    function: validate
+    aggregation_type:
+      template: openfl.component.aggregation_functions.WeightedAverage
+    kwargs:
+      apply: global
+      metrics:
+      - acc
+  defaults: plan/defaults/tasks_torch.yaml
+  locally_tuned_model_validation:
+    function: validate
+    aggregation_type:
+      template: openfl.component.aggregation_functions.WeightedAverage
+    kwargs:
+      apply: local
+      metrics:
+      - acc
+  settings: {}
+  train_IRM:
+    function: train_batches
+    aggregation_type:
+      template: openfl.component.aggregation_functions.WeightedAverage
+    kwargs:
+      num_epochs: 30
+      metrics:
+      - loss
+  dimensionality_reduction:
+    function: feature_variances
+    aggregation_type:
+      template: src.pooled_variance.Pool
+    num_batches: 5
+    kwargs:
+      variance_threshold: 0.05
+#  dimensionality_reduction:
+#    function: compute_variances
+#    aggregation_type:
+#      template: src.pooled_variance.Pool
+#    num_batches: 5
+#    kwargs:
+#      variance_threshold: 0.05
+      #      metrics:
+              #      - feature_variances
+

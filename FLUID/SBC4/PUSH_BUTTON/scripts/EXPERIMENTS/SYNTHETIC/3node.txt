@@ -1,0 +1,73 @@
+           INFO     Starting Aggregator gRPC Server                                                                                                server.py:242
+[22:49:47] INFO     Sending tasks to collaborator colab-earth for round 0                                                                      aggregator.py:298
+           INFO     Collaborator colab-earth is sending task results for aggregated_model_validation, round 0                                  aggregator.py:451
+[22:49:49] INFO     Collaborator colab-earth is sending task results for train_IRM, round 0                                                    aggregator.py:451
+           INFO     Collaborator colab-earth is sending task results for locally_tuned_model_validation, round 0                               aggregator.py:451
+[22:49:52] INFO     Sending tasks to collaborator colab-iss for round 0                                                                        aggregator.py:298
+           INFO     Sending tasks to collaborator colab-moon for round 0                                                                       aggregator.py:298
+[22:50:12] INFO     Collaborator colab-moon is sending task results for aggregated_model_validation, round 0                                   aggregator.py:451
+           INFO     Collaborator colab-iss is sending task results for aggregated_model_validation, round 0                                    aggregator.py:451
+[22:50:23] INFO     Collaborator colab-iss is sending task results for train_IRM, round 0                                                      aggregator.py:451
+[22:50:24] INFO     Collaborator colab-moon is sending task results for train_IRM, round 0                                                     aggregator.py:451
+[22:50:34] INFO     Collaborator colab-moon is sending task results for locally_tuned_model_validation, round 0                                aggregator.py:451
+           INFO     Collaborator colab-iss is sending task results for locally_tuned_model_validation, round 0                                 aggregator.py:451
+           INFO     locally_tuned_model_validation task metrics...                                                                             aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> CCR_nlerm:   0.7889     aggregator.py:754
+           INFO     aggregated_model_validation task metrics...                                                                                aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> CCR_nlerm:   0.5578     aggregator.py:754
+           INFO     Saved the best model with score 0.557789                                                                                   aggregator.py:763
+           INFO     train_IRM task metrics...                                                                                                  aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> empirical_loss_nlerm:   aggregator.py:754
+                    0.5796                                                                                                                                      
+           INFO     Saving round 1 model...                                                                                                    aggregator.py:796
+           INFO     Starting round 1...                                                                                                        aggregator.py:803
+[22:50:39] INFO     Sending tasks to collaborator colab-earth for round 1                                                                      aggregator.py:298
+           INFO     Collaborator colab-earth is sending task results for aggregated_model_validation, round 1                                  aggregator.py:451
+[22:50:41] INFO     Collaborator colab-earth is sending task results for train_IRM, round 1                                                    aggregator.py:451
+           INFO     Collaborator colab-earth is sending task results for locally_tuned_model_validation, round 1                               aggregator.py:451
+[22:50:44] INFO     Sending tasks to collaborator colab-moon for round 1                                                                       aggregator.py:298
+           INFO     Sending tasks to collaborator colab-iss for round 1                                                                        aggregator.py:298
+[22:51:04] INFO     Collaborator colab-moon is sending task results for aggregated_model_validation, round 1                                   aggregator.py:451
+           INFO     Collaborator colab-iss is sending task results for aggregated_model_validation, round 1                                    aggregator.py:451
+[22:51:14] INFO     Collaborator colab-moon is sending task results for train_IRM, round 1                                                     aggregator.py:451
+           INFO     Collaborator colab-iss is sending task results for train_IRM, round 1                                                      aggregator.py:451
+[22:51:24] INFO     Collaborator colab-moon is sending task results for locally_tuned_model_validation, round 1                                aggregator.py:451
+           INFO     Collaborator colab-iss is sending task results for locally_tuned_model_validation, round 1                                 aggregator.py:451
+           INFO     locally_tuned_model_validation task metrics...                                                                             aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> CCR_nlerm:   0.8392     aggregator.py:754
+           INFO     aggregated_model_validation task metrics...                                                                                aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> CCR_nlerm:   0.8693     aggregator.py:754
+           INFO     Saved the best model with score 0.869347                                                                                   aggregator.py:763
+[22:51:25] INFO     train_IRM task metrics...                                                                                                  aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> empirical_loss_nlerm:   aggregator.py:754
+                    0.3824                                                                                                                                      
+           INFO     Saving round 2 model...                                                                                                    aggregator.py:796
+           INFO     Starting round 2...                                                                                                        aggregator.py:803
+[22:51:32] INFO     Sending tasks to collaborator colab-earth for round 2                                                                      aggregator.py:298
+           INFO     Collaborator colab-earth is sending task results for aggregated_model_validation, round 2                                  aggregator.py:451
+[22:51:34] INFO     Collaborator colab-earth is sending task results for train_IRM, round 2                                                    aggregator.py:451
+           INFO     Collaborator colab-earth is sending task results for locally_tuned_model_validation, round 2                               aggregator.py:451
+[22:51:35] INFO     Sending tasks to collaborator colab-iss for round 2                                                                        aggregator.py:298
+           INFO     Sending tasks to collaborator colab-moon for round 2                                                                       aggregator.py:298
+[22:51:55] INFO     Collaborator colab-iss is sending task results for aggregated_model_validation, round 2                                    aggregator.py:451
+[22:51:56] INFO     Collaborator colab-moon is sending task results for aggregated_model_validation, round 2                                   aggregator.py:451
+[22:52:05] INFO     Collaborator colab-iss is sending task results for train_IRM, round 2                                                      aggregator.py:451
+[22:52:06] INFO     Collaborator colab-moon is sending task results for train_IRM, round 2                                                     aggregator.py:451
+[22:52:16] INFO     Collaborator colab-moon is sending task results for locally_tuned_model_validation, round 2                                aggregator.py:451
+           INFO     Collaborator colab-iss is sending task results for locally_tuned_model_validation, round 2                                 aggregator.py:451
+           INFO     locally_tuned_model_validation task metrics...                                                                             aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> CCR_nlerm:   0.8643     aggregator.py:754
+           INFO     aggregated_model_validation task metrics...                                                                                aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> CCR_nlerm:   0.9246     aggregator.py:754
+           INFO     Saved the best model with score 0.924623                                                                                   aggregator.py:763
+           INFO     train_IRM task metrics...                                                                                                  aggregator.py:711
+           INFO     <openfl.component.aggregation_functions.weighted_average.WeightedAverage object at 0x7ffefd33dd90> empirical_loss_nlerm:   aggregator.py:754
+                    0.3158                                                                                                                                      
+[22:52:17] INFO     Saving round 3 model...                                                                                                    aggregator.py:796
+           INFO     Experiment Completed. Cleaning up...                                                                                       aggregator.py:801
+[22:52:24] INFO     Sending signal to collaborator colab-earth to shutdown...                                                                  aggregator.py:260
+[22:52:26] INFO     Sending signal to collaborator colab-iss to shutdown...                                                                    aggregator.py:260
+           INFO     Sending signal to collaborator colab-moon to shutdown...                                                                   aggregator.py:260
+
+ ✔️ OK
+

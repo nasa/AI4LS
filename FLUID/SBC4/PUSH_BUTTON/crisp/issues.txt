@@ -1,0 +1,6 @@
++ cp -r /home/fluid/crisp/fl_plan/cols.yaml /home/fluid/crisp/fl_plan/data.yaml /home/fluid/crisp/fl_plan/dim_red_plan.yaml /home/fluid/crisp/fl_plan/plan.yaml /home/fluid/crisp/fl_plan/plan_bk.yaml plan/
++ cp -r /home/fluid/crisp/fl_src/crisp_task_runner.py /home/fluid/crisp/fl_src/dim_red_crisp_task_runner.py /home/fluid/crisp/fl_src/erm_module.py /home/fluid/crisp/fl_src/irm_module.py /home/fluid/crisp/fl_src/model_module.py /home/fluid/crisp/fl_src/pooled_variance.py /home/fluid/crisp/fl_src/synthetic_inmemory.py /home/fluid/crisp/fl_src/utils.py /home/fluid/crisp/fl_src/weighted_average.py src/
+cp: cannot open '/home/fluid/crisp/fl_src/crisp_task_runner.py' for reading: Permission denied
+cp: cannot open '/home/fluid/crisp/fl_src/erm_module.py' for reading: Permission denied
+cp: cannot open '/home/fluid/crisp/fl_src/utils.py' for reading: Permission denied
+
