@@ -413,6 +413,9 @@ class MLServiceImpl(ml_service_pb2_grpc.MLServiceServicer):
                         'trans_list': ','.join(parse_trans_list(trans_list)),
                         'train_size': len(X_train),
                         'test_size': len(X_test),
+                        # held-out samples, so the feature importance service can test on them only
+                        'test_samples': [str(i) for i in X_test.index],
+                        'random_state': random_state,
                         'training_metrics': train_metrics,
                         'test_metrics': test_metrics,
                         'cv_metrics': cv_result["cv_metrics"],

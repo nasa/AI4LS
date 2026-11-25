@@ -100,6 +100,9 @@ class InvariantCausalPrediction(object):
                     print('Rejected subset', counter)
             counter += 1
 
+        # causal_service patch: remember how many subsets were tested/accepted
+        self.n_tested_subsets = counter
+        self.n_accepted_subsets = len(accepted_subsets)
         if len(accepted_subsets):
             intersection_features = list(set.intersection(*accepted_subsets))
             if args["verbose"]:
@@ -245,6 +248,12 @@ class InvariantCausalPrediction(object):
                 "selected_feature_indices": self.selected_features,
                 "to_bucket": {
                     'method': 'Linear ICP',
+                    # causal_service patch: which ICP path chose the features. Only "intersection"
+                    # carries ICP's guarantee; "defining_set" is a best-fit fallback.
+                    'selection': 'intersection' if self.intersection_found else 'defining_set',
+                    'n_tested_subsets': getattr(self, 'n_tested_subsets', None),
+                    'n_accepted_subsets': getattr(self, 'n_accepted_subsets', None),
+                    'alpha': self.alpha,
                     'features': np.array(self.full_feature_set)[self.selected_features].tolist(),
                     'coefficients': np.array(self.coef_()).tolist(),
                     'pvals': np.array(self.p_value).tolist(),
@@ -273,6 +282,10 @@ class InvariantCausalPrediction(object):
                 "selected_feature_indices": None,
                 "to_bucket": {
                     'method': 'Linear ICP',
+                    'selection': 'none',
+                    'n_tested_subsets': getattr(self, 'n_tested_subsets', None),
+                    'n_accepted_subsets': getattr(self, 'n_accepted_subsets', None),
+                    'alpha': self.alpha,
                     'features': None,
                     'coefficients': None,
                     'pvals': None,

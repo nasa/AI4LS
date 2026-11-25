@@ -15,7 +15,9 @@ message ImportanceRequest {
   string model_id = 1;
   string dataset_id = 2;
   repeated string methods = 3;  // ["recursive", "permutation", "built_in"]
-  map<string, string> params = 4;  // Method-specific parameters
+  map<string, string> params = 4;  // Method-specific parameters; permutation: n_repeats, n_permutations
+                                   // (label shuffles for the significance test, 0 = no test), alpha, scoring
+                                   // ("brier" or "accuracy"), random_state
 }
 
 message ImportanceResponse {
@@ -34,6 +36,10 @@ message FeatureScore {
   string feature_name = 1;
   double importance = 2;
   int32 rank = 3;
+  // Label-permutation test (method "permutation" with params n_permutations > 0); NaN / false otherwise
+  double pvalue = 4;
+  double padj = 5;              // Benjamini-Hochberg across genes
+  bool significant = 6;         // padj < alpha and importance > 0
 }
 
 message GetImportanceRequest {

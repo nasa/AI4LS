@@ -1,5 +1,6 @@
 import grpc
 import logging
+import math
 from typing import Dict, List
 from src.generated.feature_importance_service_pb2 import ImportanceRequest
 from src.generated.feature_importance_service_pb2_grpc import FeatureImportanceServiceStub
@@ -19,14 +20,16 @@ class FeatureImportanceClient:
         self,
         model_id: str,
         dataset_id: str,
-        methods: List[str] = None
+        methods: List[str] = None,
+        params: Dict = None
     ) -> Dict:
         """Compute feature importance for a model"""
         try:
             request = ImportanceRequest(
                 model_id=model_id,
                 dataset_id=dataset_id,
-                methods=methods or ["permutation"]
+                methods=methods or ["permutation"],
+                params={k: str(v) for k, v in (params or {}).items()}
             )
             
             response = self.stub.ComputeImportance(request)
@@ -37,12 +40,14 @@ class FeatureImportanceClient:
                 for method, importance_data in response.importances.items():
                     features = []
                     for score in importance_data.scores:
-                        features.append({
-                            "feature_name": score.feature_name,
-                            "importance": float(score.importance),
-                            "rank": int(score.rank)
-                        })
-                    importances[method] = {"features": features}
+                        f = {"feature_name": score.feature_name,
+                             "importance": float(score.importance),
+                             "rank": int(score.rank)}
+                        if not math.isnan(score.pvalue):            # only when the permutation test ran
+                            f.update(pvalue=float(score.pvalue), padj=float(score.padj),
+                                     significant=bool(score.significant))
+                        features.append(f)
+                    importances[method] = {"features": features, "metadata": dict(importance_data.metadata)}
                 
                 return {
                     "success": True,

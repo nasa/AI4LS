@@ -86,9 +86,33 @@ def normalize_method(r: dict) -> dict:
             pvalue = flat[0]
     elif p is not None:
         pvalue = _num(p)
+    selection = r.get("selection") or ""
+    if code in ("ICP", "NLICP"):
+        # ICP's p-values test whether a gene SET is invariant (high = accepted), so they are not
+        # per-gene significance and are not reported as pvals
+        pvals = []
+        if selection == "defining_set":
+            note = (note + "; " if note else "") + ("no gene is in every accepted subset; these genes come from "
+                                                    "CRISP's best-fit fallback and are not significant")
+        elif selection == "none":
+            note = note or "no gene subset passed the invariance test"
     return {"method": name, "code": code, "causal": code in CAUSAL_CODES, "features": features,
             "coefficients": coefs, "pvals": pvals, "pvalue": pvalue,
-            "test_acc": _num(r.get("test_acc")), "val_acc": _num(r.get("validate_acc")), "note": note}
+            "test_acc": _num(r.get("test_acc")), "val_acc": _num(r.get("validate_acc")), "note": note,
+            "selection": selection,
+            "n_tested_subsets": int(r.get("n_tested_subsets") or 0),
+            "n_accepted_subsets": int(r.get("n_accepted_subsets") or 0)}
+
+
+def significant_genes(methods):
+    """gene -> methods whose formal ICP result (the intersection of all accepted subsets) contains it.
+    Under ICP's assumptions that set holds only invariant genes with probability >= 1 - alpha."""
+    sig = {}
+    for m in methods:
+        if m["code"] in ("ICP", "NLICP") and m["selection"] == "intersection":
+            for g in m["features"]:
+                sig.setdefault(g, []).append(m["code"])
+    return sig
 
 
 def build_config(job: dict, data_fp: Path, results_dir: Path) -> dict:
@@ -159,6 +183,21 @@ def main(job_path: str):
             ranking = crisp_v11_ranking(raw)
         else:
             raise ValueError(f"Unknown ranking_method '{ranking_method}' (use consensus or crisp_v1.1)")
+        # significance: genes in ICP's or NLICP's formal intersection; add any the ranking missed
+        sig = significant_genes(methods)
+        missing = [g for g in sig if g not in set(ranking["gene"])]
+        if missing:
+            ranking = pd.concat([ranking, pd.DataFrame({
+                "gene": missing, "rank": 0, "score": 0.0, "votes": 0,
+                "n_methods": int(ranking["n_methods"].iloc[0]) if len(ranking) else 0,
+                "consensus": False})], ignore_index=True)
+            ranking["rank"] = np.arange(1, len(ranking) + 1)
+        ranking["significant"] = ranking["gene"].isin(set(sig))
+        ranking["significant_in"] = ranking["gene"].map(lambda g: ",".join(sig.get(g, [])))
+        for m in methods:
+            if m["code"] in ("ICP", "NLICP"):
+                notes.append(f"{m['method']}: {m['selection'] or 'n/a'} "
+                             f"({m['n_accepted_subsets']} of {m['n_tested_subsets']} gene subsets accepted as invariant)")
         # direction from the data: +1 higher with the treatment value, -1 lower
         eff = effect_sizes(log_cpm, ranking["gene"].tolist())
         ranking = ranking.merge(eff, on="gene", how="left")
@@ -168,6 +207,7 @@ def main(job_path: str):
             if m["causal"] and not m["coefficients"]:
                 notes.append(f"{m['method']}: {m['note']}")
         out = {"success": True, "ranking_method": ranking_method, "methods": methods,
+               "n_significant": int(ranking["significant"].sum()),
                "ranking": ranking.to_dict(orient="records"), "environments": environments,
                "n_samples": int(len(crisp_df)), "n_genes": int(n_genes), "normalization": NORMALIZATION,
                "notes": notes, "runtime_seconds": time.time() - t0}

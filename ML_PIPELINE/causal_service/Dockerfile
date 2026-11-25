@@ -9,8 +9,14 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 COPY requirements.txt .
+# torch: the "+cpu" build exists only for x86_64 (Intel/AMD). On ARM (Apple Silicon, Graviton)
+# the plain PyPI wheel of the same version is already CPU-only.
 RUN pip install --upgrade "pip<24.1" && \
-    pip install torch==1.11.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu && \
+    if [ "$(uname -m)" = "x86_64" ]; then \
+        pip install torch==1.11.0+cpu --extra-index-url https://download.pytorch.org/whl/cpu; \
+    else \
+        pip install torch==1.11.0; \
+    fi && \
     pip install -r requirements.txt
 
 COPY crisp/ crisp/

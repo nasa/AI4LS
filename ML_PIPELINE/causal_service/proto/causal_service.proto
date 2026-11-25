@@ -38,6 +38,10 @@ message MethodResult {
   double test_acc = 8;                 // NaN if none
   double val_acc = 9;                  // NaN if none
   string note = 10;
+  string selection = 11;               // ICP/NLICP: "intersection" (ICP's formal result), "defining_set"
+                                       // (best-fit fallback, no guarantee) or "none"; "" for other methods
+  int32 n_tested_subsets = 12;         // ICP/NLICP: gene subsets tested for invariance
+  int32 n_accepted_subsets = 13;       // ... and accepted (invariance not rejected at alpha)
 }
 
 message RankedGene {
@@ -50,6 +54,8 @@ message RankedGene {
   bool consensus = 7;                  // votes >= majority of n_methods
   double log2fc = 8;                   // mean log2(CPM+1), treatment - control, all used samples
   bool consistent = 9;                 // treatment - control has the same sign in every environment
+  bool significant = 10;               // in ICP's or NLICP's formal result (intersection of accepted subsets)
+  string significant_in = 11;          // which of ICP, NLICP
 }
 
 message EnvironmentInfo {
@@ -73,4 +79,5 @@ message CRISPResponse {
   double runtime_seconds = 10;
   repeated string notes = 11;
   string log_tail = 12;                // last lines of CRISP's output (always on failure)
+  int32 n_significant = 13;
 }

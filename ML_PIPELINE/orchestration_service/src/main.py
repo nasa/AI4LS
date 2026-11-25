@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from typing import Dict, List, Optional
 import grpc
+import pandas as pd
 
 from src.config import Settings, get_settings
 from src.models import (
@@ -698,7 +699,7 @@ class _ResultCache:
 
 
 _crisp_cache = _ResultCache(int(os.environ.get("CRISP_CACHE_MAX", "20")))
-_CRISP_KEY_EXCLUDE = {"enabled", "reuse", "timeout_minutes", "min_votes"}
+_CRISP_KEY_EXCLUDE = {"enabled", "reuse", "timeout_minutes", "min_votes", "gene_set"}
 
 
 def _crisp_cache_key(request: PipelineRequest, group_column: str, factor_values: List[str]) -> str:
@@ -718,7 +719,99 @@ async def clear_crisp_cache():
     return {"cleared": _crisp_cache.clear()}
 
 
-def _run_crisp_step(job: "PipelineJob", request: PipelineRequest, dataset_id: str) -> Optional[dict]:
+def _study_label(osd_id: str) -> str:
+    osd_id = str(osd_id).strip()
+    return osd_id if osd_id.upper().startswith(("OSD", "GLDS")) else f"OSD-{osd_id}"
+
+
+def _add_environment_column(df, column: str, dataset_chain: List[str], pipeline_id: str,
+                            study_datasets: Optional[Dict[str, str]] = None):
+    """CRISP needs each sample's study. If the final dataset lacks `column`:
+      1. copy it from the latest earlier dataset of this run that has it (matched by sample id), else
+      2. label each sample with the study whose downloaded dataset contains it (matched by sample id).
+    Returns (df, note); raises ValueError if neither works."""
+    if column in df.columns:
+        return df, ""
+    for did in reversed(dataset_chain[:-1]):
+        try:
+            earlier = data_client.get_dataset(did)
+        except Exception as e:
+            logger.warning(f"Pipeline {pipeline_id}: couldn't fetch {did} for '{column}': {e}")
+            continue
+        if column not in earlier.columns:
+            continue
+        labels = earlier[column].reindex(df.index)
+        missing = int(labels.isna().sum())
+        if missing == len(df):
+            logger.warning(f"Pipeline {pipeline_id}: {did} has '{column}' but no matching sample ids")
+            continue
+        df = df.copy()
+        df[column] = labels
+        note = f"'{column}' taken from {did}" + (f" ({missing} samples without a label)" if missing else "")
+        logger.info(f"Pipeline {pipeline_id}: {note}")
+        return df, note
+
+    if study_datasets and len(study_datasets) >= 2:
+        owner, dup = {}, set()
+        example_ids, fetch_errors = {}, {}
+        logger.info(f"Pipeline {pipeline_id}: labelling samples from study datasets {study_datasets}")
+        for osd, did in study_datasets.items():
+            try:
+                ids = [str(i) for i in data_client.get_dataset(did).index]
+            except Exception as e:
+                fetch_errors[f"{osd}->{did}"] = f"{type(e).__name__}: {str(e)[:120]}"
+                logger.warning(f"Pipeline {pipeline_id}: couldn't fetch study dataset {did} (OSD {osd}): {e}")
+                continue
+            example_ids[osd] = ids[:2]
+            for i in ids:
+                if i in owner and owner[i] != osd:
+                    dup.add(i)
+                owner[i] = osd
+        labels = [(_study_label(owner[str(i)]) if str(i) in owner and str(i) not in dup else None) for i in df.index]
+        n_ok = sum(l is not None for l in labels)
+        if n_ok:
+            df = df.copy()
+            df[column] = labels
+            n_bad = len(df) - n_ok
+            note = (f"'{column}' rebuilt from the {len(study_datasets)} downloaded study datasets "
+                    f"({n_ok}/{len(df)} samples matched" + (f"; {len(dup)} sample ids in several studies" if dup else "")
+                    + ")")
+            if n_bad:
+                logger.warning(f"Pipeline {pipeline_id}: {note}; unmatched samples are left out of CRISP")
+            logger.info(f"Pipeline {pipeline_id}: {note}")
+            return df, note
+        if fetch_errors and not example_ids:
+            raise ValueError(f"Couldn't fetch any of the downloaded study datasets to label samples by study: "
+                             f"{fetch_errors}")
+        raise ValueError(f"Couldn't match the final dataset's sample ids (e.g. {[str(i) for i in df.index[:2]]}) to "
+                         f"the downloaded study datasets (e.g. {example_ids})"
+                         + (f"; fetch errors: {fetch_errors}" if fetch_errors else "")
+                         + "; CRISP needs each sample's study")
+
+    other = [str(c) for c in df.columns if not pd.api.types.is_numeric_dtype(df[c])]
+    raise ValueError(f"Column '{column}' is not in the final dataset or in any earlier dataset of this run "
+                     f"({', '.join(dataset_chain) or 'none recorded'}), and the per-study datasets aren't available "
+                     f"(the run started from a dataset_id). Non-numeric columns in the final dataset: {other[:10]}. "
+                     f"Set causal.environment_column to the column that identifies the study.")
+
+
+def _decode_condition(df, column: str, factor_values: List[str], pipeline_id: str):
+    """The data service stores the condition as numbers: 1 = factor_values[0], 0 = factor_values[1]
+    (DownloadDataset). CRISP matches the text labels, so map the codes back."""
+    if column not in df.columns or not pd.api.types.is_numeric_dtype(df[column]):
+        return df
+    codes = set(pd.unique(df[column].dropna()))
+    if not codes <= {0, 1}:
+        return df
+    df = df.copy()
+    df[column] = df[column].map({1: factor_values[0], 0: factor_values[1]})
+    logger.info(f"Pipeline {pipeline_id}: '{column}' decoded 1 -> {factor_values[0]}, 0 -> {factor_values[1]}")
+    return df
+
+
+def _run_crisp_step(job: "PipelineJob", request: PipelineRequest, dataset_id: str,
+                    dataset_chain: Optional[List[str]] = None,
+                    study_datasets: Optional[Dict[str, str]] = None) -> Optional[dict]:
     """CRISP on the final dataset, OSD study as the environment. Returns the result dict or None."""
     causal = request.config.causal
     pipeline_id = job.pipeline_id
@@ -744,6 +837,12 @@ def _run_crisp_step(job: "PipelineJob", request: PipelineRequest, dataset_id: st
                       "message": f"Running CRISP ({models}; environments = {causal.environment_column}). "
                                  f"This can take a while...", "progress_percent": 91})
             df = data_client.get_dataset(dataset_id)
+            try:
+                df, env_note = _add_environment_column(df, causal.environment_column,
+                                                       dataset_chain or [dataset_id], pipeline_id, study_datasets)
+            except ValueError as e:
+                return {"success": False, "error": str(e)}
+            df = _decode_condition(df, group_column, factor_values, pipeline_id)
             result = causal_client.run_crisp(
                 df, analysis_id=f"{pipeline_id[:8]}_{cache_key[-6:]}", group_column=group_column,
                 control_value=factor_values[0], treatment_value=factor_values[1],
@@ -752,6 +851,8 @@ def _run_crisp_step(job: "PipelineJob", request: PipelineRequest, dataset_id: st
                 val_fraction=causal.val_fraction, ranking_method=causal.ranking_method, top_k=causal.top_k,
                 model_options=causal.model_options, timeout_minutes=causal.timeout_minutes)
             result = {**result, "cache_key": cache_key, "source_pipeline_id": pipeline_id, "reused": False}
+            if env_note and result.get("success"):
+                result["notes"] = [env_note] + list(result.get("notes", []))
             if result.get("success"):
                 _crisp_cache.put(cache_key, result)
 
@@ -760,8 +861,8 @@ def _run_crisp_step(job: "PipelineJob", request: PipelineRequest, dataset_id: st
         how = (f" (reused from run {result['source_pipeline_id'][:8]}: same data and CRISP settings)"
                if result.get("reused") else f" in {result.get('runtime_seconds', 0) / 60:.1f} min")
         n_used = len([m for m in result["methods"] if m["causal"] and m["coefficients"]])
-        msg = (f"CRISP: {len(result['ranking'])} ranked genes, {n_cons} chosen by a majority of "
-               f"{n_used} method{'s' if n_used != 1 else ''}{how}")
+        msg = (f"CRISP: {result.get('n_significant', 0)} significant (ICP/NLICP), {len(result['ranking'])} ranked, "
+               f"{n_cons} chosen by a majority of {n_used} method{'s' if n_used != 1 else ''}{how}")
         for note in result.get("notes", []):
             logger.info(f"Pipeline {pipeline_id}: CRISP note: {note}")
     else:
@@ -781,6 +882,8 @@ def _execute_pipeline(job: PipelineJob):
 
         # ── Download and combine OSD studies (was done before the response started) ──
         transformed_id = request.dataset_id
+        dataset_chain = [transformed_id] if transformed_id else []   # every dataset this run produced, in order
+        study_datasets: Dict[str, str] = {}                           # OSD id -> that study's downloaded dataset
         if request.osd_ids and not request.dataset_id:
             osd_ids_list = [i.strip() for i in request.osd_ids.split(',') if i.strip()]
             logger.info(f"Pipeline {pipeline_id}: Downloading and combining OSD datasets {osd_ids_list}...")
@@ -807,6 +910,7 @@ def _execute_pipeline(job: PipelineJob):
                 download_response = data_stub.DownloadMultipleDatasets(download_request)
                 if not download_response.success:
                     raise RuntimeError(f"Failed to download: {download_response.error_message}")
+                study_datasets = {str(k): str(v) for k, v in download_response.dataset_ids.items()}
 
                 job.emit({"status": "downloading",
                           "message": f"Downloaded {len(download_response.dataset_ids)} "
@@ -825,6 +929,7 @@ def _execute_pipeline(job: PipelineJob):
                 data_channel.close()
 
             transformed_id = combine_response.combined_dataset_id
+            dataset_chain.append(transformed_id)
             logger.info(f"✓ Datasets combined: {transformed_id}")
             job.emit({"status": "downloading", "message": "Studies combined", "progress_percent": 20})
 
@@ -842,6 +947,7 @@ def _execute_pipeline(job: PipelineJob):
             if not bt["success"]:
                 raise RuntimeError(f"Biotype filtering failed: {bt['error_message']}")
             transformed_id = bt["filtered_dataset_id"]
+            dataset_chain.append(transformed_id)
             removed = ", ".join(f"{n} {k}" for k, n in sorted(bt.get("removed_by_biotype", {}).items(),
                                                               key=lambda kv: -kv[1])[:4])
             job.emit({"status": "filtering",
@@ -863,6 +969,7 @@ def _execute_pipeline(job: PipelineJob):
             if not filter_response_dict['success']:
                 raise RuntimeError(f"Feature filtering failed: {filter_response_dict['error_message']}")
             transformed_id = filter_response_dict['filtered_dataset_id']
+            dataset_chain.append(transformed_id)
             logger.info(f"✓ Features filtered: {filter_response_dict['original_features']} → "
                         f"{filter_response_dict['filtered_features']}")
             job.emit({"status": "filtering",
@@ -876,6 +983,7 @@ def _execute_pipeline(job: PipelineJob):
             convert_result = data_client.convert_feature_names(transformed_id)
             if convert_result["success"]:
                 transformed_id = convert_result["converted_dataset_id"]
+                dataset_chain.append(transformed_id)
                 logger.info(f"✓ Converted {convert_result['converted_count']} features "
                             f"({convert_result['conversion_rate']:.1%})")
                 job.emit({"status": "converting",
@@ -942,9 +1050,16 @@ def _execute_pipeline(job: PipelineJob):
             model_id = model["model_id"]
             job.emit({"status": "feature_importance",
                       "message": f"Feature importance {i}/{len(models)}: {model.get('algorithm', model_id)} "
-                                 f"({', '.join(fi_methods)})...",
+                                 f"({', '.join(fi_methods)}"
+                                 + (f"; significance test: {request.config.fi_n_permutations} label shuffles"
+                                    if request.config.fi_n_permutations and "permutation" in fi_methods else "")
+                                 + ")...",
                       "progress_percent": 55 + int(25 * (i - 1) / len(models))})
-            fi_result = fi_client.compute_importance(model_id=model_id, dataset_id=transformed_id, methods=fi_methods)
+            fi_result = fi_client.compute_importance(
+                model_id=model_id, dataset_id=transformed_id, methods=fi_methods,
+                params={"n_permutations": request.config.fi_n_permutations, "n_repeats": request.config.fi_n_repeats,
+                        "alpha": request.config.fi_alpha, "scoring": request.config.fi_scoring,
+                        "random_state": request.config.random_state or 42})
             if fi_result.get("success"):
                 feature_importance_results[model_id] = fi_result.get("importances", {})
             else:
@@ -1006,7 +1121,7 @@ def _execute_pipeline(job: PipelineJob):
         causal_result = None
         if request.config.causal.enabled:
             try:
-                causal_result = _run_crisp_step(job, request, transformed_id)
+                causal_result = _run_crisp_step(job, request, transformed_id, dataset_chain, study_datasets)
             except Exception as e:
                 logger.error(f"Error running CRISP: {e}", exc_info=True)
                 job.emit({"status": "causal", "message": f"CRISP error: {e}", "progress_percent": 95})
@@ -1030,6 +1145,9 @@ def _execute_pipeline(job: PipelineJob):
                 "cv_repeats": request.config.cv_repeats,
                 "cv_scoring": request.config.cv_scoring,
                 "param_grids": request.config.param_grids,
+                "fi_methods": fi_methods,
+                "fi_n_permutations": request.config.fi_n_permutations, "fi_n_repeats": request.config.fi_n_repeats,
+                "fi_alpha": request.config.fi_alpha, "fi_scoring": request.config.fi_scoring,
                 "causal": (request.config.causal.model_dump() if hasattr(request.config.causal, "model_dump")
                            else request.config.causal.dict()),
             },

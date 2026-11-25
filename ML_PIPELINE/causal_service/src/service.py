@@ -102,15 +102,19 @@ class CausalServiceImpl(causal_service_pb2_grpc.CausalServiceServicer):
                 method=m["method"], code=m["code"], causal=m["causal"], features=m["features"],
                 coefficients=m["coefficients"], pvals=m["pvals"], pvalue=_nan(m["pvalue"]),
                 test_acc=_nan(m["test_acc"]), val_acc=_nan(m["val_acc"]), note=m["note"],
+                selection=m.get("selection", ""), n_tested_subsets=m.get("n_tested_subsets", 0),
+                n_accepted_subsets=m.get("n_accepted_subsets", 0),
             ) for m in out["methods"]],
             ranking=[causal_service_pb2.RankedGene(
                 gene=str(r["gene"]), rank=int(r["rank"]), score=float(r["score"]), votes=int(r["votes"]),
                 n_methods=int(r["n_methods"]), direction=int(r["direction"]), consensus=bool(r["consensus"]),
                 log2fc=_nan(r.get("log2fc")), consistent=bool(r.get("consistent")),
+                significant=bool(r.get("significant")), significant_in=str(r.get("significant_in") or ""),
             ) for r in out["ranking"]],
             environments=[causal_service_pb2.EnvironmentInfo(**e) for e in out["environments"]],
             n_samples=out["n_samples"], n_genes=out["n_genes"], normalization=out["normalization"],
             runtime_seconds=out["runtime_seconds"], notes=out["notes"], log_tail=_tail(log_path, 15),
+            n_significant=out.get("n_significant", 0),
         )
 
     @staticmethod

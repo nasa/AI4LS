@@ -14,13 +14,14 @@ warnings.filterwarnings('ignore', category=ConvergenceWarning)
 
 # Add ml_service path to import model_store
 ml_service_path = Path(__file__).parent.parent.parent / "ml_service"
-sys.path.insert(0, str(ml_service_path))
+sys.path.append(str(ml_service_path))   # append: this service's own "src" must win (also in worker processes)
 
 from src.model_store import ModelStore
 from src.data_client import DataServiceClient
 
 from generated import feature_importance_service_pb2, feature_importance_service_pb2_grpc
 from src.importance_methods import FeatureImportanceMethods
+from src.significance import permutation_test
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,24 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
             # Prepare features and target
             X = df[feature_names]
             y = df[model_info["target_column"]]
+
+            # Held-out test samples recorded by the ML service at training time. Permutation
+            # importance and its significance test use only these (importance on training samples
+            # is inflated for models that fit them closely). Older models have no record: all samples.
+            X, y = X.copy(), y.copy()
+            X.index = X.index.map(str)
+            y.index = y.index.map(str)
+            known = set(X.index)
+            test_ids = [s for s in (model_info.get("test_samples") or []) if s in known]
+            if test_ids:
+                test_mask = X.index.isin(test_ids)
+                X_test, y_test = X[test_mask], y[test_mask]
+                X_train, y_train = X[~test_mask], y[~test_mask]
+                logger.info(f"Using {len(X_test)} held-out test samples ({len(X_train)} training) for permutation importance")
+            else:
+                X_test, y_test, X_train, y_train = X, y, None, None
+                logger.warning(f"Model {model_id} has no recorded test samples (trained before this change); "
+                               "permutation importance uses all samples and is not tested for significance")
             
             # Compute importance for each requested method
             all_importances = {}
@@ -108,13 +127,25 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
                 
                 elif method == "permutation":
                     n_repeats = int(params.get("n_repeats", 5))
-                    scores = self.importance_methods.permutation_feature_importance(
-                        model, X, y, n_repeats=n_repeats, random_state=int(params.get("random_state", 42))
-                    )
-                    metadata = {
-                        "execution_time": f"{time.time() - start_time:.2f}s",
-                        "n_repeats": str(n_repeats)
-                    }
+                    n_perm = int(params.get("n_permutations", 0))
+                    if n_perm > 0 and X_train is not None:
+                        res = permutation_test(
+                            model, X_train, y_train, X_test, y_test, n_permutations=n_perm, n_repeats=n_repeats,
+                            alpha=float(params.get("alpha", 0.05)), scoring=params.get("scoring", "brier"),
+                            random_state=int(params.get("random_state", 42)))
+                        scores = res["table"].to_dict(orient="records")
+                        metadata = {"execution_time": f"{time.time() - start_time:.2f}s",
+                                    "data": "test samples",
+                                    **{k: str(v) for k, v in res["metadata"].items()}}
+                    else:
+                        scores = self.importance_methods.permutation_feature_importance(
+                            model, X_test, y_test, n_repeats=n_repeats, random_state=int(params.get("random_state", 42))
+                        )
+                        metadata = {
+                            "execution_time": f"{time.time() - start_time:.2f}s",
+                            "n_repeats": str(n_repeats),
+                            "data": "test samples" if X_train is not None else "all samples",
+                        }
                 
                 elif method == "sequential":
                     scores = self.importance_methods.sequential_feature_selection(
@@ -134,9 +165,12 @@ class FeatureImportanceServiceImpl(feature_importance_service_pb2_grpc.FeatureIm
                 for score in scores:
                     feature_scores.append(
                         feature_importance_service_pb2.FeatureScore(
-                            feature_name=score["feature_name"],
-                            importance=score["importance"],
-                            rank=score["rank"]
+                            feature_name=str(score["feature_name"]),
+                            importance=float(score["importance"]),
+                            rank=int(score["rank"]),
+                            pvalue=float(score.get("pvalue", float("nan"))),
+                            padj=float(score.get("padj", float("nan"))),
+                            significant=bool(score.get("significant", False)),
                         )
                     )
                 

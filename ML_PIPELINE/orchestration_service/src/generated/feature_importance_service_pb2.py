@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n feature_importance_service.proto\x12\x11\x66\x65\x61tureimportance\"\xbb\x01\n\x11ImportanceRequest\x12\x10\n\x08model_id\x18\x01 \x01(\t\x12\x12\n\ndataset_id\x18\x02 \x01(\t\x12\x0f\n\x07methods\x18\x03 \x03(\t\x12@\n\x06params\x18\x04 \x03(\x0b\x32\x30.featureimportance.ImportanceRequest.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xf6\x01\n\x12ImportanceResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08model_id\x18\x02 \x01(\t\x12K\n\x0bimportances\x18\x03 \x03(\x0b\x32\x36.featureimportance.ImportanceResponse.ImportancesEntry\x12\x15\n\rerror_message\x18\x04 \x01(\t\x1aY\n\x10ImportancesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x34\n\x05value\x18\x02 \x01(\x0b\x32%.featureimportance.FeatureImportances:\x02\x38\x01\"\xbd\x01\n\x12\x46\x65\x61tureImportances\x12/\n\x06scores\x18\x01 \x03(\x0b\x32\x1f.featureimportance.FeatureScore\x12\x45\n\x08metadata\x18\x02 \x03(\x0b\x32\x33.featureimportance.FeatureImportances.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"F\n\x0c\x46\x65\x61tureScore\x12\x14\n\x0c\x66\x65\x61ture_name\x18\x01 \x01(\t\x12\x12\n\nimportance\x18\x02 \x01(\x01\x12\x0c\n\x04rank\x18\x03 \x01(\x05\"(\n\x14GetImportanceRequest\x12\x10\n\x08model_id\x18\x01 \x01(\t2\xdd\x01\n\x18\x46\x65\x61tureImportanceService\x12`\n\x11\x43omputeImportance\x12$.featureimportance.ImportanceRequest\x1a%.featureimportance.ImportanceResponse\x12_\n\rGetImportance\x12\'.featureimportance.GetImportanceRequest\x1a%.featureimportance.ImportanceResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n feature_importance_service.proto\x12\x11\x66\x65\x61tureimportance\"\xbb\x01\n\x11ImportanceRequest\x12\x10\n\x08model_id\x18\x01 \x01(\t\x12\x12\n\ndataset_id\x18\x02 \x01(\t\x12\x0f\n\x07methods\x18\x03 \x03(\t\x12@\n\x06params\x18\x04 \x03(\x0b\x32\x30.featureimportance.ImportanceRequest.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xf6\x01\n\x12ImportanceResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x10\n\x08model_id\x18\x02 \x01(\t\x12K\n\x0bimportances\x18\x03 \x03(\x0b\x32\x36.featureimportance.ImportanceResponse.ImportancesEntry\x12\x15\n\rerror_message\x18\x04 \x01(\t\x1aY\n\x10ImportancesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x34\n\x05value\x18\x02 \x01(\x0b\x32%.featureimportance.FeatureImportances:\x02\x38\x01\"\xbd\x01\n\x12\x46\x65\x61tureImportances\x12/\n\x06scores\x18\x01 \x03(\x0b\x32\x1f.featureimportance.FeatureScore\x12\x45\n\x08metadata\x18\x02 \x03(\x0b\x32\x33.featureimportance.FeatureImportances.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"y\n\x0c\x46\x65\x61tureScore\x12\x14\n\x0c\x66\x65\x61ture_name\x18\x01 \x01(\t\x12\x12\n\nimportance\x18\x02 \x01(\x01\x12\x0c\n\x04rank\x18\x03 \x01(\x05\x12\x0e\n\x06pvalue\x18\x04 \x01(\x01\x12\x0c\n\x04padj\x18\x05 \x01(\x01\x12\x13\n\x0bsignificant\x18\x06 \x01(\x08\"(\n\x14GetImportanceRequest\x12\x10\n\x08model_id\x18\x01 \x01(\t2\xdd\x01\n\x18\x46\x65\x61tureImportanceService\x12`\n\x11\x43omputeImportance\x12$.featureimportance.ImportanceRequest\x1a%.featureimportance.ImportanceResponse\x12_\n\rGetImportance\x12\'.featureimportance.GetImportanceRequest\x1a%.featureimportance.ImportanceResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -50,9 +50,9 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_FEATUREIMPORTANCES_METADATAENTRY']._serialized_start=637
   _globals['_FEATUREIMPORTANCES_METADATAENTRY']._serialized_end=684
   _globals['_FEATURESCORE']._serialized_start=686
-  _globals['_FEATURESCORE']._serialized_end=756
-  _globals['_GETIMPORTANCEREQUEST']._serialized_start=758
-  _globals['_GETIMPORTANCEREQUEST']._serialized_end=798
-  _globals['_FEATUREIMPORTANCESERVICE']._serialized_start=801
-  _globals['_FEATUREIMPORTANCESERVICE']._serialized_end=1022
+  _globals['_FEATURESCORE']._serialized_end=807
+  _globals['_GETIMPORTANCEREQUEST']._serialized_start=809
+  _globals['_GETIMPORTANCEREQUEST']._serialized_end=849
+  _globals['_FEATUREIMPORTANCESERVICE']._serialized_start=852
+  _globals['_FEATUREIMPORTANCESERVICE']._serialized_end=1073
 # @@protoc_insertion_point(module_scope)

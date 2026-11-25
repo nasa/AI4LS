@@ -30,4 +30,10 @@ class CausalConfig(BaseModel):
     model_options: Dict[str, Dict[str, Any]] = {}       # per-model overrides, e.g. {"ICP": {"alpha": 0.01}}
     reuse: bool = True                                  # reuse a cached result for the same data + CRISP settings
     timeout_minutes: int = Field(360, ge=1)
-    min_votes: int = Field(0, ge=0)                     # notebook: genes with >= min_votes; 0 = majority of methods
+    # Notebook: which genes count as "CRISP's genes" (overlaps, box plots, enrichment)
+    #   "significant": genes in ICP's or NLICP's formal result (the genes common to every gene subset
+    #                  that passed the invariance test). Can be empty, like DESeq2 at padj < 0.05.
+    #                  ICP's level is model_options {"ICP": {"alpha": 0.05}, "NLICP": {"alpha": 0.05}}.
+    #   "consensus":   the vote-based ranking (top_k genes per method, majority or min_votes)
+    gene_set: Literal["significant", "consensus"] = "significant"
+    min_votes: int = Field(0, ge=0)                     # consensus: genes with >= min_votes; 0 = majority of methods

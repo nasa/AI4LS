@@ -103,6 +103,12 @@ class PipelineConfig(BaseModel):
     min_features: Optional[int] = 1000
     exclude_columns: Optional[List[str]] = None
     fi_methods: Optional[List[str]] = ["permutation", "recursive"] 
+    # Significance of ML genes: label-permutation test on the held-out test samples
+    # ("permutation" method). 0 = no test (ML genes are then the top-N vote only).
+    fi_n_permutations: int = Field(default=100, ge=0, le=10000)
+    fi_n_repeats: int = Field(default=5, ge=1, le=100)        # shuffles of each gene per importance estimate
+    fi_alpha: float = Field(default=0.05, gt=0, le=1)        # BH-adjusted p-value cutoff
+    fi_scoring: Literal["brier", "accuracy"] = "brier"     # brier = uses predicted probabilities (more power)
     trans_list: Optional[str] = "s,l"
     # Cross-validation on the training split only (the test split is scored once at the end).
     tune_hyperparameters: bool = False          # True -> GridSearchCV per model; False -> plain k-fold CV estimate

@@ -64,16 +64,18 @@ class CausalServiceClient:
                 "method": m.method, "code": m.code, "causal": m.causal, "features": list(m.features),
                 "coefficients": list(m.coefficients), "pvals": list(m.pvals), "pvalue": _num(m.pvalue),
                 "test_acc": _num(m.test_acc), "val_acc": _num(m.val_acc), "note": m.note,
+                "selection": m.selection, "n_tested_subsets": m.n_tested_subsets,
+                "n_accepted_subsets": m.n_accepted_subsets,
             } for m in r.methods],
             "ranking": [{
                 "gene": g.gene, "rank": g.rank, "score": g.score, "votes": g.votes, "n_methods": g.n_methods,
                 "direction": g.direction, "consensus": g.consensus, "log2fc": _num(g.log2fc),
-                "consistent": g.consistent,
+                "consistent": g.consistent, "significant": g.significant, "significant_in": g.significant_in,
             } for g in r.ranking],
             "environments": [{"name": e.name, "n_control": e.n_control, "n_treatment": e.n_treatment,
                               "used": e.used, "note": e.note} for e in r.environments],
             "n_samples": r.n_samples, "n_genes": r.n_genes, "normalization": r.normalization,
-            "runtime_seconds": r.runtime_seconds, "notes": list(r.notes),
+            "runtime_seconds": r.runtime_seconds, "notes": list(r.notes), "n_significant": r.n_significant,
         }
 
     def close(self):

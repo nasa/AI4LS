@@ -81,6 +81,7 @@ class NonLinearInvariantCausalPrediction(object):
             # get p-value
             p_value = self.leveneAndWilcoxTest(res_all, e_all)
 
+            self.n_tested_subsets = getattr(self, 'n_tested_subsets', 0) + 1   # causal_service patch
             if p_value > self.alpha:
                 self.accepted_subsets.append(set(subset))
                 self.accepted_p_values.append(p_value)
@@ -401,6 +402,13 @@ class NonLinearInvariantCausalPrediction(object):
             "selected_feature_indices": self.selected_features,
             "to_bucket": {
                 'method': "Non-Linear ICP",
+                # causal_service patch: which ICP path chose the features ("intersection" carries
+                # ICP's guarantee; "defining_set" is a best-fit fallback; "none" = nothing accepted)
+                'selection': ('intersection' if self.intersection_found else
+                              'defining_set' if self.defining_set_found else 'none'),
+                'n_tested_subsets': getattr(self, 'n_tested_subsets', None),
+                'n_accepted_subsets': len(self.accepted_subsets),
+                'alpha': self.alpha,
                 'features': list(np.array(self.full_feature_set)[self.selected_features]),
                 'coefficients': overall_sties if len(self.selected_features) > 0 else None,
                 'pvals': self.selected_p_value,
